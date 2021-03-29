@@ -27,7 +27,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo.svg"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Connected Home over IP
-   &#160;<span id="projectnumber">a3d3d6e</span>
+   &#160;<span id="projectnumber">aa09e86</span>
    </div>
   </td>
  </tr>
@@ -434,7 +434,9 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-<div class="dynheader">
+<b>Initial value:</b><div class="fragment"><div class="line">{</div>
+<div class="line">        ScopedPthreadLock lock(&amp;<a class="code" href="_c_h_i_p_device_controller-_j_n_i_8cpp.html#ab971036cc832f0c2855be0f3ba8deb10">sStackLock</a>)</div>
+</div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="class_android_device_controller_wrapper_abbb1b7639c57e791efbb9be216414ee3_icgraph.png" border="0" usemap="#class_android_device_controller_wrapper_abbb1b7639c57e791efbb9be216414ee3_icgraph" alt=""/></div>
@@ -947,7 +949,9 @@ Here is the caller graph for this function:</div>
 <p>If value is null, the input size is treated as 0.</p>
 <dl class="section return"><dt>Returns</dt><dd>CHIP_ERROR_KEY_NOT_FOUND there is no value for the given key. </dd>
 <dd>
-CHIP_ERROR_NO_MEMORY if the input buffer is not big enough for the value. </dd></dl>
+CHIP_ERROR_NO_MEMORY if the input buffer is not big enough for the value. </dd>
+<dd>
+CHIP_ERROR_BUFFER_TOO_SMALL if the value's size is too large to be expressed as a uint16_t. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classchip_1_1_persistent_storage_delegate.html#ad5ace66c26bda234009969f1ff9fd0f3">chip::PersistentStorageDelegate</a>.</p>
 
@@ -985,11 +989,12 @@ CHIP_ERROR_NO_MEMORY if the input buffer is not big enough for the value. </dd><
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="a_c_h_i_p_device_controller-_j_n_i_8cpp_html_ab971036cc832f0c2855be0f3ba8deb10"><div class="ttname"><a href="_c_h_i_p_device_controller-_j_n_i_8cpp.html#ab971036cc832f0c2855be0f3ba8deb10">sStackLock</a></div><div class="ttdeci">ScopedPthreadLock lock &amp; sStackLock</div><div class="ttdef"><b>Definition:</b> CHIPDeviceController-JNI.cpp:376</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_android_device_controller_wrapper.html">AndroidDeviceControllerWrapper</a></li>
-    <li class="footer">Generated on Thu Mar 25 2021 14:12:47 for Connected Home over IP by
+    <li class="footer">Generated on Mon Mar 29 2021 13:08:06 for Connected Home over IP by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

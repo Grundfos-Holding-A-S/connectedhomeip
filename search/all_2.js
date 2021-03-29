@@ -12,7 +12,7 @@ var searchData=
   ['absinstalldir_219',['absInstallDir',['../namespacechip-device-ctrl.html#a2faf6e7a91727411dd78ed268dd8a255',1,'chip-device-ctrl']]],
   ['accept_220',['Accept',['../classmdns_1_1_minimal_1_1_query_reply_filter.html#a18ae7e623d788d0011e4d812a2174862',1,'mdns::Minimal::QueryReplyFilter::Accept()'],['../classmdns_1_1_minimal_1_1_query_responder_record_filter.html#a2eb06895c5985a910fbb26dbc969024f',1,'mdns::Minimal::QueryResponderRecordFilter::Accept()'],['../classmdns_1_1_minimal_1_1_reply_filter.html#a8d42fb8c207f9f1b36579ad4a382ddf7',1,'mdns::Minimal::ReplyFilter::Accept()']]],
   ['accesscontrollist_221',['AccessControlList',['../structchip_1_1_transport_1_1_access_control_list.html',1,'chip::Transport']]],
-  ['accountpairingchange_222',['AccountPairingChange',['../structchip_1_1_device_layer_1_1_chip_device_event.html#aaf2b2105b1329e003d7230952c534878',1,'chip::DeviceLayer::ChipDeviceEvent']]],
+  ['accountpairingchange_222',['AccountPairingChange',['../structchip_1_1_device_layer_1_1_chip_device_event.html#aada42eca7f139ebe791aa632129ef8eb',1,'chip::DeviceLayer::ChipDeviceEvent']]],
   ['ackreceive_223',['AckReceive',['../classchip_1_1_inet_1_1_t_c_p_end_point.html#a5e4315d2ef57a54081618d7b6401ccf6',1,'chip::Inet::TCPEndPoint']]],
   ['acquire_224',['Acquire',['../structchip_1_1_retransmit_1_1_lifetime.html#a65af6dd8d902ab7d43609337609d83a7',1,'chip::Retransmit::Lifetime']]],
   ['activeconnectionstate_225',['ActiveConnectionState',['../structchip_1_1_transport_1_1_t_c_p_base_1_1_active_connection_state.html',1,'chip::Transport::TCPBase']]],
@@ -115,7 +115,7 @@ var searchData=
   ['androidpersistentstoragedelegate_322',['AndroidPersistentStorageDelegate',['../interfacechip_1_1devicecontroller_1_1_android_persistent_storage_delegate.html',1,'chip::devicecontroller']]],
   ['androidpersistentstoragedelegate_2ejava_323',['AndroidPersistentStorageDelegate.java',['../_android_persistent_storage_delegate_8java.html',1,'']]],
   ['anonymous_324',['Anonymous',['../namespacechip_1_1_t_l_v.html#a8501b3705ddb4dd6f83af76d879f596ea7079c72c21415131774625ba1d64f4b0',1,'chip::TLV']]],
-  ['anonymoustag_325',['AnonymousTag',['../namespacechip_1_1_t_l_v.html#af368002b35765a85d8bd6ca398392099af1b5d38b639f412d3d890c4e973e4add',1,'chip::TLV']]],
+  ['anonymoustag_325',['AnonymousTag',['../namespacechip_1_1_t_l_v.html#ab6b4893216d0093fcd96c01b6534781caf1b5d38b639f412d3d890c4e973e4add',1,'chip::TLV']]],
   ['any_326',['Any',['../classchip_1_1_inet_1_1_i_p_address.html#af5d9a5b0c768886aeade1b0f5895cac9',1,'chip::Inet::IPAddress::Any()'],['../unionchip_1_1_inet_1_1_peer_sock_addr.html#ab36e7cda1c3bbcc817a817e44266c79e',1,'chip::Inet::PeerSockAddr::any()'],['../namespacemdns_1_1_minimal.html#a0679d6d4c6fb2a8df60e27562d3158f2a8e1bde3c3d303163521522cf1d62f21f',1,'mdns::Minimal::ANY()'],['../namespacemdns_1_1_minimal.html#a1213676cbad150824b486db9f4730cd2a8e1bde3c3d303163521522cf1d62f21f',1,'mdns::Minimal::ANY()']]],
   ['app_5fentropy_5fsource_327',['app_entropy_source',['../namespacechip_1_1_device_layer.html#afadd417c3eab009b02177cc4fe44b138',1,'chip::DeviceLayer::app_entropy_source(void *data, unsigned char *output, size_t len, size_t *olen)'],['../namespacechip_1_1_device_layer.html#afadd417c3eab009b02177cc4fe44b138',1,'chip::DeviceLayer::app_entropy_source(void *data, unsigned char *output, size_t len, size_t *olen)'],['../namespacechip_1_1_device_layer.html#afadd417c3eab009b02177cc4fe44b138',1,'chip::DeviceLayer::app_entropy_source(void *data, unsigned char *output, size_t len, size_t *olen)']]],
   ['app_5fget_5frandom_328',['app_get_random',['../namespacechip_1_1_device_layer.html#a8e600118570f5d07bb9978b300bf5711',1,'chip::DeviceLayer']]],
@@ -149,9 +149,10 @@ var searchData=
   ['asyncsetkeyvalue_356',['AsyncSetKeyValue',['../class_android_device_controller_wrapper.html#adc8b897f48efbfb831bb24bce18eedb9',1,'AndroidDeviceControllerWrapper::AsyncSetKeyValue()'],['../classchip_1_1_controller_1_1_python_persistent_storage_delegate.html#adc49fbbf3d94008e446073334067795f',1,'chip::Controller::PythonPersistentStorageDelegate::AsyncSetKeyValue()'],['../classchip_1_1_persistent_storage_delegate.html#aa0223577b75a9d858a7d74adb5da98d4',1,'chip::PersistentStorageDelegate::AsyncSetKeyValue()']]],
   ['asyncworkfunct_357',['AsyncWorkFunct',['../namespacechip_1_1_device_layer.html#a4536f0203bb21f8661c3fa8aacbf20e4',1,'chip::DeviceLayer']]],
   ['at_358',['At',['../classchip_1_1_static_allocator_bitmap.html#af17202bc88707143a2ad30946002b776',1,'chip::StaticAllocatorBitmap']]],
-  ['avahitimeout_359',['AvahiTimeout',['../struct_avahi_timeout.html',1,'']]],
-  ['avahiwatch_360',['AvahiWatch',['../struct_avahi_watch.html',1,'']]],
-  ['available_361',['Available',['../classchip_1_1_encoding_1_1_buffer_writer.html#abdcd740ea62220b66d57d655bc89d3c2',1,'chip::Encoding::BufferWriter']]],
-  ['availabledatalength_362',['AvailableDataLength',['../classchip_1_1_t_l_v_1_1_c_h_i_p_circular_t_l_v_buffer.html#a7ade792f558863899759cc7418b57955',1,'chip::TLV::CHIPCircularTLVBuffer::AvailableDataLength()'],['../classchip_1_1_system_1_1_packet_buffer.html#a87fcec49262eac0bdcd3fe4ae12fb14f',1,'chip::System::PacketBuffer::AvailableDataLength()']]],
-  ['avalue_363',['aValue',['../_c_h_i_p_device_controller-_j_n_i_8cpp.html#ad31e092b80cd0cc6db34088be2016593',1,'CHIPDeviceController-JNI.cpp']]]
+  ['attribute_359',['attribute',['../classchip_1_1exceptions_1_1_unknown_attribute.html#a7035a51b9c125a84df038c5adebcca9d',1,'chip::exceptions::UnknownAttribute']]],
+  ['avahitimeout_360',['AvahiTimeout',['../struct_avahi_timeout.html',1,'']]],
+  ['avahiwatch_361',['AvahiWatch',['../struct_avahi_watch.html',1,'']]],
+  ['available_362',['Available',['../classchip_1_1_encoding_1_1_buffer_writer.html#abdcd740ea62220b66d57d655bc89d3c2',1,'chip::Encoding::BufferWriter']]],
+  ['availabledatalength_363',['AvailableDataLength',['../classchip_1_1_t_l_v_1_1_c_h_i_p_circular_t_l_v_buffer.html#a7ade792f558863899759cc7418b57955',1,'chip::TLV::CHIPCircularTLVBuffer::AvailableDataLength()'],['../classchip_1_1_system_1_1_packet_buffer.html#a87fcec49262eac0bdcd3fe4ae12fb14f',1,'chip::System::PacketBuffer::AvailableDataLength()']]],
+  ['avalue_364',['aValue',['../_c_h_i_p_device_controller-_j_n_i_8cpp.html#ad31e092b80cd0cc6db34088be2016593',1,'CHIPDeviceController-JNI.cpp']]]
 ];
