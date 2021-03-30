@@ -1,7 +1,7 @@
 var searchData=
 [
   ['ualign_6034',['uAlign',['../unionchip_1_1_system_1_1_object_arena.html#a0b5216bab5d61fac84ad1fb5e43d9d3f',1,'chip::System::ObjectArena']]],
-  ['udp_6035',['UDP',['../classchip_1_1_transport_1_1_u_d_p.html',1,'chip::Transport::UDP'],['../classchip_1_1_transport_1_1_peer_address.html#a29887d5a38a4e7cf65d48925fc8404ec',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr)'],['../classchip_1_1_transport_1_1_peer_address.html#a432912d46277ea31a3779ec2c1c95e28',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr, uint16_t port)'],['../classchip_1_1_transport_1_1_peer_address.html#a502d5d9233e6e7c5f9b05acf6753ca07',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr, uint16_t port, Inet::InterfaceId interface)'],['../structmdns_1_1_minimal_1_1_server_base_1_1_endpoint_info.html#a9d99959643068a93c0bd2b5294cfae98',1,'mdns::Minimal::ServerBase::EndpointInfo::udp()']]],
+  ['udp_6035',['UDP',['../classchip_1_1_transport_1_1_u_d_p.html',1,'chip::Transport::UDP'],['../structmdns_1_1_minimal_1_1_server_base_1_1_endpoint_info.html#a9d99959643068a93c0bd2b5294cfae98',1,'mdns::Minimal::ServerBase::EndpointInfo::udp()'],['../classchip_1_1_transport_1_1_peer_address.html#a29887d5a38a4e7cf65d48925fc8404ec',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr)'],['../classchip_1_1_transport_1_1_peer_address.html#a432912d46277ea31a3779ec2c1c95e28',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr, uint16_t port)'],['../classchip_1_1_transport_1_1_peer_address.html#a502d5d9233e6e7c5f9b05acf6753ca07',1,'chip::Transport::PeerAddress::UDP(const Inet::IPAddress &amp;addr, uint16_t port, Inet::InterfaceId interface)']]],
   ['udp_2ecpp_6036',['UDP.cpp',['../_u_d_p_8cpp.html',1,'']]],
   ['udp_2eh_6037',['UDP.h',['../_u_d_p_8h.html',1,'']]],
   ['udpendpoint_6038',['UDPEndPoint',['../classchip_1_1_inet_1_1_u_d_p_end_point.html',1,'chip::Inet']]],
@@ -62,6 +62,6 @@ var searchData=
   ['uuidhelper_6093',['UUIDHelper',['../interface_u_u_i_d_helper.html',1,'']]],
   ['uuidhelper_2eh_6094',['UUIDHelper.h',['../_u_u_i_d_helper_8h.html',1,'']]],
   ['uuidhelperimpl_2emm_6095',['UUIDHelperImpl.mm',['../_u_u_i_d_helper_impl_8mm.html',1,'']]],
-  ['uuids_6096',['uuids',['../classchip_1_1_chip_bluez_mgr_1_1_bluez_dbus_device.html#af9b2a617f6b6e5a55098e67619d13be0',1,'chip.ChipBluezMgr.BluezDbusDevice.uuids()'],['../classchip_1_1_chip_bluez_mgr_1_1_bluez_dbus_adapter.html#a705bf8fc17e8be811dc1764a70cd8931',1,'chip.ChipBluezMgr.BluezDbusAdapter.UUIDs()']]],
+  ['uuids_6096',['UUIDs',['../classchip_1_1_chip_bluez_mgr_1_1_bluez_dbus_adapter.html#a705bf8fc17e8be811dc1764a70cd8931',1,'chip.ChipBluezMgr.BluezDbusAdapter.UUIDs()'],['../classchip_1_1_chip_bluez_mgr_1_1_bluez_dbus_device.html#af9b2a617f6b6e5a55098e67619d13be0',1,'chip.ChipBluezMgr.BluezDbusDevice.uuids()']]],
   ['uuidsmatch_6097',['UUIDsMatch',['../namespacechip_1_1_ble.html#a92d0c5b1b534923b35b73e0c6756f4ac',1,'chip::Ble']]]
 ];

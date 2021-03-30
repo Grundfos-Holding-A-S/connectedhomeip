@@ -1,5 +1,8 @@
 var NAVTREEINDEX40 =
 {
+"platform_2_k32_w_2_software_update_manager_impl_8h_source.html":[11,0,7,5,29],
+"python_2chip_2clusters_2_c_h_i_p_clusters_8cpp.html":[11,0,1,1,0,1,0],
+"python_2chip_2clusters_2_c_h_i_p_clusters_8cpp.html#a02cd17b21874dd586750605cce39f4d4":[11,0,1,1,0,1,0,31],
 "python_2chip_2clusters_2_c_h_i_p_clusters_8cpp.html#a07871cc7acc5525d8ed067c0502793c3":[11,0,1,1,0,1,0,150],
 "python_2chip_2clusters_2_c_h_i_p_clusters_8cpp.html#a07bfa7b289a0753646bce912b05949f4":[11,0,1,1,0,1,0,155],
 "python_2chip_2clusters_2_c_h_i_p_clusters_8cpp.html#a082bec30ef7efe6150bc970461eb4778":[11,0,1,1,0,1,0,136],
@@ -246,8 +249,5 @@ var NAVTREEINDEX40 =
 "qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ac0ce3f502ae8e4c9b39685b95acefb89":[11,0,7,10,4,1,12],
 "qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59adb5486aaf38fbf04af913848fb500427":[11,0,7,10,4,1,18],
 "qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ae037328251fb9a49318706eb30087f6e":[11,0,7,10,4,1,13],
-"qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ae17bcd28deaac5e0978f6a5dd79bcb63":[11,0,7,10,4,1,17],
-"qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ae515e7e56bf33c0e250ba89fe6c26c69":[11,0,7,10,4,1,6],
-"qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ae92013c68d6cb1f0bc0304ba142b83d0":[11,0,7,10,4,1,16],
-"qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59aee1cf5c6fa9e2b577999480ad6bddeb5":[11,0,7,10,4,1,11]
+"qpg6100_2_c_h_i_p_device_platform_event_8h.html#ae8584e0138538b418ca0f730e054ed59ae17bcd28deaac5e0978f6a5dd79bcb63":[11,0,7,10,4,1,17]
 };

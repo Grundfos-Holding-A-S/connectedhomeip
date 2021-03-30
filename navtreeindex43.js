@@ -1,5 +1,8 @@
 var NAVTREEINDEX43 =
 {
+"structchip_1_1_shell_1_1streamer.html#a07201e84f03a3774f8b5a6daf0fe612a":[10,0,1,27,2,1],
+"structchip_1_1_shell_1_1streamer.html#a274061f1d9364ff4a5a14e5546816683":[10,0,1,27,2,2],
+"structchip_1_1_shell_1_1streamer.html#a88265ca3c98d641af1963ba89deff9f6":[10,0,1,27,2,0],
 "structchip_1_1_system_1_1_lw_i_p_event.html":[10,0,1,28,3],
 "structchip_1_1_system_1_1_lw_i_p_event.html#a2f905264732fd089f15433efdbb9498f":[10,0,1,28,3,1],
 "structchip_1_1_system_1_1_lw_i_p_event.html#ac5fbee738fa3cd60f02b47e6096d729d":[10,0,1,28,3,0],
@@ -31,8 +34,8 @@ var NAVTREEINDEX43 =
 "structchip_1_1test__suites__t.html":[10,0,1,85],
 "structchip_1_1test__suites__t.html#a2794200fb4d9ba171f697592b975e53b":[10,0,1,85,1],
 "structchip_1_1test__suites__t.html#a8babac193649be0f2906b349d85414b8":[10,0,1,85,0],
-"structchip_o_ble_profile_c_bs__t.html":[10,0,15],
-"structchip_o_ble_profile_c_bs__t.html#ad4f5a2f43a776374730d73c087734ddb":[10,0,15,0],
+"structchip_o_ble_profile_c_bs__t.html":[10,0,16],
+"structchip_o_ble_profile_c_bs__t.html#ad4f5a2f43a776374730d73c087734ddb":[10,0,16,0],
 "structmdns_1_1_minimal_1_1_full_q_name.html":[10,0,4,0,5],
 "structmdns_1_1_minimal_1_1_full_q_name.html#a0ce233ca08fc65f063a96b8b4ed2e1ba":[10,0,4,0,5,7],
 "structmdns_1_1_minimal_1_1_full_q_name.html#a1e51f27d4cc3fa4312ce9db3b1cf2629":[10,0,4,0,5,6],
@@ -56,7 +59,7 @@ var NAVTREEINDEX43 =
 "structmdns_1_1_minimal_1_1_server_base_1_1_endpoint_info.html#a44ae54d01507918526641611bbfc6341":[10,0,4,0,33,0,0],
 "structmdns_1_1_minimal_1_1_server_base_1_1_endpoint_info.html#a9d99959643068a93c0bd2b5294cfae98":[10,0,4,0,33,0,2],
 "structmdns_1_1_minimal_1_1_server_base_1_1_endpoint_info.html#af3421c7f6ff5ca68f0c3149782f79bc6":[10,0,4,0,33,0,1],
-"structsize_counter_struct__tag.html":[10,0,17],
+"structsize_counter_struct__tag.html":[10,0,18],
 "support_2logging_2_constants_8h.html":[11,0,6,3,0,2],
 "support_2logging_2_constants_8h.html#a0c911e4b46b73ea3124a20cee4d5dfce":[11,0,6,3,0,2,0],
 "support_2logging_2_constants_8h.html#a0c911e4b46b73ea3124a20cee4d5dfcea10430dff997040dda6a321563cfe4ac0":[11,0,6,3,0,2,0,4],
