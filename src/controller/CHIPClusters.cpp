@@ -116,18 +116,14 @@ CHIP_ERROR BarrierControlCluster::BarrierControlGoToPercent(Callback::Cancelable
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // percentOpen: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), percentOpen));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), percentOpen));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -150,16 +146,11 @@ CHIP_ERROR BarrierControlCluster::BarrierControlStop(Callback::Cancelable * onSu
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -229,16 +220,11 @@ CHIP_ERROR BasicCluster::MfgSpecificPing(Callback::Cancelable * onSuccessCallbac
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -354,6 +340,60 @@ CHIP_ERROR BasicCluster::ReadAttributeSoftwareVersionString(Callback::Cancelable
     return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
 }
 
+CHIP_ERROR BasicCluster::ReadAttributeManufacturingDate(Callback::Cancelable * onSuccessCallback,
+                                                        Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadManufacturingDateAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::ReadAttributePartNumber(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadPartNumberAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::ReadAttributeProductURL(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadProductURLAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::ReadAttributeProductLabel(Callback::Cancelable * onSuccessCallback,
+                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadProductLabelAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::ReadAttributeSerialNumber(Callback::Cancelable * onSuccessCallback,
+                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadSerialNumberAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::ReadAttributeLocalConfigDisabled(Callback::Cancelable * onSuccessCallback,
+                                                          Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterReadLocalConfigDisabledAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR BasicCluster::WriteAttributeLocalConfigDisabled(Callback::Cancelable * onSuccessCallback,
+                                                           Callback::Cancelable * onFailureCallback, uint8_t value)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeBasicClusterWriteLocalConfigDisabledAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
 CHIP_ERROR BasicCluster::ReadAttributeClusterRevision(Callback::Cancelable * onSuccessCallback,
                                                       Callback::Cancelable * onFailureCallback)
 {
@@ -375,24 +415,20 @@ CHIP_ERROR BindingCluster::Bind(Callback::Cancelable * onSuccessCallback, Callba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // nodeId: nodeId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), nodeId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), nodeId));
     // groupId: groupId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // endpointId: endpointId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), endpointId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), endpointId));
     // clusterId: clusterId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), clusterId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), clusterId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -416,24 +452,20 @@ CHIP_ERROR BindingCluster::Unbind(Callback::Cancelable * onSuccessCallback, Call
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // nodeId: nodeId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), nodeId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), nodeId));
     // groupId: groupId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // endpointId: endpointId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), endpointId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), endpointId));
     // clusterId: clusterId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), clusterId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), clusterId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -472,24 +504,20 @@ CHIP_ERROR ColorControlCluster::MoveColor(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // rateX: int16s
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rateX));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rateX));
     // rateY: int16s
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rateY));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rateY));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -514,28 +542,24 @@ CHIP_ERROR ColorControlCluster::MoveColorTemperature(Callback::Cancelable * onSu
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // moveMode: hueMoveMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), moveMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), moveMode));
     // rate: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rate));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rate));
     // colorTemperatureMinimum: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMinimum));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMinimum));
     // colorTemperatureMaximum: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMaximum));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMaximum));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -558,24 +582,20 @@ CHIP_ERROR ColorControlCluster::MoveHue(Callback::Cancelable * onSuccessCallback
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // moveMode: hueMoveMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), moveMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), moveMode));
     // rate: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rate));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rate));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -598,24 +618,20 @@ CHIP_ERROR ColorControlCluster::MoveSaturation(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // moveMode: saturationMoveMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), moveMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), moveMode));
     // rate: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rate));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rate));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -639,26 +655,22 @@ CHIP_ERROR ColorControlCluster::MoveToColor(Callback::Cancelable * onSuccessCall
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // colorX: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorX));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorX));
     // colorY: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorY));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorY));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -682,24 +694,20 @@ CHIP_ERROR ColorControlCluster::MoveToColorTemperature(Callback::Cancelable * on
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // colorTemperature: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorTemperature));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorTemperature));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -723,26 +731,22 @@ CHIP_ERROR ColorControlCluster::MoveToHue(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // hue: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), hue));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), hue));
     // direction: hueDirection
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), direction));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), direction));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -766,26 +770,22 @@ CHIP_ERROR ColorControlCluster::MoveToHueAndSaturation(Callback::Cancelable * on
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // hue: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), hue));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), hue));
     // saturation: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), saturation));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), saturation));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -809,24 +809,20 @@ CHIP_ERROR ColorControlCluster::MoveToSaturation(Callback::Cancelable * onSucces
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // saturation: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), saturation));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), saturation));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -850,26 +846,22 @@ CHIP_ERROR ColorControlCluster::StepColor(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepX: int16s
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepX));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepX));
     // stepY: int16s
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepY));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepY));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -894,30 +886,26 @@ CHIP_ERROR ColorControlCluster::StepColorTemperature(Callback::Cancelable * onSu
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepMode: hueStepMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepMode));
     // stepSize: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepSize));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepSize));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // colorTemperatureMinimum: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMinimum));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMinimum));
     // colorTemperatureMaximum: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMaximum));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), colorTemperatureMaximum));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -942,26 +930,22 @@ CHIP_ERROR ColorControlCluster::StepHue(Callback::Cancelable * onSuccessCallback
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepMode: hueStepMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepMode));
     // stepSize: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepSize));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepSize));
     // transitionTime: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -985,26 +969,22 @@ CHIP_ERROR ColorControlCluster::StepSaturation(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepMode: saturationStepMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepMode));
     // stepSize: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepSize));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepSize));
     // transitionTime: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1027,20 +1007,16 @@ CHIP_ERROR ColorControlCluster::StopMoveStep(Callback::Cancelable * onSuccessCal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // optionsMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsMask));
     // optionsOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionsOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1654,6 +1630,54 @@ CHIP_ERROR ColorControlCluster::ReadAttributeClusterRevision(Callback::Cancelabl
     return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
 }
 
+// Descriptor Cluster Commands
+// Descriptor Cluster Attributes
+CHIP_ERROR DescriptorCluster::DiscoverAttributes(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterDiscoverAttributes(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+CHIP_ERROR DescriptorCluster::ReadAttributeDeviceList(Callback::Cancelable * onSuccessCallback,
+                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterReadDeviceListAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR DescriptorCluster::ReadAttributeServerList(Callback::Cancelable * onSuccessCallback,
+                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterReadServerListAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR DescriptorCluster::ReadAttributeClientList(Callback::Cancelable * onSuccessCallback,
+                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterReadClientListAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR DescriptorCluster::ReadAttributePartsList(Callback::Cancelable * onSuccessCallback,
+                                                     Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterReadPartsListAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR DescriptorCluster::ReadAttributeClusterRevision(Callback::Cancelable * onSuccessCallback,
+                                                           Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeDescriptorClusterReadClusterRevisionAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
 // DoorLock Cluster Commands
 CHIP_ERROR DoorLockCluster::ClearAllPins(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
 {
@@ -1666,16 +1690,11 @@ CHIP_ERROR DoorLockCluster::ClearAllPins(Callback::Cancelable * onSuccessCallbac
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1696,16 +1715,11 @@ CHIP_ERROR DoorLockCluster::ClearAllRfids(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1727,18 +1741,14 @@ CHIP_ERROR DoorLockCluster::ClearHolidaySchedule(Callback::Cancelable * onSucces
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1760,18 +1770,14 @@ CHIP_ERROR DoorLockCluster::ClearPin(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1793,18 +1799,14 @@ CHIP_ERROR DoorLockCluster::ClearRfid(Callback::Cancelable * onSuccessCallback, 
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1826,20 +1828,16 @@ CHIP_ERROR DoorLockCluster::ClearWeekdaySchedule(Callback::Cancelable * onSucces
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1862,20 +1860,16 @@ CHIP_ERROR DoorLockCluster::ClearYeardaySchedule(Callback::Cancelable * onSucces
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1898,18 +1892,14 @@ CHIP_ERROR DoorLockCluster::GetHolidaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1931,18 +1921,14 @@ CHIP_ERROR DoorLockCluster::GetLogRecord(Callback::Cancelable * onSuccessCallbac
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // logIndex: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), logIndex));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), logIndex));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1964,18 +1950,14 @@ CHIP_ERROR DoorLockCluster::GetPin(Callback::Cancelable * onSuccessCallback, Cal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -1997,18 +1979,14 @@ CHIP_ERROR DoorLockCluster::GetRfid(Callback::Cancelable * onSuccessCallback, Ca
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2030,18 +2008,14 @@ CHIP_ERROR DoorLockCluster::GetUserType(Callback::Cancelable * onSuccessCallback
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2063,20 +2037,16 @@ CHIP_ERROR DoorLockCluster::GetWeekdaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2099,20 +2069,16 @@ CHIP_ERROR DoorLockCluster::GetYeardaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2135,18 +2101,14 @@ CHIP_ERROR DoorLockCluster::LockDoor(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // pin: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), pin));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), pin));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2169,24 +2131,20 @@ CHIP_ERROR DoorLockCluster::SetHolidaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // localStartTime: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), localStartTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), localStartTime));
     // localEndTime: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), localEndTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), localEndTime));
     // operatingModeDuringHoliday: enum8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), operatingModeDuringHoliday));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), operatingModeDuringHoliday));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2209,24 +2167,20 @@ CHIP_ERROR DoorLockCluster::SetPin(Callback::Cancelable * onSuccessCallback, Cal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
     // userStatus: doorLockUserStatus
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userStatus));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userStatus));
     // userType: doorLockUserType
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userType));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userType));
     // pin: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), pin));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), pin));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2249,24 +2203,20 @@ CHIP_ERROR DoorLockCluster::SetRfid(Callback::Cancelable * onSuccessCallback, Ca
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
     // userStatus: doorLockUserStatus
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userStatus));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userStatus));
     // userType: doorLockUserType
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userType));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userType));
     // id: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), id));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), id));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2289,20 +2239,16 @@ CHIP_ERROR DoorLockCluster::SetUserType(Callback::Cancelable * onSuccessCallback
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
     // userType: doorLockUserType
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userType));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userType));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2325,30 +2271,26 @@ CHIP_ERROR DoorLockCluster::SetWeekdaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
     // daysMask: doorLockDayOfWeek
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), daysMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), daysMask));
     // startHour: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), startHour));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), startHour));
     // startMinute: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), startMinute));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), startMinute));
     // endHour: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), endHour));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), endHour));
     // endMinute: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), endMinute));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), endMinute));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2371,24 +2313,20 @@ CHIP_ERROR DoorLockCluster::SetYeardaySchedule(Callback::Cancelable * onSuccessC
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // scheduleId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), scheduleId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), scheduleId));
     // userId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), userId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), userId));
     // localStartTime: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), localStartTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), localStartTime));
     // localEndTime: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), localEndTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), localEndTime));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2411,18 +2349,14 @@ CHIP_ERROR DoorLockCluster::UnlockDoor(Callback::Cancelable * onSuccessCallback,
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // pin: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), pin));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), pin));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2444,20 +2378,16 @@ CHIP_ERROR DoorLockCluster::UnlockWithTimeout(Callback::Cancelable * onSuccessCa
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // timeoutInSeconds: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutInSeconds));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutInSeconds));
     // pin: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), pin));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), pin));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2536,22 +2466,18 @@ CHIP_ERROR GeneralCommissioningCluster::ArmFailSafe(Callback::Cancelable * onSuc
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // expiryLengthSeconds: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), expiryLengthSeconds));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), expiryLengthSeconds));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2574,16 +2500,11 @@ CHIP_ERROR GeneralCommissioningCluster::CommissioningComplete(Callback::Cancelab
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2606,24 +2527,20 @@ CHIP_ERROR GeneralCommissioningCluster::SetFabric(Callback::Cancelable * onSucce
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // fabricId: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), fabricId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), fabricId));
     // fabricSecret: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), fabricSecret));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), fabricSecret));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2720,20 +2637,16 @@ CHIP_ERROR GroupsCluster::AddGroup(Callback::Cancelable * onSuccessCallback, Cal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // groupName: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupName));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupName));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2755,20 +2668,16 @@ CHIP_ERROR GroupsCluster::AddGroupIfIdentifying(Callback::Cancelable * onSuccess
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // groupName: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupName));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupName));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2791,20 +2700,16 @@ CHIP_ERROR GroupsCluster::GetGroupMembership(Callback::Cancelable * onSuccessCal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupCount: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupCount));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupCount));
     // groupList: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupList));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupList));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2826,16 +2731,11 @@ CHIP_ERROR GroupsCluster::RemoveAllGroups(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2857,18 +2757,14 @@ CHIP_ERROR GroupsCluster::RemoveGroup(Callback::Cancelable * onSuccessCallback, 
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -2890,18 +2786,14 @@ CHIP_ERROR GroupsCluster::ViewGroup(Callback::Cancelable * onSuccessCallback, Ca
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3009,18 +2901,14 @@ CHIP_ERROR IdentifyCluster::Identify(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // identifyTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), identifyTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), identifyTime));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3041,16 +2929,11 @@ CHIP_ERROR IdentifyCluster::IdentifyQuery(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3104,24 +2987,20 @@ CHIP_ERROR LevelControlCluster::Move(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // moveMode: moveMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), moveMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), moveMode));
     // rate: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rate));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rate));
     // optionMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionMask));
     // optionOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3144,24 +3023,20 @@ CHIP_ERROR LevelControlCluster::MoveToLevel(Callback::Cancelable * onSuccessCall
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // level: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), level));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), level));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionMask));
     // optionOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3185,20 +3060,16 @@ CHIP_ERROR LevelControlCluster::MoveToLevelWithOnOff(Callback::Cancelable * onSu
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // level: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), level));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), level));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3221,20 +3092,16 @@ CHIP_ERROR LevelControlCluster::MoveWithOnOff(Callback::Cancelable * onSuccessCa
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // moveMode: moveMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), moveMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), moveMode));
     // rate: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), rate));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), rate));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3257,26 +3124,22 @@ CHIP_ERROR LevelControlCluster::Step(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepMode: stepMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepMode));
     // stepSize: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepSize));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepSize));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // optionMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionMask));
     // optionOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3299,22 +3162,18 @@ CHIP_ERROR LevelControlCluster::StepWithOnOff(Callback::Cancelable * onSuccessCa
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // stepMode: stepMode
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepMode));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepMode));
     // stepSize: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), stepSize));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), stepSize));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3337,20 +3196,16 @@ CHIP_ERROR LevelControlCluster::Stop(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // optionMask: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionMask));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionMask));
     // optionOverride: bitmap8
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), optionOverride));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), optionOverride));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3371,16 +3226,11 @@ CHIP_ERROR LevelControlCluster::StopWithOnOff(Callback::Cancelable * onSuccessCa
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3441,16 +3291,11 @@ CHIP_ERROR LowPowerCluster::Sleep(Callback::Cancelable * onSuccessCallback, Call
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3489,22 +3334,18 @@ CHIP_ERROR NetworkCommissioningCluster::AddThreadNetwork(Callback::Cancelable * 
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // operationalDataset: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), operationalDataset));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), operationalDataset));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3528,24 +3369,20 @@ CHIP_ERROR NetworkCommissioningCluster::AddWiFiNetwork(Callback::Cancelable * on
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // ssid: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), ssid));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), ssid));
     // credentials: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), credentials));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), credentials));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3569,22 +3406,18 @@ CHIP_ERROR NetworkCommissioningCluster::DisableNetwork(Callback::Cancelable * on
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // networkID: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), networkID));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), networkID));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3608,22 +3441,18 @@ CHIP_ERROR NetworkCommissioningCluster::EnableNetwork(Callback::Cancelable * onS
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // networkID: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), networkID));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), networkID));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3647,18 +3476,14 @@ CHIP_ERROR NetworkCommissioningCluster::GetLastNetworkCommissioningResult(Callba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3682,22 +3507,18 @@ CHIP_ERROR NetworkCommissioningCluster::RemoveNetwork(Callback::Cancelable * onS
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // networkID: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), networkID));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), networkID));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3721,22 +3542,18 @@ CHIP_ERROR NetworkCommissioningCluster::ScanNetworks(Callback::Cancelable * onSu
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // ssid: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), ssid));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), ssid));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3761,22 +3578,18 @@ CHIP_ERROR NetworkCommissioningCluster::UpdateThreadNetwork(Callback::Cancelable
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // operationalDataset: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), operationalDataset));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), operationalDataset));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3800,24 +3613,20 @@ CHIP_ERROR NetworkCommissioningCluster::UpdateWiFiNetwork(Callback::Cancelable *
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // ssid: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), ssid));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), ssid));
     // credentials: octetString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), credentials));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), credentials));
     // breadcrumb: int64u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), breadcrumb));
     // timeoutMs: int32u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), timeoutMs));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3856,16 +3665,11 @@ CHIP_ERROR OnOffCluster::Off(Callback::Cancelable * onSuccessCallback, Callback:
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3886,16 +3690,11 @@ CHIP_ERROR OnOffCluster::On(Callback::Cancelable * onSuccessCallback, Callback::
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -3916,16 +3715,11 @@ CHIP_ERROR OnOffCluster::Toggle(Callback::Cancelable * onSuccessCallback, Callba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
-
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
     // Command takes no arguments.
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4087,30 +3881,26 @@ CHIP_ERROR ScenesCluster::AddScene(Callback::Cancelable * onSuccessCallback, Cal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // sceneId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneId));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
     // sceneName: charString
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneName));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneName));
     // clusterId: clusterId
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), clusterId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), clusterId));
     // length: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), length));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), length));
     // value: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), value));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), value));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4133,18 +3923,14 @@ CHIP_ERROR ScenesCluster::GetSceneMembership(Callback::Cancelable * onSuccessCal
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4166,22 +3952,18 @@ CHIP_ERROR ScenesCluster::RecallScene(Callback::Cancelable * onSuccessCallback, 
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // sceneId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneId));
     // transitionTime: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), transitionTime));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), transitionTime));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4204,18 +3986,14 @@ CHIP_ERROR ScenesCluster::RemoveAllScenes(Callback::Cancelable * onSuccessCallba
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4237,20 +4015,16 @@ CHIP_ERROR ScenesCluster::RemoveScene(Callback::Cancelable * onSuccessCallback, 
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // sceneId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4272,20 +4046,16 @@ CHIP_ERROR ScenesCluster::StoreScene(Callback::Cancelable * onSuccessCallback, C
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // sceneId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4307,20 +4077,16 @@ CHIP_ERROR ScenesCluster::ViewScene(Callback::Cancelable * onSuccessCallback, Ca
                                               (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
     app::Command * ZCLcommand             = mDevice->GetCommandSender();
 
-    TLV::TLVWriter writer = ZCLcommand->CreateCommandDataElementTLVWriter();
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
 
-    TLV::TLVType dummyType = TLV::kTLVType_NotSpecified;
-    ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag, TLV::kTLVType_Structure, dummyType));
-
-    uint8_t argSeqNumber = 0;
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
     // groupId: int16u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), groupId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), groupId));
     // sceneId: int8u
-    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(argSeqNumber++), sceneId));
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), sceneId));
 
-    ReturnErrorOnFailure(writer.EndContainer(dummyType));
-    ReturnErrorOnFailure(writer.Finalize());
-    ReturnErrorOnFailure(ZCLcommand->AddCommand(cmdParams));
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
 
     return mDevice->SendCommands();
 #else
@@ -4439,6 +4205,620 @@ CHIP_ERROR TemperatureMeasurementCluster::ReadAttributeClusterRevision(Callback:
 {
     uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
     System::PacketBufferHandle encodedCommand = encodeTemperatureMeasurementClusterReadClusterRevisionAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+// Thermostat Cluster Commands
+CHIP_ERROR ThermostatCluster::ClearWeeklySchedule(Callback::Cancelable * onSuccessCallback,
+                                                  Callback::Cancelable * onFailureCallback)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kClearWeeklyScheduleCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    // Command takes no arguments.
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterClearWeeklyScheduleCommand(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR ThermostatCluster::GetRelayStatusLog(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kGetRelayStatusLogCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    // Command takes no arguments.
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterGetRelayStatusLogCommand(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR ThermostatCluster::GetWeeklySchedule(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                                uint8_t daysToReturn, uint8_t modeToReturn)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kGetWeeklyScheduleCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // daysToReturn: dayOfWeek
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), daysToReturn));
+    // modeToReturn: modeForSequence
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), modeToReturn));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeThermostatClusterGetWeeklyScheduleCommand(seqNum, mEndpoint, daysToReturn, modeToReturn);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR ThermostatCluster::SetWeeklySchedule(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                                uint8_t numberOfTransitionsForSequence, uint8_t dayOfWeekForSequence,
+                                                uint8_t modeForSequence, uint8_t payload)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kSetWeeklyScheduleCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // numberOfTransitionsForSequence: enum8
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), numberOfTransitionsForSequence));
+    // dayOfWeekForSequence: dayOfWeek
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), dayOfWeekForSequence));
+    // modeForSequence: modeForSequence
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), modeForSequence));
+    // payload: int8u
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), payload));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterSetWeeklyScheduleCommand(
+        seqNum, mEndpoint, numberOfTransitionsForSequence, dayOfWeekForSequence, modeForSequence, payload);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR ThermostatCluster::SetpointRaiseLower(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                                 uint8_t mode, int8_t amount)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kSetpointRaiseLowerCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // mode: setpointAdjustMode
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), mode));
+    // amount: int8s
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), amount));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterSetpointRaiseLowerCommand(seqNum, mEndpoint, mode, amount);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+// Thermostat Cluster Attributes
+CHIP_ERROR ThermostatCluster::DiscoverAttributes(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterDiscoverAttributes(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+CHIP_ERROR ThermostatCluster::ReadAttributeLocalTemperature(Callback::Cancelable * onSuccessCallback,
+                                                            Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadLocalTemperatureAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ConfigureAttributeLocalTemperature(Callback::Cancelable * onSuccessCallback,
+                                                                 Callback::Cancelable * onFailureCallback, uint16_t minInterval,
+                                                                 uint16_t maxInterval, int16_t change)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeThermostatClusterConfigureLocalTemperatureAttribute(seqNum, mEndpoint, minInterval, maxInterval, change);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReportAttributeLocalTemperature(Callback::Cancelable * onReportCallback)
+{
+    return RequestAttributeReporting(0x0000, onReportCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReadAttributeOccupiedCoolingSetpoint(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadOccupiedCoolingSetpointAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::WriteAttributeOccupiedCoolingSetpoint(Callback::Cancelable * onSuccessCallback,
+                                                                    Callback::Cancelable * onFailureCallback, int16_t value)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeThermostatClusterWriteOccupiedCoolingSetpointAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReadAttributeOccupiedHeatingSetpoint(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadOccupiedHeatingSetpointAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::WriteAttributeOccupiedHeatingSetpoint(Callback::Cancelable * onSuccessCallback,
+                                                                    Callback::Cancelable * onFailureCallback, int16_t value)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeThermostatClusterWriteOccupiedHeatingSetpointAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReadAttributeControlSequenceOfOperation(Callback::Cancelable * onSuccessCallback,
+                                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadControlSequenceOfOperationAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::WriteAttributeControlSequenceOfOperation(Callback::Cancelable * onSuccessCallback,
+                                                                       Callback::Cancelable * onFailureCallback, uint8_t value)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeThermostatClusterWriteControlSequenceOfOperationAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReadAttributeSystemMode(Callback::Cancelable * onSuccessCallback,
+                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadSystemModeAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::WriteAttributeSystemMode(Callback::Cancelable * onSuccessCallback,
+                                                       Callback::Cancelable * onFailureCallback, uint8_t value)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterWriteSystemModeAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR ThermostatCluster::ReadAttributeClusterRevision(Callback::Cancelable * onSuccessCallback,
+                                                           Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeThermostatClusterReadClusterRevisionAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+// WindowCovering Cluster Commands
+CHIP_ERROR WindowCoveringCluster::WindowCoveringDownClose(Callback::Cancelable * onSuccessCallback,
+                                                          Callback::Cancelable * onFailureCallback)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringDownCloseCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    // Command takes no arguments.
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterWindowCoveringDownCloseCommand(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringGoToLiftPercentage(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback,
+                                                                   uint8_t percentageLiftValue)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringGoToLiftPercentageCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // percentageLiftValue: int8u
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), percentageLiftValue));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterWindowCoveringGoToLiftPercentageCommand(seqNum, mEndpoint, percentageLiftValue);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringGoToLiftValue(Callback::Cancelable * onSuccessCallback,
+                                                              Callback::Cancelable * onFailureCallback, uint16_t liftValue)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringGoToLiftValueCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // liftValue: int16u
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), liftValue));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterWindowCoveringGoToLiftValueCommand(seqNum, mEndpoint, liftValue);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringGoToTiltPercentage(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback,
+                                                                   uint8_t percentageTiltValue)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringGoToTiltPercentageCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // percentageTiltValue: int8u
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), percentageTiltValue));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterWindowCoveringGoToTiltPercentageCommand(seqNum, mEndpoint, percentageTiltValue);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringGoToTiltValue(Callback::Cancelable * onSuccessCallback,
+                                                              Callback::Cancelable * onFailureCallback, uint16_t tiltValue)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringGoToTiltValueCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    TLV::TLVWriter * writer = ZCLcommand->GetCommandDataElementTLVWriter();
+    uint8_t argSeqNumber    = 0;
+    // tiltValue: int16u
+    ReturnErrorOnFailure(writer->Put(TLV::ContextTag(argSeqNumber++), tiltValue));
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterWindowCoveringGoToTiltValueCommand(seqNum, mEndpoint, tiltValue);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringStop(Callback::Cancelable * onSuccessCallback,
+                                                     Callback::Cancelable * onFailureCallback)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringStopCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    // Command takes no arguments.
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterWindowCoveringStopCommand(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+CHIP_ERROR WindowCoveringCluster::WindowCoveringUpOpen(Callback::Cancelable * onSuccessCallback,
+                                                       Callback::Cancelable * onFailureCallback)
+{
+#if CHIP_ENABLE_INTERACTION_MODEL
+    VerifyOrReturnError(mDevice != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    (void) onSuccessCallback;
+    (void) onFailureCallback;
+
+    app::Command::CommandParams cmdParams = { mEndpoint, /* group id */ 0, mClusterId, kWindowCoveringUpOpenCommandId,
+                                              (chip::app::Command::CommandPathFlags::kEndpointIdValid) };
+    app::Command * ZCLcommand             = mDevice->GetCommandSender();
+
+    ReturnErrorOnFailure(ZCLcommand->PrepareCommand(&cmdParams));
+
+    // Command takes no arguments.
+
+    ReturnErrorOnFailure(ZCLcommand->FinishCommand());
+
+    return mDevice->SendCommands();
+#else
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterWindowCoveringUpOpenCommand(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+#endif
+}
+
+// WindowCovering Cluster Attributes
+CHIP_ERROR WindowCoveringCluster::DiscoverAttributes(Callback::Cancelable * onSuccessCallback,
+                                                     Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterDiscoverAttributes(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+CHIP_ERROR WindowCoveringCluster::ReadAttributeWindowCoveringType(Callback::Cancelable * onSuccessCallback,
+                                                                  Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadWindowCoveringTypeAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ConfigureAttributeWindowCoveringType(Callback::Cancelable * onSuccessCallback,
+                                                                       Callback::Cancelable * onFailureCallback,
+                                                                       uint16_t minInterval, uint16_t maxInterval)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterConfigureWindowCoveringTypeAttribute(seqNum, mEndpoint, minInterval, maxInterval);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReportAttributeWindowCoveringType(Callback::Cancelable * onReportCallback)
+{
+    return RequestAttributeReporting(0x0000, onReportCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeCurrentPositionLift(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadCurrentPositionLiftAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ConfigureAttributeCurrentPositionLift(Callback::Cancelable * onSuccessCallback,
+                                                                        Callback::Cancelable * onFailureCallback,
+                                                                        uint16_t minInterval, uint16_t maxInterval, uint16_t change)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterConfigureCurrentPositionLiftAttribute(seqNum, mEndpoint, minInterval, maxInterval, change);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReportAttributeCurrentPositionLift(Callback::Cancelable * onReportCallback)
+{
+    return RequestAttributeReporting(0x0003, onReportCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeCurrentPositionTilt(Callback::Cancelable * onSuccessCallback,
+                                                                   Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadCurrentPositionTiltAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ConfigureAttributeCurrentPositionTilt(Callback::Cancelable * onSuccessCallback,
+                                                                        Callback::Cancelable * onFailureCallback,
+                                                                        uint16_t minInterval, uint16_t maxInterval, uint16_t change)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterConfigureCurrentPositionTiltAttribute(seqNum, mEndpoint, minInterval, maxInterval, change);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReportAttributeCurrentPositionTilt(Callback::Cancelable * onReportCallback)
+{
+    return RequestAttributeReporting(0x0004, onReportCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeConfigStatus(Callback::Cancelable * onSuccessCallback,
+                                                            Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadConfigStatusAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ConfigureAttributeConfigStatus(Callback::Cancelable * onSuccessCallback,
+                                                                 Callback::Cancelable * onFailureCallback, uint16_t minInterval,
+                                                                 uint16_t maxInterval)
+{
+    uint8_t seqNum = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand =
+        encodeWindowCoveringClusterConfigureConfigStatusAttribute(seqNum, mEndpoint, minInterval, maxInterval);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReportAttributeConfigStatus(Callback::Cancelable * onReportCallback)
+{
+    return RequestAttributeReporting(0x0007, onReportCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeInstalledOpenLimitLift(Callback::Cancelable * onSuccessCallback,
+                                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadInstalledOpenLimitLiftAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeInstalledClosedLimitLift(Callback::Cancelable * onSuccessCallback,
+                                                                        Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadInstalledClosedLimitLiftAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeInstalledOpenLimitTilt(Callback::Cancelable * onSuccessCallback,
+                                                                      Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadInstalledOpenLimitTiltAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeInstalledClosedLimitTilt(Callback::Cancelable * onSuccessCallback,
+                                                                        Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadInstalledClosedLimitTiltAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeMode(Callback::Cancelable * onSuccessCallback,
+                                                    Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadModeAttribute(seqNum, mEndpoint);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::WriteAttributeMode(Callback::Cancelable * onSuccessCallback,
+                                                     Callback::Cancelable * onFailureCallback, uint8_t value)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterWriteModeAttribute(seqNum, mEndpoint, value);
+    return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
+}
+
+CHIP_ERROR WindowCoveringCluster::ReadAttributeClusterRevision(Callback::Cancelable * onSuccessCallback,
+                                                               Callback::Cancelable * onFailureCallback)
+{
+    uint8_t seqNum                            = mDevice->GetNextSequenceNumber();
+    System::PacketBufferHandle encodedCommand = encodeWindowCoveringClusterReadClusterRevisionAttribute(seqNum, mEndpoint);
     return SendCommand(seqNum, std::move(encodedCommand), onSuccessCallback, onFailureCallback);
 }
 

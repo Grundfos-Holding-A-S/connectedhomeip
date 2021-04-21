@@ -25,6 +25,7 @@ chip_test_suite("tests") {
     "TestCommandInteraction.cpp",
     "TestMessageDef.cpp",
     "TestReadInteraction.cpp",
+    "TestReportingEngine.cpp",
   ]
 
   cflags = [ "-Wconversion" ]
@@ -32,6 +33,7 @@ chip_test_suite("tests") {
   public_deps = [
     "${chip_root}/src/app",
     "${chip_root}/src/lib/core",
+    "${chip_root}/src/protocols",
     "${nlunit_test_root}:nlunit-test",
   ]
 }
