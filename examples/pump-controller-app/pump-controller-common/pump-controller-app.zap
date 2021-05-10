@@ -1,5 +1,5 @@
 {
-  "featureLevel": 26,
+  "featureLevel": 30,
   "creator": "zap",
   "keyValuePairs": [
     {
@@ -12,20 +12,20 @@
     },
     {
       "key": "manufacturerCodes",
-      "value": "0x1002"
+      "value": "0x1049"
     }
   ],
   "package": [
     {
       "pathRelativity": "relativeToZap",
-      "path": "../../../../src/app/zap-templates/zcl/zcl.json",
+      "path": "../../zcl/zcl.json",
       "version": "ZCL Test Data",
       "type": "zcl-properties"
     },
     {
       "pathRelativity": "relativeToZap",
-      "path": "../../../../src/app/zap-templates/app-templates.json",
-      "version": "chip-v1",
+      "path": "../../chip-templates.json",
+      "version": "test-v1",
       "type": "gen-templates-json"
     }
   ],
@@ -37,10 +37,10 @@
       "deviceTypeProfileId": 260,
       "clusters": [
         {
-          "name": "Power Configuration",
-          "code": 1,
+          "name": "Basic",
+          "code": 0,
           "mfgCode": null,
-          "define": "POWER_CONFIG_CLUSTER",
+          "define": "BASIC_CLUSTER",
           "side": "client",
           "enabled": 0,
           "commands": [],
@@ -52,9 +52,9 @@
               "side": "client",
               "included": 1,
               "storageOption": "RAM",
-              "singleton": 0,
+              "singleton": 1,
               "bounded": 0,
-              "defaultValue": "2",
+              "defaultValue": "3",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -63,106 +63,39 @@
           ]
         },
         {
-          "name": "Power Configuration",
-          "code": 1,
+          "name": "Basic",
+          "code": 0,
           "mfgCode": null,
-          "define": "POWER_CONFIG_CLUSTER",
+          "define": "BASIC_CLUSTER",
           "side": "server",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [],
           "attributes": [
             {
-              "name": "battery percentage remaining",
-              "code": 33,
-              "mfgCode": null,
-              "side": "server",
-              "included": 0,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "battery alarm state",
-              "code": 62,
-              "mfgCode": null,
-              "side": "server",
-              "included": 0,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00000000",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "2",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Device Temperature Configuration",
-          "code": 2,
-          "mfgCode": null,
-          "define": "DEVICE_TEMP_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Device Temperature Configuration",
-          "code": 2,
-          "mfgCode": null,
-          "define": "DEVICE_TEMP_CLUSTER",
-          "side": "server",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "current temperature",
+              "name": "ZCL version",
               "code": 0,
               "mfgCode": null,
               "side": "server",
               "included": 1,
               "storageOption": "RAM",
-              "singleton": 0,
+              "singleton": 1,
               "bounded": 0,
-              "defaultValue": "",
+              "defaultValue": "0x08",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "power source",
+              "code": 7,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 1,
+              "bounded": 0,
+              "defaultValue": "0x00",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -175,9 +108,9 @@
               "side": "server",
               "included": 1,
               "storageOption": "RAM",
-              "singleton": 0,
+              "singleton": 1,
               "bounded": 0,
-              "defaultValue": "0x0001",
+              "defaultValue": "3",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -191,7 +124,7 @@
           "mfgCode": null,
           "define": "IDENTIFY_CLUSTER",
           "side": "client",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "Identify",
@@ -199,7 +132,7 @@
               "mfgCode": null,
               "source": "client",
               "incoming": 1,
-              "outgoing": 0
+              "outgoing": 1
             },
             {
               "name": "IdentifyQuery",
@@ -207,7 +140,7 @@
               "mfgCode": null,
               "source": "client",
               "incoming": 1,
-              "outgoing": 0
+              "outgoing": 1
             }
           ],
           "attributes": [
@@ -234,14 +167,14 @@
           "mfgCode": null,
           "define": "IDENTIFY_CLUSTER",
           "side": "server",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "IdentifyQueryResponse",
               "code": 0,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
+              "incoming": 1,
               "outgoing": 1
             }
           ],
@@ -284,55 +217,55 @@
           "mfgCode": null,
           "define": "GROUPS_CLUSTER",
           "side": "client",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "AddGroup",
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "ViewGroup",
               "code": 1,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "GetGroupMembership",
               "code": 2,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "RemoveGroup",
               "code": 3,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "RemoveAllGroups",
               "code": 4,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "AddGroupIfIdentifying",
               "code": 5,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             }
           ],
           "attributes": [
@@ -366,32 +299,32 @@
               "code": 0,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "ViewGroupResponse",
               "code": 1,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "GetGroupMembershipResponse",
               "code": 2,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "RemoveGroupResponse",
               "code": 3,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             }
           ],
           "attributes": [
@@ -433,63 +366,63 @@
           "mfgCode": null,
           "define": "SCENES_CLUSTER",
           "side": "client",
-          "enabled": 0,
+          "enabled": 1,
           "commands": [
             {
               "name": "AddScene",
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "ViewScene",
               "code": 1,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "RemoveScene",
               "code": 2,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "RemoveAllScenes",
               "code": 3,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "StoreScene",
               "code": 4,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "RecallScene",
               "code": 5,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             },
             {
               "name": "GetSceneMembership",
               "code": 6,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "incoming": 0,
+              "outgoing": 1
             }
           ],
           "attributes": [
@@ -523,48 +456,48 @@
               "code": 0,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "ViewSceneResponse",
               "code": 1,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "RemoveSceneResponse",
               "code": 2,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "RemoveAllScenesResponse",
               "code": 3,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "StoreSceneResponse",
               "code": 4,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
               "name": "GetSceneMembershipResponse",
               "code": 6,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             }
           ],
           "attributes": [
@@ -721,21 +654,6 @@
           "commands": [],
           "attributes": [
             {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "2",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
               "name": "on/off",
               "code": 0,
               "mfgCode": null,
@@ -749,118 +667,12 @@
               "minInterval": 0,
               "maxInterval": 65344,
               "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Alarms",
-          "code": 9,
-          "mfgCode": null,
-          "define": "ALARM_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "ResetAlarm",
-              "code": 0,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
             },
-            {
-              "name": "ResetAllAlarms",
-              "code": 1,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            }
-          ],
-          "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Alarms",
-          "code": 9,
-          "mfgCode": null,
-          "define": "ALARM_CLUSTER",
-          "side": "server",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "Alarm",
-              "code": 0,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 0,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
             {
               "name": "cluster revision",
               "code": 65533,
               "mfgCode": null,
               "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Commissioning",
-          "code": 21,
-          "mfgCode": null,
-          "define": "COMMISSIONING_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "RestartDevice",
-              "code": 0,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "ResetStartupParameters",
-              "code": 3,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            }
-          ],
-          "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
@@ -874,402 +686,89 @@
           ]
         },
         {
-          "name": "Commissioning",
-          "code": 21,
+          "name": "Level Control",
+          "code": 8,
           "mfgCode": null,
-          "define": "COMMISSIONING_CLUSTER",
-          "side": "server",
-          "enabled": 0,
+          "define": "LEVEL_CONTROL_CLUSTER",
+          "side": "client",
+          "enabled": 1,
           "commands": [
             {
-              "name": "RestartDeviceResponse",
+              "name": "MoveToLevel",
               "code": 0,
               "mfgCode": null,
-              "source": "server",
+              "source": "client",
               "incoming": 0,
               "outgoing": 1
             },
             {
-              "name": "SaveStartupParametersResponse",
+              "name": "Move",
               "code": 1,
               "mfgCode": null,
-              "source": "server",
+              "source": "client",
               "incoming": 0,
               "outgoing": 1
             },
             {
-              "name": "RestoreStartupParametersResponse",
+              "name": "Step",
               "code": 2,
               "mfgCode": null,
-              "source": "server",
+              "source": "client",
               "incoming": 0,
               "outgoing": 1
             },
             {
-              "name": "ResetStartupParametersResponse",
+              "name": "Stop",
               "code": 3,
               "mfgCode": null,
-              "source": "server",
+              "source": "client",
               "incoming": 0,
               "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "short address",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0xFFFF",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
             },
             {
-              "name": "extended pan id",
-              "code": 1,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0xFFFFFFFFFFFFFFFF",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "pan id",
-              "code": 2,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0xFFFF",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "channel mask",
-              "code": 3,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x07FFF800",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "protocol version",
+              "name": "MoveToLevelWithOnOff",
               "code": 4,
               "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x02",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
+              "source": "client",
+              "incoming": 0,
+              "outgoing": 1
             },
             {
-              "name": "stack profile",
+              "name": "MoveWithOnOff",
               "code": 5,
               "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x02",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
+              "source": "client",
+              "incoming": 0,
+              "outgoing": 1
             },
             {
-              "name": "startup control",
+              "name": "StepWithOnOff",
               "code": 6,
               "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x03",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
+              "source": "client",
+              "incoming": 0,
+              "outgoing": 1
             },
             {
-              "name": "trust center address",
-              "code": 16,
+              "name": "StopWithOnOff",
+              "code": 7,
               "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0000000000000000",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "network key",
-              "code": 18,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00000000000000000000000000000000",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "use insecure join",
-              "code": 19,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x01",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "preconfigured link key",
-              "code": 20,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00000000000000000000000000000000",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "network key sequence number",
-              "code": 21,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "network key type",
-              "code": 22,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x05",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "network manager address",
-              "code": 23,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0000",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "scan attempts",
-              "code": 32,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x05",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "time between scans",
-              "code": 33,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0064",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "rejoin interval",
-              "code": 34,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x003C",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "max rejoin interval",
-              "code": 35,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0E10",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "indirect poll rate",
-              "code": 48,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "parent retry threshold",
-              "code": 49,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "concentrator flag",
-              "code": 64,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "concentrator radius",
-              "code": 65,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0F",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "concentrator discovery time",
-              "code": 66,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
+              "source": "client",
+              "incoming": 0,
+              "outgoing": 1
+            }
+          ],
+          "attributes": [
             {
               "name": "cluster revision",
               "code": 65533,
               "mfgCode": null,
-              "side": "server",
+              "side": "client",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "2",
+              "defaultValue": "3",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -1278,22 +777,37 @@
           ]
         },
         {
-          "name": "Basic",
-          "code": 40,
+          "name": "Level Control",
+          "code": 8,
           "mfgCode": null,
-          "define": "BASIC_CLUSTER",
-          "side": "client",
+          "define": "LEVEL_CONTROL_CLUSTER",
+          "side": "server",
           "enabled": 0,
           "commands": [],
           "attributes": [
             {
+              "name": "current level",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
               "name": "cluster revision",
               "code": 65533,
               "mfgCode": null,
-              "side": "client",
+              "side": "server",
               "included": 1,
               "storageOption": "RAM",
-              "singleton": 1,
+              "singleton": 0,
               "bounded": 0,
               "defaultValue": "3",
               "reportable": 0,
@@ -1304,255 +818,84 @@
           ]
         },
         {
-          "name": "Basic",
-          "code": 40,
+          "name": "Over the Air Bootloading",
+          "code": 25,
           "mfgCode": null,
-          "define": "BASIC_CLUSTER",
-          "side": "server",
+          "define": "OTA_BOOTLOAD_CLUSTER",
+          "side": "client",
           "enabled": 1,
           "commands": [
             {
-              "name": "StartUp",
-              "code": 0,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "ShutDown",
+              "name": "QueryNextImageRequest",
               "code": 1,
               "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
+              "source": "client",
+              "incoming": 0,
               "outgoing": 1
             },
             {
-              "name": "Leave",
-              "code": 2,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "InteractionModelVersion",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "VendorName",
-              "code": 1,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "VendorID",
-              "code": 2,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "ProductName",
+              "name": "ImageBlockRequest",
               "code": 3,
               "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "ProductID",
-              "code": 4,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "UserLabel",
-              "code": 5,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "Location",
-              "code": 6,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "HardwareVersion",
-              "code": 7,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "HardwareVersionString",
-              "code": 8,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "SoftwareVersion",
-              "code": 9,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "SoftwareVersionString",
-              "code": 10,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "3",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "General Commissioning",
-          "code": 48,
-          "mfgCode": null,
-          "define": "GENERAL_COMMISSIONING_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "ArmFailSafe",
-              "code": 0,
-              "mfgCode": null,
               "source": "client",
-              "incoming": 1,
+              "incoming": 0,
               "outgoing": 1
             },
             {
-              "name": "SetRegulatoryConfig",
-              "code": 2,
+              "name": "UpgradeEndRequest",
+              "code": 6,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "CommissioningComplete",
-              "code": 4,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
+              "incoming": 0,
               "outgoing": 1
             }
           ],
           "attributes": [
+            {
+              "name": "OTA Upgrade Server ID",
+              "code": 0,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0xffffffffffffffff",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "Offset (address) into the file",
+              "code": 1,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0xffffffff",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "OTA Upgrade Status",
+              "code": 6,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x00",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
             {
               "name": "cluster revision",
               "code": 65533,
@@ -1562,7 +905,7 @@
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "0x0001",
+              "defaultValue": "4",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -1571,256 +914,44 @@
           ]
         },
         {
-          "name": "General Commissioning",
-          "code": 48,
+          "name": "Over the Air Bootloading",
+          "code": 25,
           "mfgCode": null,
-          "define": "GENERAL_COMMISSIONING_CLUSTER",
+          "define": "OTA_BOOTLOAD_CLUSTER",
           "side": "server",
-          "enabled": 1,
-          "commands": [
-            {
-              "name": "ArmFailSafeResponse",
-              "code": 1,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "SetRegulatoryConfigResponse",
-              "code": 3,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 0,
-              "outgoing": 1
-            },
-            {
-              "name": "CommissioningCompleteResponse",
-              "code": 5,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "FabricId",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "o",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "Breadcrumb",
-              "code": 1,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Network Commissioning",
-          "code": 49,
-          "mfgCode": null,
-          "define": "NETWORK_COMMISSIONING_CLUSTER",
-          "side": "client",
           "enabled": 0,
           "commands": [
             {
-              "name": "ScanNetworks",
+              "name": "ImageNotify",
               "code": 0,
               "mfgCode": null,
-              "source": "client",
+              "source": "server",
               "incoming": 1,
-              "outgoing": 1
+              "outgoing": 0
             },
             {
-              "name": "AddWiFiNetwork",
+              "name": "QueryNextImageResponse",
               "code": 2,
               "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "UpdateWiFiNetwork",
-              "code": 4,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "AddThreadNetwork",
-              "code": 6,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "UpdateThreadNetwork",
-              "code": 8,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "RemoveNetwork",
-              "code": 10,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "EnableNetwork",
-              "code": 12,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "DisableNetwork",
-              "code": 14,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "GetLastNetworkCommissioningResult",
-              "code": 16,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Network Commissioning",
-          "code": 49,
-          "mfgCode": null,
-          "define": "NETWORK_COMMISSIONING_CLUSTER",
-          "side": "server",
-          "enabled": 1,
-          "commands": [
-            {
-              "name": "ScanNetworksResponse",
-              "code": 1,
-              "mfgCode": null,
               "source": "server",
               "incoming": 1,
-              "outgoing": 1
+              "outgoing": 0
             },
             {
-              "name": "AddWiFiNetworkResponse",
-              "code": 3,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 0,
-              "outgoing": 1
-            },
-            {
-              "name": "UpdateWiFiNetworkResponse",
+              "name": "ImageBlockResponse",
               "code": 5,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
+              "incoming": 1,
+              "outgoing": 0
             },
             {
-              "name": "AddThreadNetworkResponse",
+              "name": "UpgradeEndResponse",
               "code": 7,
               "mfgCode": null,
               "source": "server",
-              "incoming": 0,
-              "outgoing": 1
-            },
-            {
-              "name": "UpdateThreadNetworkResponse",
-              "code": 9,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 0,
-              "outgoing": 1
-            },
-            {
-              "name": "RemoveNetworkResponse",
-              "code": 11,
-              "mfgCode": null,
-              "source": "server",
               "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "EnableNetworkResponse",
-              "code": 13,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "DisableNetworkResponse",
-              "code": 15,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
+              "outgoing": 0
             }
           ],
           "attributes": [
@@ -1833,7 +964,7 @@
               "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
-              "defaultValue": "0x0001",
+              "defaultValue": "4",
               "reportable": 0,
               "minInterval": 0,
               "maxInterval": 65344,
@@ -1876,21 +1007,6 @@
           "enabled": 0,
           "commands": [],
           "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 0,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
             {
               "name": "max pressure",
               "code": 0,
@@ -2010,6 +1126,387 @@
               "minInterval": 0,
               "maxInterval": 65344,
               "reportableChange": 0
+            },
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Temperature Measurement",
+          "code": 1026,
+          "mfgCode": null,
+          "define": "TEMP_MEASUREMENT_CLUSTER",
+          "side": "client",
+          "enabled": 1,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "3",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Temperature Measurement",
+          "code": 1026,
+          "mfgCode": null,
+          "define": "TEMP_MEASUREMENT_CLUSTER",
+          "side": "server",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "measured value",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x8000",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "min measured value",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x8000",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "max measured value",
+              "code": 2,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x8000",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "tolerance",
+              "code": 3,
+              "mfgCode": null,
+              "side": "server",
+              "included": 0,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "3",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Pressure Measurement",
+          "code": 1027,
+          "mfgCode": null,
+          "define": "PRESSURE_MEASUREMENT_CLUSTER",
+          "side": "client",
+          "enabled": 1,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "2",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Pressure Measurement",
+          "code": 1027,
+          "mfgCode": null,
+          "define": "PRESSURE_MEASUREMENT_CLUSTER",
+          "side": "server",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "measured value",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0000",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "min measured value",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "max measured value",
+              "code": 2,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "tolerance",
+              "code": 3,
+              "mfgCode": null,
+              "side": "server",
+              "included": 0,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "scaled value",
+              "code": 16,
+              "mfgCode": null,
+              "side": "server",
+              "included": 0,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0000",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "scaled tolerance",
+              "code": 19,
+              "mfgCode": null,
+              "side": "server",
+              "included": 0,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "2",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Flow Measurement",
+          "code": 1028,
+          "mfgCode": null,
+          "define": "FLOW_MEASUREMENT_CLUSTER",
+          "side": "client",
+          "enabled": 1,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "2",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Flow Measurement",
+          "code": 1028,
+          "mfgCode": null,
+          "define": "FLOW_MEASUREMENT_CLUSTER",
+          "side": "server",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "measured value",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0000",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "min measured value",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "max measured value",
+              "code": 2,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "tolerance",
+              "code": 3,
+              "mfgCode": null,
+              "side": "server",
+              "included": 0,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "cluster revision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "2",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
             }
           ]
         }
@@ -2022,7 +1519,10 @@
       "endpointTypeIndex": 0,
       "profileId": 260,
       "endpointId": 1,
-      "networkId": 0
+      "networkId": 0,
+      "endpointVersion": 1,
+      "deviceIdentifier": null
     }
-  ]
+  ],
+  "log": []
 }
