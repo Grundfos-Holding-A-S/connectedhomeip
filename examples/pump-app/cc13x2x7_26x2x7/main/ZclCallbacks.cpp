@@ -30,6 +30,8 @@
 
 using namespace ::chip;
 
+extern void emberAfPumpConfigurationAndControlClusterServerInitCallback(EndpointId endpoint);
+
 void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId, AttributeId attributeId, uint8_t mask,
                                         uint16_t manufacturerCode, uint8_t type, uint8_t size, uint8_t * value)
 {
@@ -73,4 +75,5 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
     // TODO: implement any additional Cluster Server init actions
+    emberAfPumpConfigurationAndControlClusterServerInitCallback(endpoint);
 }
