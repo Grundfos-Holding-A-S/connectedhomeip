@@ -7,7 +7,7 @@
  *    You may obtain a copy of the License at
  *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *BoltLockManager
+ *
  *    Unless required by applicable law or agreed to in writing, software
  *    distributed under the License is distributed on an "AS IS" BASIS,
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,13 @@
 
 #include <support/logging/CHIPLogging.h>
 
-#include "AppConfig.h"
+#include "AppTask.h"
 #include "PumpManager.h"
 
-#include <app-common/zap-generated/enums.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
-#include <app/chip-zcl-zpro-codec.h>
 #include <app/util/af-types.h>
-#include <app/util/attribute-storage.h>
-#include <app/util/util.h>
+#include <app/util/af.h>
 
 using namespace ::chip;
 using namespace ::chip::app::Clusters;
@@ -36,23 +33,23 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
 {
     if (clusterId != OnOff::Id)
     {
-        ChipLogProgress(Zcl, "Unknown cluster ID: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
+        ChipLogProgress(Zcl, "Unknown cluster ID: %" PRIx32, clusterId);
         return;
     }
 
     if (attributeId != OnOff::Attributes::Ids::OnOff)
     {
-        ChipLogProgress(Zcl, "Unknown attribute ID: " ChipLogFormatMEI, ChipLogValueMEI(attributeId));
+        ChipLogProgress(Zcl, "Unknown attribute ID: %" PRIx32, attributeId);
         return;
     }
 
     if (*value)
     {
-        PumpMgr().InitiateAction(0, PumpManager::LOCK_ACTION);
+        PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
     }
     else
     {
-        PumpMgr().InitiateAction(0, PumpManager::UNLOCK_ACTION);
+        PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
     }
 }
 
@@ -73,5 +70,5 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
-    // TODO: implement any additional Cluster Server init actions
+    GetAppTask().UpdateClusterState();
 }
