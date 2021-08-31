@@ -39,6 +39,7 @@ public:
 
     void PostLockActionRequest(int32_t aActor, PumpManager::Action_t aAction);
     void PostEvent(const AppEvent * event);
+    void UpdateClusterState(void);
 
 private:
     friend AppTask & GetAppTask(void);

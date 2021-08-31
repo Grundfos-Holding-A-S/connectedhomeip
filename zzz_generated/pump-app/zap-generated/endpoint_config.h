@@ -799,6 +799,7 @@
     const EmberAfGenericClusterFunction chipFuncArrayPumpConfigurationAndControlServer[] = {                                       \
         (EmberAfGenericClusterFunction) emberAfPumpConfigurationAndControlClusterServerInitCallback,                               \
         (EmberAfGenericClusterFunction) emberAfPumpConfigurationAndControlClusterServerAttributeChangedCallback,                   \
+        (EmberAfGenericClusterFunction) emberAfPumpConfigurationAndControlClusterServerPreAttributeChangedCallback,                \
     };
 
 #define ZAP_CLUSTER_MASK(mask) CLUSTER_MASK_##mask
@@ -860,7 +861,8 @@
                 ZAP_ATTRIBUTE_INDEX(103),                                                                                          \
                 8,                                                                                                                 \
                 13,                                                                                                                \
-                ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION),         \
+                ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION) |        \
+                    ZAP_CLUSTER_MASK(PRE_ATTRIBUTE_CHANGED_FUNCTION),                                                              \
                 chipFuncArrayPumpConfigurationAndControlServer                                                                     \
             }, /* Endpoint: 1, Cluster: Pump Configuration and Control (server) */                                                 \
             {                                                                                                                      \

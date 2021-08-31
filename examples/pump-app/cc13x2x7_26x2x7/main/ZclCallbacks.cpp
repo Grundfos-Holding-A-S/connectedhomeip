@@ -17,7 +17,8 @@
 
 #include <support/logging/CHIPLogging.h>
 
-#include "AppConfig.h"
+//#include "AppConfig.h"
+#include "AppTask.h"
 #include "PumpManager.h"
 
 #include <app/chip-zcl-zpro-codec.h>
@@ -74,4 +75,10 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
     // TODO: implement any additional Cluster Server init actions
+}
+
+void emberAfPumpConfigurationAndControlClusterInitCallback(chip::EndpointId endpoint)
+{
+    // TODO: Setup the default values in the cluster for this specific application
+    GetAppTask().UpdateClusterState();
 }
