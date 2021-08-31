@@ -1,11 +1,11 @@
-# CHIP CC1352 CC2652 Lock Example Application
+# Matter CC1352 CC2652 Pump Example Application
 
 An example application showing the use [CHIP][chip] on the Texas Instruments
 CC13X2_26X2 family of Wireless MCUs.
 
 ---
 
--   [CHIP CC1352 CC2652 Lock Example Application](#chip-cc1352-cc2652-lock-example-application)
+-   [CHIP CC1352 CC2652 Pump Example Application](#chip-cc1352-cc2652-pump-example-application)
     -   [Introduction](#introduction)
         -   [Device UI](#device-ui)
     -   [Building](#building)
@@ -28,29 +28,29 @@ CC13X2_26X2 family of Wireless MCUs.
 
 ![CC1352R1_LAUNCHXL](doc/images/cc1352r1_launchxl.jpg)
 
-The CC13X2_26X2 lock example application provides a working demonstration of a
-connected door lock device. This uses the open-source CHIP implementation and
-the Texas Instruments SimpleLink™ CC13x2 and CC26x2 software development kit.
+The CC13X2_26X2 pump example application provides a working demonstration of a
+connected pump device. This uses the open-source CHIP implementation and the
+Texas Instruments SimpleLink™ CC13x2 and CC26x2 software development kit.
 
 This example is enabled to build for CC2652R7 devices. This upcoming devices are
 currently not yet in full production. For more information on device
 availability or early access to an engineering build of our CHIP-enabled SDK,
 please reach out [here][ti_cc13x2_26x2_r7_chip_request].
 
-The lock example is intended to serve both as a means to explore the workings of
-CHIP, as well as a template for creating real products based on the Texas
+The pump example is intended to serve both as a means to explore the workings of
+Matter, as well as a template for creating real products based on the Texas
 Instruments devices.
 
 ## Device UI
 
 This example application has a simple User Interface to depict the state of the
-door lock and to control the state. The user LEDs on the LaunchPad are set on
-when the lock is locked, and are set off when unlocked. The LEDs will flash when
-in the transition state between locked and unlocked.
+pump motor and to control the state. The user LEDs on the LaunchPad are set on
+when the pump is running, and are set off when stopped. The LEDs will flash when
+in the transition state between running and stopped.
 
 Short presses (less than 1000ms) of the user buttons are used for requesting
-lock and unlock of the door lock. The left button (`BTN-1`) is used to request
-locking. The right button (`BTN-2`) is used to request unlocking.
+start and stop of the pump. The left button (`BTN-1`) is used to request start.
+The right button (`BTN-2`) is used to request stopping.
 
 Long presses (greater than 1000ms) of the user buttons are used for controlling
 BLE advertisements. The left button (`BTN-1`) is used to disable advertisements
@@ -124,7 +124,7 @@ Ninja to build the executable.
     `C:\ti`
 
     ```
-    $ cd ~/connectedhomeip/examples/lock-app/cc13x2_26x2
+    $ cd ~/connectedhomeip/examples/pump-app/cc13x2_26x2
     $ export TI_SIMPLELINK_SDK_ROOT=<path-to-simplelink-sdk>
     $ export TI_SYSCONFIG_ROOT=<path-to-sysconfig-sdk>
     $ gn gen out/debug --args="ti_simplelink_sdk_root=\"${TI_SIMPLELINK_SDK_ROOT}\" ti_sysconfig_root=\"${TI_SYSCONFIG_ROOT}\""
@@ -182,13 +182,13 @@ fully provisioned, BLE advertising will stop.
 #### Bluetooth LE Rendezvous
 
 In this example, the provisioning procedure (called Rendezvous) is done over
-Bluetooth LE between a CHIP device (lock-app) and the CHIP controller
+Bluetooth LE between a CHIP device (pump-app) and the CHIP controller
 (CHIPTool), where the controller has the commissioner role.
 
 To start the rendezvous, the controller must get the commissioning information
 from the CHIP device.
 
-This is done by scanning a QR code. A URL will be displayed on the lock-app's
+This is done by scanning a QR code. A URL will be displayed on the pump-app's
 log ([UART terminal](#viewing-logging-output)). It will look like the following:
 
 ```
@@ -208,8 +208,8 @@ Once the CHIP device is provisioned and operating on the network, CHIPTool can
 be used to control the device. During the provisioning process, the CHIP device
 would have sent one of its newly assigned IPv6 addresses to the CHIPTool.
 
-In the app, you should see an On/Off cluster; this corresponds to the lock-app.
-You can now control the lock-app CHIP device from the smartphone!
+In the app, you should see an On/Off cluster; this corresponds to pump-app. You
+can now control the pump-app CHIP device from the smartphone!
 
 ## TI Support
 

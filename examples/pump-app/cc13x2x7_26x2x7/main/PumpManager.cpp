@@ -39,7 +39,7 @@ int PumpManager::Init()
             ;
     }
 
-    mState              = kState_StartCompleted;
+    mState               = kState_StartCompleted;
     mAutoStartTimerArmed = false;
     mAutoRestart         = false;
     mAutoStartDuration   = 0;
@@ -136,7 +136,7 @@ void PumpManager::TimerEventHandler(TimerHandle_t aTimer)
     // once sPumpTimer expires. Post an event to apptask queue with the actual handler
     // so that the event can be handled in the context of the apptask.
     AppEvent event;
-    event.Type                  = AppEvent::kEventType_AppEvent;
+    event.Type                   = AppEvent::kEventType_AppEvent;
     event.PumpStateEvent.Context = static_cast<PumpManager *>(pump);
     if (pump->mAutoStartTimerArmed)
     {
