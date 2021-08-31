@@ -37,23 +37,23 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
 {
     if (clusterId != OnOff::Id)
     {
-        ChipLogProgress(Zcl, "Unknown cluster ID: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
+        ChipLogProgress(Zcl, "Unknown cluster ID: %" PRIx32, clusterId);
         return;
     }
 
     if (attributeId != OnOff::Attributes::Ids::OnOff)
     {
-        ChipLogProgress(Zcl, "Unknown attribute ID: " ChipLogFormatMEI, ChipLogValueMEI(attributeId));
+        ChipLogProgress(Zcl, "Unknown attribute ID: %" PRIx32, attributeId);
         return;
     }
 
     if (*value)
     {
-        PumpMgr().InitiateAction(0, PumpManager::LOCK_ACTION);
+        PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
     }
     else
     {
-        PumpMgr().InitiateAction(0, PumpManager::UNLOCK_ACTION);
+        PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
     }
 }
 
@@ -74,7 +74,7 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
-    // TODO: implement any additional Cluster Server init actions
+    GetAppTask().UpdateClusterState();
 }
 
 void emberAfPumpConfigurationAndControlClusterInitCallback(chip::EndpointId endpoint)
