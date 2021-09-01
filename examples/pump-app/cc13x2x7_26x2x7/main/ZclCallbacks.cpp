@@ -20,10 +20,13 @@
 #include "AppTask.h"
 #include "PumpManager.h"
 
+#include <app-common/zap-generated/enums.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
+#include <app/chip-zcl-zpro-codec.h>
 #include <app/util/af-types.h>
-#include <app/util/af.h>
+#include <app/util/attribute-storage.h>
+#include <app/util/util.h>
 
 using namespace ::chip;
 using namespace ::chip::app::Clusters;
@@ -33,13 +36,13 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
 {
     if (clusterId != OnOff::Id)
     {
-        ChipLogProgress(Zcl, "Unknown cluster ID: %" PRIx32, clusterId);
+        ChipLogProgress(Zcl, "Unknown cluster ID: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
         return;
     }
 
     if (attributeId != OnOff::Attributes::Ids::OnOff)
     {
-        ChipLogProgress(Zcl, "Unknown attribute ID: %" PRIx32, attributeId);
+        ChipLogProgress(Zcl, "Unknown attribute ID: " ChipLogFormatMEI, ChipLogValueMEI(attributeId));
         return;
     }
 
@@ -70,5 +73,5 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
-    GetAppTask().UpdateClusterState();
+
 }

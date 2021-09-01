@@ -131,8 +131,8 @@ void LogOpenThreadStateChange(otInstance * otInst, uint32_t flags)
         }
 #if CHIP_CONFIG_SECURITY_TEST_MODE
         {
-            const otNetworkKey * otKey = otThreadGetNetworkKey(otInst);
-            for (int i = 0; i < OT_NETWORK_KEY_SIZE; i++)
+            const otMasterKey * otKey = otThreadGetMasterKey(otInst);
+            for (int i = 0; i < OT_MASTER_KEY_SIZE; i++)
                 snprintf(&strBuf[i * 2], 3, "%02X", otKey->m8[i]);
             ChipLogDetail(DeviceLayer, "   Master Key: %s", strBuf);
         }

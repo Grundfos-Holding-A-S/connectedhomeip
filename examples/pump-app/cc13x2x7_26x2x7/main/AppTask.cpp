@@ -22,11 +22,6 @@
 #include "AppEvent.h"
 #include <app/server/Server.h>
 
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/attribute-type.h>
-#include <app-common/zap-generated/cluster-id.h>
-#include <app/util/attribute-storage.h>
-
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 
@@ -37,6 +32,8 @@
 #include <support/CHIPPlatformMemory.h>
 
 #include <app/server/OnboardingCodesUtil.h>
+
+//#include <app/server/DataModelHandler.h>
 
 #include <ti/drivers/apps/Button.h>
 #include <ti/drivers/apps/LED.h>
@@ -360,18 +357,5 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_None:
     default:
         break;
-    }
-}
-
-void AppTask::UpdateClusterState()
-{
-    uint8_t newValue = !PumpMgr().IsStopped();
-
-    // write the new on/off value
-    EmberAfStatus status = emberAfWriteAttribute(1, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, CLUSTER_MASK_SERVER, &newValue,
-                                                 ZCL_BOOLEAN_ATTRIBUTE_TYPE);
-    if (status != EMBER_ZCL_STATUS_SUCCESS)
-    {
-        PLAT_LOG("Updating on/off %x", status);
     }
 }
