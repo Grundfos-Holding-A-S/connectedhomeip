@@ -374,104 +374,104 @@ void AppTask::UpdateClusterState(void)
 
     // write the new values
     int16_t maxPressure = PumpMgr().GetMaxPressure();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_PRESSURE_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxPressure, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status              = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_PRESSURE_ATTRIBUTE_ID,
+                                                      (uint8_t *) &maxPressure, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxPressure  %" PRIx8, status);
     }
 
     uint16_t maxSpeed = PumpMgr().GetMaxSpeed();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_SPEED_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxSpeed, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_SPEED_ATTRIBUTE_ID, (uint8_t *) &maxSpeed,
+                                         ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxSpeed  %" PRIx8, status);
     }
 
     uint16_t maxFlow = PumpMgr().GetMaxFlow();
-    status           = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_FLOW_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                             (uint8_t *) &maxFlow, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_FLOW_ATTRIBUTE_ID, (uint8_t *) &maxFlow,
+                                         ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxFlow  %" PRIx8, status);
     }
 
     int16_t minConstPress = PumpMgr().GetMinConstPressure();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_PRESSURE_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &minConstPress, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status                = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_PRESSURE_ATTRIBUTE_ID,
+                                                        (uint8_t *) &minConstPress, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MinConstPressure  %" PRIx8, status);
     }
 
     int16_t maxConstPress = PumpMgr().GetMaxConstPressure();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_PRESSURE_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxConstPress, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status                = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_PRESSURE_ATTRIBUTE_ID,
+                                                        (uint8_t *) &maxConstPress, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxConstPressure  %" PRIx8, status);
     }
 
     int16_t minCompPress = PumpMgr().GetMinCompPressure();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_COMP_PRESSURE_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &minCompPress, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status               = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_COMP_PRESSURE_ATTRIBUTE_ID,
+                                                       (uint8_t *) &minCompPress, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MinCompPressure  %" PRIx8, status);
     }
 
     int16_t maxCompPress = PumpMgr().GetMaxCompPressure();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_COMP_PRESSURE_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxCompPress, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status               = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_COMP_PRESSURE_ATTRIBUTE_ID,
+                                                       (uint8_t *) &maxCompPress, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxCompPressure  %" PRIx8, status);
     }
 
     uint16_t minConstSpeed = PumpMgr().GetMinConstSpeed();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_SPEED_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &minConstSpeed, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status                 = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_SPEED_ATTRIBUTE_ID,
+                                                         (uint8_t *) &minConstSpeed, ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MinConstSpeed  %" PRIx8, status);
     }
 
     uint16_t maxConstSpeed = PumpMgr().GetMaxConstSpeed();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_SPEED_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxConstSpeed, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status                 = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_SPEED_ATTRIBUTE_ID,
+                                                         (uint8_t *) &maxConstSpeed, ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxConstSpeed  %" PRIx8, status);
     }
 
     uint16_t minConstFlow = PumpMgr().GetMinConstFlow();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_FLOW_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &minConstFlow, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status                = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_FLOW_ATTRIBUTE_ID,
+                                                        (uint8_t *) &minConstFlow, ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MinConstFlow  %" PRIx8, status);
     }
 
     uint16_t maxConstFlow = PumpMgr().GetMaxConstFlow();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_FLOW_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxConstFlow, ZCL_INT16U_ATTRIBUTE_TYPE);
+    status                = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_FLOW_ATTRIBUTE_ID,
+                                                        (uint8_t *) &maxConstFlow, ZCL_INT16U_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxConstFlow  %" PRIx8, status);
     }
 
     int16_t minConstTemp = PumpMgr().GetMinConstTemp();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_TEMP_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &minConstTemp, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status               = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MIN_CONST_TEMP_ATTRIBUTE_ID,
+                                                       (uint8_t *) &minConstTemp, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MinConstTemp  %" PRIx8, status);
     }
 
     int16_t maxConstTemp = PumpMgr().GetMaxConstTemp();
-    status = emberAfWriteAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_TEMP_ATTRIBUTE_ID, CLUSTER_MASK_SERVER,
-                                   (uint8_t *) &maxConstTemp, ZCL_INT16S_ATTRIBUTE_TYPE);
+    status               = emberAfWriteServerAttribute(1, ZCL_PUMP_CONFIG_CONTROL_CLUSTER_ID, ZCL_MAX_CONST_TEMP_ATTRIBUTE_ID,
+                                                       (uint8_t *) &maxConstTemp, ZCL_INT16S_ATTRIBUTE_TYPE);
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxConstTemp  %" PRIx8, status);
