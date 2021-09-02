@@ -39,11 +39,11 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
     {
         if (*value)
         {
-            PumpMgr().InitiateAction(0, PumpManager::LOCK_ACTION);
+            PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
         }
         else
         {
-            PumpMgr().InitiateAction(0, PumpManager::UNLOCK_ACTION);
+            PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
         }
     }
     else if (clusterId == LevelControl::Id && attributeId == LevelControl::Attributes::Ids::CurrentLevel)
