@@ -183,8 +183,8 @@ int AppTask::Init()
     buttionParams.longPressDuration = 1000U; // ms
     sAppRightHandle                 = Button_open(CONFIG_BTN_RIGHT, ButtonRightEventHandler, &buttionParams);
 
-    // Initialize BoltLock module
-    PLAT_LOG("Initialize BoltLock");
+    // Initialize Pump module
+    PLAT_LOG("Initialize Pump");
     PumpMgr().Init();
 
     PumpMgr().SetCallbacks(ActionInitiated, ActionCompleted);
@@ -263,16 +263,16 @@ void AppTask::ButtonRightEventHandler(Button_Handle handle, Button_EventMask eve
 
 void AppTask::ActionInitiated(PumpManager::Action_t aAction, int32_t aActor)
 {
-    // If the action has been initiated by the lock, update the bolt lock trait
+    // If the action has been initiated by the pump, update the pump trait
     // and start flashing the LEDs rapidly to indicate action initiation.
-    if (aAction == PumpManager::LOCK_ACTION)
+    if (aAction == PumpManager::START_ACTION)
     {
-        PLAT_LOG("Lock initiated");
+        PLAT_LOG("Pump start initiated");
         ; // TODO
     }
-    else if (aAction == PumpManager::UNLOCK_ACTION)
+    else if (aAction == PumpManager::STOP_ACTION)
     {
-        PLAT_LOG("Unlock initiated");
+        PLAT_LOG("Stop initiated");
         ; // TODO
     }
 
@@ -284,20 +284,20 @@ void AppTask::ActionInitiated(PumpManager::Action_t aAction, int32_t aActor)
 
 void AppTask::ActionCompleted(PumpManager::Action_t aAction)
 {
-    // if the action has been completed by the lock, update the bolt lock trait.
-    // Turn on the lock LED if in a LOCKED state OR
-    // Turn off the lock LED if in an UNLOCKED state.
-    if (aAction == PumpManager::LOCK_ACTION)
+    // if the action has been completed by the pump, update the pump trait.
+    // Turn on the pump state LED if in a STARTED state OR
+    // Turn off the pump state LED if in an STOPPED state.
+    if (aAction == PumpManager::START_ACTION)
     {
-        PLAT_LOG("Lock completed");
+        PLAT_LOG("Pump start completed");
         LED_stopBlinking(sAppGreenHandle);
         LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
         LED_stopBlinking(sAppRedHandle);
         LED_setOn(sAppRedHandle, LED_BRIGHTNESS_MAX);
     }
-    else if (aAction == PumpManager::UNLOCK_ACTION)
+    else if (aAction == PumpManager::STOP_ACTION)
     {
-        PLAT_LOG("Unlock completed");
+        PLAT_LOG("Pump stop completed");
         LED_stopBlinking(sAppGreenHandle);
         LED_setOff(sAppGreenHandle);
         LED_stopBlinking(sAppRedHandle);
@@ -312,9 +312,9 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_ButtonLeft:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
-            if (!PumpMgr().IsUnlocked())
+            if (!PumpMgr().IsStopped())
             {
-                PumpMgr().InitiateAction(0, PumpManager::UNLOCK_ACTION);
+                PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
             }
         }
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
@@ -331,9 +331,9 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_ButtonRight:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
-            if (PumpMgr().IsUnlocked())
+            if (PumpMgr().IsStopped())
             {
-                PumpMgr().InitiateAction(0, PumpManager::LOCK_ACTION);
+                PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
             }
         }
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
@@ -366,7 +366,7 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     }
 }
 
-void AppTask::UpdateClusterState(void)
+void AppTask::UpdateClusterState()
 {
     EmberStatus status;
 

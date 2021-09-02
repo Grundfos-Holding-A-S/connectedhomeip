@@ -69,7 +69,7 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
-    // TODO: implement any additional Cluster Server init actions
+    GetAppTask().UpdateClusterState();
 }
 
 void emberAfPumpConfigurationAndControlClusterInitCallback(chip::EndpointId endpoint)
