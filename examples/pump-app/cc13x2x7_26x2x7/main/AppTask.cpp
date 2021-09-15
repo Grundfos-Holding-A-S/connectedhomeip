@@ -23,9 +23,9 @@
 
 #include "FreeRTOS.h"
 
+#include <lib/support/CHIPMem.h>
+#include <lib/support/CHIPPlatformMemory.h>
 #include <platform/CHIPDeviceLayer.h>
-#include <support/CHIPMem.h>
-#include <support/CHIPPlatformMemory.h>
 
 #include <app/server/OnboardingCodesUtil.h>
 
@@ -152,7 +152,7 @@ int AppTask::Init()
 
     // Init ZCL Data Model and start server
     PLAT_LOG("Initialize Server");
-    InitServer();
+    chip::Server::GetInstance().Init();
 
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
@@ -341,7 +341,8 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
             // Enable BLE advertisements
             if (!ConnectivityMgr().IsBLEAdvertisingEnabled())
             {
-                if (OpenBasicCommissioningWindow(chip::ResetFabrics::kNo) == CHIP_NO_ERROR)
+                if (chip::Server::GetInstance().GetCommissionManager().OpenBasicCommissioningWindow(chip::ResetFabrics::kNo) ==
+                    CHIP_NO_ERROR)
                 {
                     PLAT_LOG("Enabled BLE Advertisement");
                 }
