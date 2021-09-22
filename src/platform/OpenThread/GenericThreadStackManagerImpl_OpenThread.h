@@ -144,8 +144,8 @@ private:
                                                                 Mdns::OperationalAdvertisingParameters::kTxtTotalValueSize);
 #else
         // Thread only supports operational discovery.
-        static constexpr size_t kSubTypeMaxNumber    = 0;
-        static constexpr size_t kSubTypeTotalLength  = 0;
+        static constexpr size_t kSubTypeMaxNumber    = 1;
+        static constexpr size_t kSubTypeTotalLength  = Mdns::kSubTypeCompressedFabricIdMaxLength;
         static constexpr size_t kTxtMaxNumber        = Mdns::OperationalAdvertisingParameters::kTxtMaxNumber;
         static constexpr size_t kTxtTotalValueLength = Mdns::OperationalAdvertisingParameters::kTxtTotalValueSize;
 #endif
