@@ -42,13 +42,14 @@ extern "C" {
 
 #include "hal_types.h"
 
-#include "chipOBleProfile.h"
 #include "ti_ble_config.h"
 #include "ti_drivers_config.h"
 
 #ifdef __cplusplus
 }
 #endif
+
+#include "chipOBleProfile.h"
 
 namespace chip {
 namespace DeviceLayer {

@@ -84,7 +84,7 @@ constexpr size_t kEmitDerIntegerOverhead           = 3; // Tag + Length byte + 1
  * We also have to account for possibly some custom extensions on some targets,
  * especially for mbedTLS, so an extra sizeof(uint64_t) is added to account.
  */
-constexpr size_t kMAX_Hash_SHA256_Context_Size = ((sizeof(unsigned int) * (8 + 2 + 16 + 2)) + sizeof(uint64_t));
+constexpr size_t kMAX_Hash_SHA256_Context_Size = ((sizeof(unsigned int) * (8 + 2 + 16 + 2)) + sizeof(uint64_t) + (24 * sizeof(uint64_t)));
 
 /*
  * Overhead to encode a raw ECDSA signature in X9.62 format in ASN.1 DER
