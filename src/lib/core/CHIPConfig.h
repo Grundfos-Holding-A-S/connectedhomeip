@@ -2038,8 +2038,8 @@
 
 #if CHIP_SYSTEM_CONFIG_USE_SOCKETS
 #define _CHIP_CONFIG_IsPlatformPOSIXErrorNonCritical(CODE)                                                                         \
-    ((CODE) == chip::System::MapErrorPOSIX(EHOSTUNREACH) || (CODE) == chip::System::MapErrorPOSIX(ENETUNREACH) ||                  \
-     (CODE) == chip::System::MapErrorPOSIX(EADDRNOTAVAIL) || (CODE) == chip::System::MapErrorPOSIX(EPIPE))
+    ((CODE) == CHIP_ERROR_POSIX(EHOSTUNREACH) || (CODE) == CHIP_ERROR_POSIX(ENETUNREACH) ||                                        \
+     (CODE) == CHIP_ERROR_POSIX(EADDRNOTAVAIL) || (CODE) == CHIP_ERROR_POSIX(EPIPE))
 #else // !CHIP_SYSTEM_CONFIG_USE_SOCKETS
 #define _CHIP_CONFIG_IsPlatformPOSIXErrorNonCritical(CODE) 0
 #endif // !CHIP_SYSTEM_CONFIG_USE_SOCKETS
@@ -2486,6 +2486,16 @@ extern const char CHIP_NON_PRODUCTION_MARKER[];
  */
 #ifndef CHIP_CONFIG_LAMBDA_EVENT_ALIGN
 #define CHIP_CONFIG_LAMBDA_EVENT_ALIGN (sizeof(void *))
+#endif
+
+/**
+ * @def CHIP_CONFIG_VERBOSE_VERIFY_OR_DIE
+ *
+ * @brief If true, VerifyOrDie() calls with no message will use an
+ *        automatically generated message that makes it clear what failed.
+ */
+#ifndef CHIP_CONFIG_VERBOSE_VERIFY_OR_DIE
+#define CHIP_CONFIG_VERBOSE_VERIFY_OR_DIE 0
 #endif
 
 /**

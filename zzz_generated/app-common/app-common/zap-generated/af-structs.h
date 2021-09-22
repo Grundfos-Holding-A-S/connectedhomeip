@@ -27,6 +27,33 @@
 
 #include "enums.h"
 
+// Struct for SimpleStruct
+typedef struct _SimpleStruct
+{
+    /* TYPE WARNING: unknown defaults to */ uint8_t * a;
+    bool b;
+    uint8_t c;
+    chip::ByteSpan d;
+    uint8_t * e;
+} SimpleStruct;
+
+// Struct for NestedStructList
+typedef struct _NestedStructList
+{
+    /* TYPE WARNING: unknown defaults to */ uint8_t * a;
+    bool b;
+    /* TYPE WARNING: array array defaults to */ uint8_t * d;
+    /* TYPE WARNING: array array defaults to */ uint8_t * e;
+    /* TYPE WARNING: array array defaults to */ uint8_t * f;
+    /* TYPE WARNING: array array defaults to */ uint8_t * g;
+} NestedStructList;
+
+// Struct for DoubleNestedStructList
+typedef struct _DoubleNestedStructList
+{
+    /* TYPE WARNING: array array defaults to */ uint8_t * a;
+} DoubleNestedStructList;
+
 // Struct for ApplicationLauncherApp
 typedef struct _ApplicationLauncherApp
 {
@@ -224,6 +251,13 @@ typedef struct _NeighborTable
     bool IsChild;
 } NeighborTable;
 
+// Struct for NestedStruct
+typedef struct _NestedStruct
+{
+    /* TYPE WARNING: unknown defaults to */ uint8_t * a;
+    bool b;
+} NestedStruct;
+
 // Struct for NetworkInterfaceType
 typedef struct _NetworkInterfaceType
 {
@@ -302,7 +336,7 @@ typedef struct _ReadStructuredAttributeRecord
 {
     chip::AttributeId attributeId;
     uint8_t indicator;
-    uint16_t indicies;
+    /* TYPE WARNING: array array defaults to */ uint8_t * indicies;
 } ReadStructuredAttributeRecord;
 
 // Struct for ReportAttributeRecord
@@ -440,7 +474,7 @@ typedef struct _WriteStructuredAttributeRecord
 {
     chip::AttributeId attributeId;
     uint8_t indicator;
-    uint16_t indicies;
+    /* TYPE WARNING: array array defaults to */ uint8_t * indicies;
     uint8_t attributeType;
     uint8_t * attributeLocation;
 } WriteStructuredAttributeRecord;
@@ -451,5 +485,5 @@ typedef struct _WriteStructuredAttributeStatusRecord
     uint8_t status;
     chip::AttributeId attributeId;
     uint8_t indicator;
-    uint16_t indicies;
+    /* TYPE WARNING: array array defaults to */ uint8_t * indicies;
 } WriteStructuredAttributeStatusRecord;
