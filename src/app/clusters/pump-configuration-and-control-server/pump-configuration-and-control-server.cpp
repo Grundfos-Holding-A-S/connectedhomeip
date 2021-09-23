@@ -17,20 +17,51 @@
 
 #include <app/util/af.h>
 
-#include <app/util/af-event.h>
-#include <app/util/attribute-storage.h>
-
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/attribute-type.h>
-#include <app-common/zap-generated/cluster-id.h>
+#include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/enums.h>
+#include <app-common/zap-generated/ids/Attributes.h>
+#include <app-common/zap-generated/ids/Clusters.h>
+#include <app-common/zap-generated/ids/Commands.h>
 
 using namespace chip;
+using namespace chip::app::Clusters::PumpConfigurationAndControl::Attributes;
 
 void emberAfPumpConfigurationAndControlClusterServerInitCallback(EndpointId endpoint)
 {
     emberAfDebugPrintln("Initialize PCC Server Cluster [EP:%d]", endpoint);
     // TODO
+}
+
+// Method being called prior to setting the actual attribute
+EmberAfStatus emberAfPumpConfigurationAndControlClusterServerPreAttributeChangedCallback(chip::EndpointId endpoint,
+                                                                                         chip::AttributeId attributeId,
+                                                                                         EmberAfAttributeType attributeType,
+                                                                                         uint16_t size, uint8_t * value)
+{
+    EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+
+    emberAfDebugPrintln("PCC ServerPreAttributeChangedCB: [EP:%d, ID:0x%x, size:%d]", endpoint, attributeId, size);
+
+    switch (attributeId)
+    {
+    case Ids::OperationMode: {
+        uint8_t opMode = *value;
+        if (opMode < EMBER_ZCL_PUMP_OPERATION_MODE_NORMAL || opMode > EMBER_ZCL_PUMP_OPERATION_MODE_LOCAL)
+        {
+            status = EMBER_ZCL_STATUS_INVALID_VALUE;
+        }
+        else
+        {
+            SetEffectiveOperationMode(endpoint, opMode);
+            status = EMBER_ZCL_STATUS_SUCCESS;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    return status;
 }
 
 void emberAfPumpConfigurationAndControlClusterServerAttributeChangedCallback(EndpointId endpoint, AttributeId attributeId)
