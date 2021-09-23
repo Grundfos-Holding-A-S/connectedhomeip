@@ -17,7 +17,8 @@
 
 #include <lib/support/logging/CHIPLogging.h>
 
-#include "AppConfig.h"
+//#include "AppConfig.h"
+#include "AppTask.h"
 #include "PumpManager.h"
 
 #include <app-common/zap-generated/enums.h>
@@ -34,25 +35,20 @@ using namespace ::chip::app::Clusters;
 void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId, AttributeId attributeId, uint8_t mask,
                                         uint16_t manufacturerCode, uint8_t type, uint16_t size, uint8_t * value)
 {
-    if (clusterId != OnOff::Id)
+    if (clusterId == OnOff::Id && attributeId == OnOff::Attributes::Ids::OnOff)
     {
-        ChipLogProgress(Zcl, "Unknown cluster ID: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
-        return;
+        if (*value)
+        {
+            PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
+        }
+        else
+        {
+            PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
+        }
     }
-
-    if (attributeId != OnOff::Attributes::Ids::OnOff)
+    else if (clusterId == LevelControl::Id && attributeId == LevelControl::Attributes::Ids::CurrentLevel)
     {
-        ChipLogProgress(Zcl, "Unknown attribute ID: " ChipLogFormatMEI, ChipLogValueMEI(attributeId));
-        return;
-    }
-
-    if (*value)
-    {
-        PumpMgr().InitiateAction(0, PumpManager::LOCK_ACTION);
-    }
-    else
-    {
-        PumpMgr().InitiateAction(0, PumpManager::UNLOCK_ACTION);
+        ChipLogProgress(Zcl, "[pump-app] Cluster LevelControl: attribute CurrentLevel set to %" PRIu8, *value);
     }
 }
 
@@ -73,5 +69,5 @@ void emberAfPostAttributeChangeCallback(EndpointId endpoint, ClusterId clusterId
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
-    // TODO: implement any additional Cluster Server init actions
+    GetAppTask().UpdateClusterState();
 }
