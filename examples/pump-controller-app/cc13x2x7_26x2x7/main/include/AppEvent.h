@@ -51,7 +51,7 @@ struct AppEvent
         struct
         {
             void * Context;
-        } BoltLockEvent;
+        } PumpStateEvent;
     };
 
     EventHandler Handler;
