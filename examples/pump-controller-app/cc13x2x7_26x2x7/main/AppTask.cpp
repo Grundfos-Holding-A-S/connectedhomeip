@@ -88,7 +88,7 @@ int AppTask::StartAppTask()
 int AppTask::Init()
 {
     LED_Params ledParams;
-    Button_Params buttionParams;
+    Button_Params buttonParams;
     ConnectivityManager::ThreadPollingConfig pollingConfig;
 
     cc13x2_26x2LogInit();
@@ -171,15 +171,15 @@ int AppTask::Init()
     PLAT_LOG("Initialize buttons");
     Button_init();
 
-    Button_Params_init(&buttionParams);
-    buttionParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
-    buttionParams.longPressDuration = 1000U; // ms
-    sAppLeftHandle                  = Button_open(CONFIG_BTN_LEFT, ButtonLeftEventHandler, &buttionParams);
+    Button_Params_init(&buttonParams);
+    buttonParams.buttonEventMask   = Button_EV_CLICKED;
+    buttonParams.longPressDuration = 1000U; // ms
+    sAppLeftHandle                 = Button_open(CONFIG_BTN_LEFT, ButtonLeftEventHandler, &buttonParams);
 
-    Button_Params_init(&buttionParams);
-    buttionParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
-    buttionParams.longPressDuration = 1000U; // ms
-    sAppRightHandle                 = Button_open(CONFIG_BTN_RIGHT, ButtonRightEventHandler, &buttionParams);
+    Button_Params_init(&buttonParams);
+    buttonParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGPRESSED;
+    buttonParams.longPressDuration = 5000U; // ms
+    sAppRightHandle                = Button_open(CONFIG_BTN_RIGHT, ButtonRightEventHandler, &buttonParams);
 
     // Initialize Pump module
     PLAT_LOG("Initialize Pump");
@@ -228,10 +228,7 @@ void AppTask::ButtonLeftEventHandler(Button_Handle handle, Button_EventMask even
     {
         event.ButtonEvent.Type = AppEvent::kAppEventButtonType_Clicked;
     }
-    else if (events & Button_EV_LONGCLICKED)
-    {
-        event.ButtonEvent.Type = AppEvent::kAppEventButtonType_LongClicked;
-    }
+
     // button callbacks are in ISR context
     if (xQueueSendFromISR(sAppEventQueue, &event, NULL) != pdPASS)
     {
@@ -248,9 +245,9 @@ void AppTask::ButtonRightEventHandler(Button_Handle handle, Button_EventMask eve
     {
         event.ButtonEvent.Type = AppEvent::kAppEventButtonType_Clicked;
     }
-    else if (events & Button_EV_LONGCLICKED)
+    else if (events & Button_EV_LONGPRESSED)
     {
-        event.ButtonEvent.Type = AppEvent::kAppEventButtonType_LongClicked;
+        event.ButtonEvent.Type = AppEvent::kAppEventButtonType_LongPressed;
     }
     // button callbacks are in ISR context
     if (xQueueSendFromISR(sAppEventQueue, &event, NULL) != pdPASS)
@@ -310,18 +307,14 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_ButtonLeft:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
+            // Toggle Pump state
             if (!PumpMgr().IsStopped())
             {
                 PumpMgr().InitiateAction(0, PumpManager::STOP_ACTION);
             }
-        }
-        else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
-        {
-            // Disable BLE advertisements
-            if (ConnectivityMgr().IsBLEAdvertisingEnabled())
+            else
             {
-                ConnectivityMgr().SetBLEAdvertisingEnabled(false);
-                PLAT_LOG("Disabled BLE Advertisements");
+                PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
             }
         }
         break;
@@ -329,14 +322,7 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_ButtonRight:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
-            if (PumpMgr().IsStopped())
-            {
-                PumpMgr().InitiateAction(0, PumpManager::START_ACTION);
-            }
-        }
-        else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
-        {
-            // Enable BLE advertisements
+            // Toggle BLE advertisements
             if (!ConnectivityMgr().IsBLEAdvertisingEnabled())
             {
                 if (chip::Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow() == CHIP_NO_ERROR)
@@ -348,6 +334,16 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
                     PLAT_LOG("OpenBasicCommissioningWindow() failed");
                 }
             }
+            else
+            {
+                // Disable BLE advertisements
+                ConnectivityMgr().SetBLEAdvertisingEnabled(false);
+                PLAT_LOG("Disabled BLE Advertisements");
+            }
+        }
+        else if (AppEvent::kAppEventButtonType_LongPressed == aEvent->ButtonEvent.Type)
+        {
+            ConfigurationMgr().InitiateFactoryReset();
         }
         break;
 

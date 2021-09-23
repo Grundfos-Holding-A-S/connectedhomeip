@@ -39,7 +39,7 @@ int PumpManager::Init()
             ;
     }
 
-    mState               = kState_StartCompleted;
+    mState               = kState_StopCompleted;
     mAutoStartTimerArmed = false;
     mAutoRestart         = false;
     mAutoStartDuration   = 0;
