@@ -83,7 +83,7 @@ bool PumpManager::InitiateAction(int32_t aActor, Action_t aAction)
     {
         action_initiated = true;
 
-        new_state = kState_StartInitiated;
+        new_state = kState_StopInitiated;
     }
     else if (mState == kState_StopCompleted && aAction == START_ACTION)
     {
