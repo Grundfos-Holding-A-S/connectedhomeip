@@ -165,15 +165,17 @@ int AppTask::Init()
     PLAT_LOG("Initialize buttons");
     Button_init();
 
-    Button_Params_init(&buttionParams);
-    buttionParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
-    buttionParams.longPressDuration = 1000U; // ms
-    sAppLeftHandle                  = Button_open(CONFIG_BTN_LEFT, ButtonLeftEventHandler, &buttionParams);
+    Button_Params_init(&buttonParams);
+    buttonParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
+    buttonParams.longPressDuration = 1000U; // ms
+    sAppLeftHandle                 = Button_open(CONFIG_BTN_LEFT, &buttonParams);
+    Button_setCallback(sAppLeftHandle, ButtonLeftEventHandler);
 
-    Button_Params_init(&buttionParams);
-    buttionParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
-    buttionParams.longPressDuration = 1000U; // ms
-    sAppRightHandle                 = Button_open(CONFIG_BTN_RIGHT, ButtonRightEventHandler, &buttionParams);
+    Button_Params_init(&buttonParams);
+    buttonParams.buttonEventMask   = Button_EV_CLICKED | Button_EV_LONGCLICKED;
+    buttonParams.longPressDuration = 1000U; // ms
+    sAppRightHandle                = Button_open(CONFIG_BTN_RIGHT, &buttonParams);
+    Button_setCallback(sAppRightHandle, ButtonRightEventHandler);
 
     // Initialize BoltLock module
     PLAT_LOG("Initialize BoltLock");
