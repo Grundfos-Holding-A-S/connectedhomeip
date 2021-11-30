@@ -363,6 +363,27 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     }
 }
 
+void AppTask::InitOnOffClusterState()
+{
+
+    EmberStatus status;
+
+    ChipLogProgress(NotSpecified, "Init On/Off clusterstate");
+
+    // Write false as pump always boots in stopped mode
+
+    status = OnOff::Attributes::OnOff::Set(ONOFF_CLUSTER_ENDPOINT, false);
+
+    if (status != EMBER_ZCL_STATUS_SUCCESS)
+
+    {
+
+        ChipLogError(NotSpecified, "ERR: Init On/Off state  %" PRIx8, status);
+    }
+}
+
+void AppTask::InitPCCClusterState() {}
+
 void AppTask::UpdateClusterState()
 {
     EmberStatus status;
