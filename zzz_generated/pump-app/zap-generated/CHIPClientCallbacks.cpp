@@ -133,3 +133,16 @@ namespace {
 
 // Singleton instance of the callbacks manager
 app::CHIPDeviceCallbacksMgr & gCallbacks = app::CHIPDeviceCallbacksMgr::GetInstance();
+
+bool emberAfIdentifyClusterIdentifyQueryResponseCallback(EndpointId endpoint, app::CommandSender * commandObj, uint16_t timeout)
+{
+    ChipLogProgress(Zcl, "IdentifyQueryResponse:");
+    ChipLogProgress(Zcl, "  timeout: %" PRIu16 "", timeout);
+
+    GET_CLUSTER_RESPONSE_CALLBACKS("IdentifyClusterIdentifyQueryResponseCallback");
+
+    Callback::Callback<IdentifyClusterIdentifyQueryResponseCallback> * cb =
+        Callback::Callback<IdentifyClusterIdentifyQueryResponseCallback>::FromCancelable(onSuccessCallback);
+    cb->mCall(cb->mContext, timeout);
+    return true;
+}
