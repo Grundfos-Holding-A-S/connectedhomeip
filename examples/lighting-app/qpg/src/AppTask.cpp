@@ -16,7 +16,7 @@
  *    limitations under the License.
  */
 
-#include "qvCHIP.h"
+#include "qvIO.h"
 
 #include "AppConfig.h"
 #include "AppEvent.h"
@@ -27,6 +27,7 @@
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/attribute-type.h>
 #include <app-common/zap-generated/cluster-id.h>
+#include <app/server/Dnssd.h>
 #include <app/server/Server.h>
 #include <app/util/attribute-storage.h>
 
@@ -73,6 +74,10 @@ StaticTask_t appTaskStruct;
 
 AppTask AppTask::sAppTask;
 
+namespace {
+constexpr int extDiscTimeoutSecs = 20;
+}
+
 CHIP_ERROR AppTask::StartAppTask()
 {
     sAppEventQueue = xQueueCreateStatic(APP_EVENT_QUEUE_SIZE, sizeof(AppEvent), sAppEventQueueBuffer, &sAppEventQueueStruct);
@@ -107,7 +112,11 @@ CHIP_ERROR AppTask::Init()
     LightingMgr().SetCallbacks(ActionInitiated, ActionCompleted);
 
     // Subscribe with our button callback to the qvCHIP button handler.
-    qvCHIP_SetBtnCallback(ButtonEventHandler);
+    qvIO_SetBtnCallback(ButtonEventHandler);
+
+#if CHIP_DEVICE_CONFIG_ENABLE_EXTENDED_DISCOVERY
+    chip::app::DnssdServer::Instance().SetExtendedDiscoveryTimeoutSecs(extDiscTimeoutSecs);
+#endif
 
     // Init ZCL Data Model
     chip::Server::GetInstance().Init();
@@ -178,15 +187,15 @@ void AppTask::AppTaskMain(void * pvParameter)
         {
             if (sIsThreadProvisioned && sIsThreadEnabled)
             {
-                qvCHIP_LedBlink(SYSTEM_STATE_LED, 950, 50);
+                qvIO_LedBlink(SYSTEM_STATE_LED, 950, 50);
             }
             else if (sHaveBLEConnections)
             {
-                qvCHIP_LedBlink(SYSTEM_STATE_LED, 100, 100);
+                qvIO_LedBlink(SYSTEM_STATE_LED, 100, 100);
             }
             else
             {
-                qvCHIP_LedBlink(SYSTEM_STATE_LED, 50, 950);
+                qvIO_LedBlink(SYSTEM_STATE_LED, 50, 950);
             }
         }
     }
@@ -301,9 +310,9 @@ void AppTask::FunctionTimerEventHandler(AppEvent * aEvent)
 
         // Turn off all LEDs before starting blink to make sure blink is
         // co-ordinated.
-        qvCHIP_LedSet(SYSTEM_STATE_LED, false);
+        qvIO_LedSet(SYSTEM_STATE_LED, false);
 
-        qvCHIP_LedBlink(SYSTEM_STATE_LED, 500, 500);
+        qvIO_LedBlink(SYSTEM_STATE_LED, 500, 500);
     }
     else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == kFunction_FactoryReset)
     {

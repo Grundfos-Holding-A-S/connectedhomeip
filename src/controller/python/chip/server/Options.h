@@ -1,6 +1,7 @@
 /*
  *
- *    Copyright (c) 2021 Project CHIP Authors
+ *    Copyright (c) 2020 Project CHIP Authors
+ *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,14 +16,25 @@
  *    limitations under the License.
  */
 
-const kType = 'STRUCT';
+/**
+ *    @file
+ *      Support functions for parsing command-line arguments.
+ *
+ */
 
-function isStruct(type)
+#pragma once
+
+#include <cstdint>
+
+#include <lib/core/CHIPError.h>
+
+struct LinuxDeviceOptions
 {
-  return type.toUpperCase() == kType;
-}
+    uint32_t mBleDevice = 0;
+    bool mWiFi          = true;
+    bool mThread        = false;
 
-//
-// Module exports
-//
-exports.isStruct = isStruct;
+    static LinuxDeviceOptions & GetInstance();
+};
+
+CHIP_ERROR ParseArguments(int argc, char * argv[]);

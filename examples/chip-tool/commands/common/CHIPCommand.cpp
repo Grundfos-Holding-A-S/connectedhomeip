@@ -29,6 +29,10 @@
 
 using DeviceControllerFactory = chip::Controller::DeviceControllerFactory;
 
+constexpr chip::FabricId kIdentityAlphaFabricId = 1;
+constexpr chip::FabricId kIdentityBetaFabricId  = 2;
+constexpr chip::FabricId kIdentityGammaFabricId = 3;
+
 CHIP_ERROR CHIPCommand::Run()
 {
 #if CHIP_DEVICE_LAYER_TARGET_LINUX && CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE
@@ -36,10 +40,93 @@ CHIP_ERROR CHIPCommand::Run()
     ReturnLogErrorOnFailure(chip::DeviceLayer::Internal::BLEMgrImpl().ConfigureBle(0, true));
 #endif
 
-    ReturnLogErrorOnFailure(mStorage.Init());
-    ReturnLogErrorOnFailure(mOpCredsIssuer.Initialize(mStorage));
-    ReturnLogErrorOnFailure(mFabricStorage.Initialize(&mStorage));
+    ReturnLogErrorOnFailure(mDefaultStorage.Init());
+    ReturnLogErrorOnFailure(mFabricStorage.Initialize(&mDefaultStorage));
 
+    chip::Controller::FactoryInitParams factoryInitParams;
+    factoryInitParams.fabricStorage = &mFabricStorage;
+    factoryInitParams.listenPort    = static_cast<uint16_t>(mDefaultStorage.GetListenPort() + CurrentCommissionerIndex());
+    ReturnLogErrorOnFailure(DeviceControllerFactory::GetInstance().Init(factoryInitParams));
+
+    ReturnLogErrorOnFailure(InitializeCommissioner(GetIdentity(), CurrentCommissionerIndex()));
+
+    chip::DeviceLayer::PlatformMgr().ScheduleWork(RunQueuedCommand, reinterpret_cast<intptr_t>(this));
+    ReturnLogErrorOnFailure(StartWaiting(GetWaitDuration()));
+
+    Shutdown();
+
+    //
+    // We can call DeviceController::Shutdown() safely without grabbing the stack lock
+    // since the CHIP thread and event queue have been stopped, preventing any thread
+    // races.
+    //
+    ReturnLogErrorOnFailure(ShutdownCommissioner(GetIdentity()));
+
+    return CHIP_NO_ERROR;
+}
+
+void CHIPCommand::SetIdentity(const char * identity)
+{
+    std::string name = std::string(identity);
+    if (name.compare(kIdentityAlpha) != 0 && name.compare(kIdentityBeta) != 0 && name.compare(kIdentityGamma) != 0)
+    {
+        ChipLogError(chipTool, "Unknown commissioner name: %s. Supported names are [%s, %s, %s]", name.c_str(), kIdentityAlpha,
+                     kIdentityBeta, kIdentityGamma);
+        chipDie();
+    }
+
+    mCommissionerName.SetValue(const_cast<char *>(identity));
+}
+
+std::string CHIPCommand::GetIdentity()
+{
+    std::string name = mCommissionerName.HasValue() ? mCommissionerName.Value() : kIdentityAlpha;
+    if (name.compare(kIdentityAlpha) != 0 && name.compare(kIdentityBeta) != 0 && name.compare(kIdentityGamma) != 0)
+    {
+        ChipLogError(chipTool, "Unknown commissioner name: %s. Supported names are [%s, %s, %s]", name.c_str(), kIdentityAlpha,
+                     kIdentityBeta, kIdentityGamma);
+        chipDie();
+    }
+
+    return name;
+}
+
+uint16_t CHIPCommand::CurrentCommissionerIndex()
+{
+    uint16_t index = 0;
+
+    std::string name = GetIdentity();
+    if (name.compare(kIdentityAlpha) == 0)
+    {
+        index = kIdentityAlphaFabricId;
+    }
+    else if (name.compare(kIdentityBeta) == 0)
+    {
+        index = kIdentityBetaFabricId;
+    }
+    else if (name.compare(kIdentityGamma) == 0)
+    {
+        index = kIdentityGammaFabricId;
+    }
+
+    VerifyOrDieWithMsg(index != 0, chipTool, "Unknown commissioner name: %s. Supported names are [%s, %s, %s]", name.c_str(),
+                       kIdentityAlpha, kIdentityBeta, kIdentityGamma);
+    return index;
+}
+
+chip::Controller::DeviceCommissioner & CHIPCommand::CurrentCommissioner()
+{
+    auto item = mCommissioners.find(GetIdentity());
+    return *item->second.get();
+}
+
+CHIP_ERROR CHIPCommand::ShutdownCommissioner(std::string key)
+{
+    return mCommissioners[key].get()->Shutdown();
+}
+
+CHIP_ERROR CHIPCommand::InitializeCommissioner(std::string key, chip::FabricId fabricId)
+{
     chip::Platform::ScopedMemoryBuffer<uint8_t> noc;
     chip::Platform::ScopedMemoryBuffer<uint8_t> icac;
     chip::Platform::ScopedMemoryBuffer<uint8_t> rcac;
@@ -64,15 +151,14 @@ CHIP_ERROR CHIPCommand::Run()
     // TODO - OpCreds should only be generated for pairing command
     //        store the credentials in persistent storage, and
     //        generate when not available in the storage.
-    ReturnLogErrorOnFailure(mOpCredsIssuer.GenerateNOCChainAfterValidation(mStorage.GetLocalNodeId(), mStorage.GetFabricId(),
+    ReturnLogErrorOnFailure(mCommissionerStorage.Init(key.c_str()));
+    ReturnLogErrorOnFailure(mOpCredsIssuer.Initialize(mCommissionerStorage));
+    ReturnLogErrorOnFailure(mOpCredsIssuer.GenerateNOCChainAfterValidation(mCommissionerStorage.GetLocalNodeId(), fabricId,
                                                                            ephemeralKey.Pubkey(), rcacSpan, icacSpan, nocSpan));
 
-    chip::Controller::FactoryInitParams factoryInitParams;
-    factoryInitParams.fabricStorage = &mFabricStorage;
-    factoryInitParams.listenPort    = mStorage.GetListenPort();
-
+    std::unique_ptr<ChipDeviceCommissioner> commissioner = std::make_unique<ChipDeviceCommissioner>();
     chip::Controller::SetupParams commissionerParams;
-    commissionerParams.storageDelegate                = &mStorage;
+    commissionerParams.storageDelegate                = &mCommissionerStorage;
     commissionerParams.operationalCredentialsDelegate = &mOpCredsIssuer;
     commissionerParams.ephemeralKeypair               = &ephemeralKey;
     commissionerParams.controllerRCAC                 = rcacSpan;
@@ -80,20 +166,8 @@ CHIP_ERROR CHIPCommand::Run()
     commissionerParams.controllerNOC                  = nocSpan;
     commissionerParams.controllerVendorId             = chip::VendorId::TestVendor1;
 
-    ReturnLogErrorOnFailure(DeviceControllerFactory::GetInstance().Init(factoryInitParams));
-    ReturnLogErrorOnFailure(DeviceControllerFactory::GetInstance().SetupCommissioner(commissionerParams, mController));
-
-    chip::DeviceLayer::PlatformMgr().ScheduleWork(RunQueuedCommand, reinterpret_cast<intptr_t>(this));
-    ReturnLogErrorOnFailure(StartWaiting(GetWaitDuration()));
-
-    Shutdown();
-
-    //
-    // We can call DeviceController::Shutdown() safely without grabbing the stack lock
-    // since the CHIP thread and event queue have been stopped, preventing any thread
-    // races.
-    //
-    ReturnLogErrorOnFailure(mController.Shutdown());
+    ReturnLogErrorOnFailure(DeviceControllerFactory::GetInstance().SetupCommissioner(commissionerParams, *(commissioner.get())));
+    mCommissioners[key] = std::move(commissioner);
 
     return CHIP_NO_ERROR;
 }

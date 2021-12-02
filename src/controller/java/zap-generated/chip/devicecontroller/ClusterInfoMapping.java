@@ -151,6 +151,52 @@ public class ClusterInfoMapping {
     }
   }
 
+  public static class DelegatedFloatAttributeCallback
+      implements ChipClusters.FloatAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(float value) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo setupPINResponseValue = new CommandResponseInfo("value", "float");
+      responseValues.put(setupPINResponseValue, value);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+
+  public static class DelegatedDoubleAttributeCallback
+      implements ChipClusters.DoubleAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(double value) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo setupPINResponseValue = new CommandResponseInfo("value", "double");
+      responseValues.put(setupPINResponseValue, value);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+
   public static class DelegatedDefaultClusterCallback
       implements DefaultClusterCallback, DelegatedClusterCallback {
     private ClusterCommandCallback callback;
@@ -8220,6 +8266,19 @@ public class ClusterInfoMapping {
             testClustertestUnknownCommandCommandParams);
     testClusterClusterInteractionInfoMap.put(
         "testUnknownCommand", testClustertestUnknownCommandInteractionInfo);
+    Map<String, CommandParameterInfo> testClustertimedInvokeRequestCommandParams =
+        new LinkedHashMap<String, CommandParameterInfo>();
+    // Populate commands
+    InteractionInfo testClustertimedInvokeRequestInteractionInfo =
+        new InteractionInfo(
+            (cluster, callback, commandArguments) -> {
+              ((ChipClusters.TestClusterCluster) cluster)
+                  .timedInvokeRequest((DefaultClusterCallback) callback);
+            },
+            () -> new DelegatedDefaultClusterCallback(),
+            testClustertimedInvokeRequestCommandParams);
+    testClusterClusterInteractionInfoMap.put(
+        "timedInvokeRequest", testClustertimedInvokeRequestInteractionInfo);
     commandMap.put("testCluster", testClusterClusterInteractionInfoMap);
     Map<String, InteractionInfo> thermostatClusterInteractionInfoMap = new LinkedHashMap<>();
     Map<String, CommandParameterInfo> thermostatclearWeeklyScheduleCommandParams =
