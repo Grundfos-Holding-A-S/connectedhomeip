@@ -57,6 +57,15 @@ public:
     CHIP_ERROR ReportAttributeClusterRevision(Callback::Cancelable * onReportCallback);
 };
 
+class DLL_EXPORT OccupancySensingCluster : public ClusterBase
+{
+public:
+    OccupancySensingCluster() : ClusterBase(app::Clusters::OccupancySensing::Id) {}
+    ~OccupancySensingCluster() {}
+
+    // Cluster Attributes
+};
+
 class DLL_EXPORT PressureMeasurementCluster : public ClusterBase
 {
 public:
@@ -82,6 +91,58 @@ public:
     CHIP_ERROR SubscribeAttributeClusterRevision(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
                                                  uint16_t minInterval, uint16_t maxInterval);
     CHIP_ERROR ReportAttributeClusterRevision(Callback::Cancelable * onReportCallback);
+};
+
+class DLL_EXPORT ScenesCluster : public ClusterBase
+{
+public:
+    ScenesCluster() : ClusterBase(app::Clusters::Scenes::Id) {}
+    ~ScenesCluster() {}
+
+    // Cluster Commands
+    CHIP_ERROR AddScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback, uint16_t groupId,
+                        uint8_t sceneId, uint16_t transitionTime, chip::CharSpan sceneName, chip::ClusterId clusterId,
+                        uint8_t length, uint8_t value);
+    CHIP_ERROR GetSceneMembership(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                  uint16_t groupId);
+    CHIP_ERROR RecallScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback, uint16_t groupId,
+                           uint8_t sceneId, uint16_t transitionTime);
+    CHIP_ERROR RemoveAllScenes(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                               uint16_t groupId);
+    CHIP_ERROR RemoveScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback, uint16_t groupId,
+                           uint8_t sceneId);
+    CHIP_ERROR StoreScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback, uint16_t groupId,
+                          uint8_t sceneId);
+    CHIP_ERROR ViewScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback, uint16_t groupId,
+                         uint8_t sceneId);
+
+    // Cluster Attributes
+    CHIP_ERROR ReadAttributeSceneCount(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeSceneCount(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                            uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeSceneCount(Callback::Cancelable * onReportCallback);
+    CHIP_ERROR ReadAttributeCurrentScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeCurrentScene(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                              uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeCurrentScene(Callback::Cancelable * onReportCallback);
+    CHIP_ERROR ReadAttributeCurrentGroup(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeCurrentGroup(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                              uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeCurrentGroup(Callback::Cancelable * onReportCallback);
+    CHIP_ERROR ReadAttributeSceneValid(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeSceneValid(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                            uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeSceneValid(Callback::Cancelable * onReportCallback);
+    CHIP_ERROR ReadAttributeNameSupport(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeNameSupport(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                             uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeNameSupport(Callback::Cancelable * onReportCallback);
+    CHIP_ERROR ReadAttributeClusterRevision(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback);
+    CHIP_ERROR SubscribeAttributeClusterRevision(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback,
+                                                 uint16_t minInterval, uint16_t maxInterval);
+    CHIP_ERROR ReportAttributeClusterRevision(Callback::Cancelable * onReportCallback);
+
+private:
 };
 
 class DLL_EXPORT TemperatureMeasurementCluster : public ClusterBase
