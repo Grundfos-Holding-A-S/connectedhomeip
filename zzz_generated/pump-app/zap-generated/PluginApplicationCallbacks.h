@@ -32,7 +32,6 @@
     MatterGeneralCommissioningPluginServerInitCallback();                                                                          \
     MatterGeneralDiagnosticsPluginServerInitCallback();                                                                            \
     MatterGroupsPluginServerInitCallback();                                                                                        \
-    MatterIdentifyPluginServerInitCallback();                                                                                      \
     MatterLevelControlPluginServerInitCallback();                                                                                  \
     MatterNetworkCommissioningPluginServerInitCallback();                                                                          \
     MatterOccupancySensingPluginClientInitCallback();                                                                              \
