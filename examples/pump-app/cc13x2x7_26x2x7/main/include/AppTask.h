@@ -55,6 +55,10 @@ private:
     static void ButtonRightEventHandler(Button_Handle handle, Button_EventMask events);
     static void TimerEventHandler(void * p_context);
 
+    void CancelHeapTrackTimer(void);
+    void HeapTrackTimer(uint32_t aTimeoutMs);
+    static void HeapTrackTimerEventHandler(TimerHandle_t aTimer);
+   
     enum Function_t
     {
         kFunction_NoneSelected   = 0,

@@ -37,6 +37,7 @@
 #include <lib/support/CHIPMem.h>
 #include <lib/support/CHIPPlatformMemory.h>
 #include <platform/CHIPDeviceLayer.h>
+#include <platform/cc13x2_26x2/DiagnosticDataProviderImpl.h>
 
 #include <app/server/OnboardingCodesUtil.h>
 
@@ -52,6 +53,8 @@
 
 #define PCC_CLUSTER_ENDPOINT 1
 #define ONOFF_CLUSTER_ENDPOINT 1
+#define EXTENDED_DISCOVERY_TIMEOUT_SEC 20
+#define HEAP_TRACK_PERIOD_MS 10
 
 using namespace ::chip::Credentials;
 using namespace ::chip::DeviceLayer;
@@ -64,6 +67,8 @@ static LED_Handle sAppRedHandle;
 static LED_Handle sAppGreenHandle;
 static Button_Handle sAppLeftHandle;
 static Button_Handle sAppRightHandle;
+static uint64_t minHeapFree;
+TimerHandle_t mHeapTrackTimerHandle;
 
 AppTask AppTask::sAppTask;
 
@@ -87,6 +92,19 @@ int AppTask::StartAppTask()
         while (1)
             ;
     }
+
+    // Create a timer to track the heap usage
+    mHeapTrackTimerHandle =
+        xTimerCreate("HEAP_TIMER", pdMS_TO_TICKS(HEAP_TRACK_PERIOD_MS), pdTRUE, this, HeapTrackTimerEventHandler);
+    if (NULL == mHeapTrackTimerHandle)
+    {
+        PLAT_LOG("failed to create heap track timer");
+        while (1)
+            ;
+    }
+
+    HeapTrackTimer(HEAP_TRACK_PERIOD_MS);
+
     return ret;
 }
 
@@ -184,7 +202,9 @@ int AppTask::Init()
     ConfigurationMgr().LogDeviceConfig();
 
     // QR code will be used with CHIP Tool
-    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
+    PrintOnboardingCodes(chip::RendezvousInformationFlag::kBLE);
+
+    minHeapFree = 0xFFFFFFFFFFF;
 
     return 0;
 }
@@ -337,6 +357,28 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
                 ConnectivityMgr().SetBLEAdvertisingEnabled(false);
                 PLAT_LOG("Disabled BLE Advertisements");
             }
+
+            chip::DeviceLayer::ThreadMetrics *threadMetricsOut, *currThread;
+            uint64_t heapFree, heapUsed;
+
+            DiagnosticDataProviderImpl::GetDefaultInstance().GetThreadMetrics(&threadMetricsOut);
+
+            currThread = threadMetricsOut;
+            while (currThread)
+            {
+                PLAT_LOG("Thread Metrics Task Name: %s ID: %d", currThread->name, (uint32_t) currThread->id);
+                PLAT_LOG("Stack Free Min: %d", (uint32_t) currThread->stackFreeMinimum);
+
+                currThread = currThread->Next;
+            }
+
+            DiagnosticDataProviderImpl::GetDefaultInstance().ReleaseThreadMetrics(threadMetricsOut);
+
+            DiagnosticDataProviderImpl::GetDefaultInstance().GetCurrentHeapUsed(heapUsed);
+            DiagnosticDataProviderImpl::GetDefaultInstance().GetCurrentHeapFree(heapFree);
+
+            PLAT_LOG("Heap Metrics Heap Free: %d Heap Used: %d Min Heap Free: %d", (uint32_t) heapFree, (uint32_t) heapUsed,
+                     (uint32_t) minHeapFree);
         }
         else if (AppEvent::kAppEventButtonType_LongPressed == aEvent->ButtonEvent.Type)
         {
@@ -462,5 +504,29 @@ void AppTask::UpdateClusterState()
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
         ChipLogError(NotSpecified, "ERR: Updating MaxConstTemp  %" PRIx8, status);
+    }
+}
+
+void AppTask::HeapTrackTimer(uint32_t aTimeoutMs)
+{
+    xTimerChangePeriod(mHeapTrackTimerHandle, pdMS_TO_TICKS(aTimeoutMs), 100);
+    xTimerStart(mHeapTrackTimerHandle, 100);
+}
+
+void AppTask::CancelHeapTrackTimer(void)
+{
+    xTimerStop(mHeapTrackTimerHandle, 100);
+}
+
+void AppTask::HeapTrackTimerEventHandler(TimerHandle_t aTimer)
+{
+    uint64_t heapFree;
+
+    DiagnosticDataProviderImpl::GetDefaultInstance().GetCurrentHeapFree(heapFree);
+
+    if (heapFree < minHeapFree)
+    {
+        minHeapFree = heapFree;
+        PLAT_LOG("Heap Metrics New low! Heap Free: %d", (uint32_t) heapFree);
     }
 }
