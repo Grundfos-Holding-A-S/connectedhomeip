@@ -45,7 +45,6 @@
 
 #include <app/InteractionModelEngine.h>
 #include <app/OperationalDeviceProxy.h>
-#include <app/util/DataModelHandler.h>
 #include <app/util/error-mapping.h>
 #include <credentials/CHIPCert.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
@@ -92,7 +91,7 @@ using namespace chip::Credentials;
 // For some applications those does not implement IMDelegate, the DeviceControllerInteractionModelDelegate will dispatch the
 // response to IMDefaultResponseCallback CHIPClientCallbacks, for the applications those implemented IMDelegate, this function will
 // not be used.
-bool __attribute__((weak)) IMDefaultResponseCallback(const chip::app::Command * commandObj, EmberAfStatus status)
+bool __attribute__((weak)) IMDefaultResponseCallback(const chip::app::CommandSender * commandObj, EmberAfStatus status)
 {
     return false;
 }
@@ -122,7 +121,7 @@ CHIP_ERROR DeviceController::Init(ControllerInitParams params)
     VerifyOrReturnError(params.systemState != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
 
     VerifyOrReturnError(params.systemState->SystemLayer() != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrReturnError(params.systemState->InetLayer() != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(params.systemState->UDPEndPointManager() != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
 
     mStorageDelegate = params.storageDelegate;
 #if CONFIG_NETWORK_LAYER_BLE
@@ -132,13 +131,11 @@ CHIP_ERROR DeviceController::Init(ControllerInitParams params)
     VerifyOrReturnError(params.systemState->TransportMgr() != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
 
 #if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
-    Dnssd::Resolver::Instance().Init(params.systemState->InetLayer());
-    Dnssd::Resolver::Instance().SetResolverDelegate(this);
+    ReturnErrorOnFailure(mDNSResolver.Init(params.systemState->UDPEndPointManager()));
+    mDNSResolver.SetResolverDelegate(this);
     RegisterDeviceAddressUpdateDelegate(params.deviceAddressUpdateDelegate);
     RegisterDeviceDiscoveryDelegate(params.deviceDiscoveryDelegate);
 #endif // CHIP_DEVICE_CONFIG_ENABLE_DNSSD
-
-    InitDataModelHandler(params.systemState->ExchangeMgr());
 
     VerifyOrReturnError(params.operationalCredentialsDelegate != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
     mOperationalCredentialsDelegate = params.operationalCredentialsDelegate;
@@ -146,17 +143,28 @@ CHIP_ERROR DeviceController::Init(ControllerInitParams params)
     mFabricIndex = params.fabricIndex;
     ReturnErrorOnFailure(ProcessControllerNOCChain(params));
 
+    mFabricInfo = params.systemState->Fabrics()->FindFabricWithIndex(mFabricIndex);
+    VerifyOrReturnError(mFabricInfo != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
+
     DeviceProxyInitParams deviceInitParams = {
         .sessionManager = params.systemState->SessionMgr(),
         .exchangeMgr    = params.systemState->ExchangeMgr(),
         .idAllocator    = &mIDAllocator,
-        .fabricInfo     = params.systemState->Fabrics()->FindFabricWithIndex(mFabricIndex),
+        .fabricTable    = params.systemState->Fabrics(),
+        .clientPool     = &mCASEClientPool,
         .imDelegate     = params.systemState->IMDelegate(),
+        .mrpLocalConfig = Optional<ReliableMessageProtocolConfig>::Value(mMRPConfig),
     };
 
     CASESessionManagerConfig sessionManagerConfig = {
         .sessionInitParams = deviceInitParams,
         .dnsCache          = &mDNSCache,
+        .devicePool        = &mDevicePool,
+#if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
+        .dnsResolver = &mDNSResolver,
+#else
+        .dnsResolver = nullptr,
+#endif
     };
 
     mCASESessionManager = chip::Platform::New<CASESessionManager>(sessionManagerConfig);
@@ -224,10 +232,6 @@ CHIP_ERROR DeviceController::Shutdown()
 
     mState = State::NotInitialized;
 
-#if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
-    Dnssd::Resolver::Instance().Shutdown();
-#endif // CHIP_DEVICE_CONFIG_ENABLE_DNSSD
-
     mStorageDelegate = nullptr;
 
     mSystemState->Fabrics()->ReleaseFabricIndex(mFabricIndex);
@@ -235,7 +239,7 @@ CHIP_ERROR DeviceController::Shutdown()
     mSystemState = nullptr;
 
 #if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
-    Dnssd::Resolver::Instance().SetResolverDelegate(nullptr);
+    mDNSResolver.Shutdown();
     mDeviceAddressUpdateDelegate = nullptr;
     mDeviceDiscoveryDelegate     = nullptr;
 #endif // CHIP_DEVICE_CONFIG_ENABLE_DNSSD
@@ -347,7 +351,7 @@ CHIP_ERROR DeviceController::GetPeerAddressAndPort(PeerId peerId, Inet::IPAddres
 {
     VerifyOrReturnError(mState == State::Initialized, CHIP_ERROR_INCORRECT_STATE);
     Transport::PeerAddress peerAddr;
-    ReturnErrorOnFailure(mCASESessionManager->GetPeerAddress(peerId.GetNodeId(), peerAddr));
+    ReturnErrorOnFailure(mCASESessionManager->GetPeerAddress(mFabricInfo, peerId.GetNodeId(), peerAddr));
     addr = peerAddr.GetIPAddress();
     port = peerAddr.GetPort();
     return CHIP_NO_ERROR;
@@ -585,14 +589,14 @@ void DeviceController::OnNodeIdResolutionFailed(const chip::PeerId & peer, CHIP_
 ControllerDeviceInitParams DeviceController::GetControllerDeviceInitParams()
 {
     return ControllerDeviceInitParams{
-        .transportMgr    = mSystemState->TransportMgr(),
-        .sessionManager  = mSystemState->SessionMgr(),
-        .exchangeMgr     = mSystemState->ExchangeMgr(),
-        .inetLayer       = mSystemState->InetLayer(),
-        .storageDelegate = mStorageDelegate,
-        .idAllocator     = &mIDAllocator,
-        .fabricsTable    = mSystemState->Fabrics(),
-        .imDelegate      = mSystemState->IMDelegate(),
+        .transportMgr       = mSystemState->TransportMgr(),
+        .sessionManager     = mSystemState->SessionMgr(),
+        .exchangeMgr        = mSystemState->ExchangeMgr(),
+        .udpEndPointManager = mSystemState->UDPEndPointManager(),
+        .storageDelegate    = mStorageDelegate,
+        .idAllocator        = &mIDAllocator,
+        .fabricsTable       = mSystemState->Fabrics(),
+        .imDelegate         = mSystemState->IMDelegate(),
     };
 }
 
@@ -631,12 +635,12 @@ CHIP_ERROR DeviceCommissioner::Init(CommissionerInitParams params)
 
 #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY // make this commissioner discoverable
     mUdcTransportMgr = chip::Platform::New<DeviceIPTransportMgr>();
-    ReturnErrorOnFailure(mUdcTransportMgr->Init(Transport::UdpListenParameters(mSystemState->InetLayer())
+    ReturnErrorOnFailure(mUdcTransportMgr->Init(Transport::UdpListenParameters(mSystemState->UDPEndPointManager())
                                                     .SetAddressType(Inet::IPAddressType::kIPv6)
                                                     .SetListenPort((uint16_t)(mUdcListenPort))
 #if INET_CONFIG_ENABLE_IPV4
                                                     ,
-                                                Transport::UdpListenParameters(mSystemState->InetLayer())
+                                                Transport::UdpListenParameters(mSystemState->UDPEndPointManager())
                                                     .SetAddressType(Inet::IPAddressType::kIPv4)
                                                     .SetListenPort((uint16_t)(mUdcListenPort))
 #endif // INET_CONFIG_ENABLE_IPV4
@@ -708,9 +712,9 @@ CommissioneeDeviceProxy * DeviceCommissioner::FindCommissioneeDevice(SessionHand
         if (deviceProxy->MatchesSession(session))
         {
             foundDevice = deviceProxy;
-            return false;
+            return Loop::Break;
         }
-        return true;
+        return Loop::Continue;
     });
 
     return foundDevice;
@@ -723,9 +727,9 @@ CommissioneeDeviceProxy * DeviceCommissioner::FindCommissioneeDevice(NodeId id)
         if (deviceProxy->GetDeviceId() == id)
         {
             foundDevice = deviceProxy;
-            return false;
+            return Loop::Break;
         }
-        return true;
+        return Loop::Continue;
     });
 
     return foundDevice;
@@ -761,6 +765,20 @@ CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, const char * se
 
 CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, RendezvousParameters & params)
 {
+    CommissioningParameters commissioningParams;
+    return PairDevice(remoteDeviceId, params, commissioningParams);
+}
+
+CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, RendezvousParameters & rendezvousParams,
+                                          CommissioningParameters & commissioningParams)
+{
+    ReturnErrorOnFailure(EstablishPASEConnection(remoteDeviceId, rendezvousParams));
+    return Commission(remoteDeviceId, commissioningParams);
+}
+
+CHIP_ERROR DeviceCommissioner::EstablishPASEConnection(NodeId remoteDeviceId, RendezvousParameters & params)
+{
+
     CHIP_ERROR err                     = CHIP_NO_ERROR;
     CommissioneeDeviceProxy * device   = nullptr;
     Transport::PeerAddress peerAddress = Transport::PeerAddress::UDP(Inet::IPAddress::Any);
@@ -804,30 +822,6 @@ CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, RendezvousParam
 
     mDeviceBeingCommissioned = device;
 
-    // If the CSRNonce is passed in, using that else using a random one..
-    if (params.HasCSRNonce())
-    {
-        ReturnErrorOnFailure(device->SetCSRNonce(params.GetCSRNonce().Value()));
-    }
-    else
-    {
-        uint8_t mCSRNonce[kOpCSRNonceLength];
-        Crypto::DRBG_get_bytes(mCSRNonce, sizeof(mCSRNonce));
-        ReturnErrorOnFailure(device->SetCSRNonce(ByteSpan(mCSRNonce)));
-    }
-
-    // If the AttestationNonce is passed in, using that else using a random one..
-    if (params.HasAttestationNonce())
-    {
-        ReturnErrorOnFailure(device->SetAttestationNonce(params.GetAttestationNonce().Value()));
-    }
-    else
-    {
-        uint8_t mAttestationNonce[kAttestationNonceLength];
-        Crypto::DRBG_get_bytes(mAttestationNonce, sizeof(mAttestationNonce));
-        ReturnErrorOnFailure(device->SetAttestationNonce(ByteSpan(mAttestationNonce)));
-    }
-
     mIsIPRendezvous = (params.GetPeerAddress().GetTransportType() != Transport::Type::kBle);
 
     device->Init(GetControllerDeviceInitParams(), remoteDeviceId, peerAddress, fabric->GetFabricIndex());
@@ -835,8 +829,6 @@ CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, RendezvousParam
     err = device->GetPairing().MessageDispatch().Init(mSystemState->SessionMgr());
     SuccessOrExit(err);
 
-    mSystemState->SystemLayer()->StartTimer(chip::System::Clock::Milliseconds32(kSessionEstablishmentTimeout),
-                                            OnSessionEstablishmentTimeoutCallback, this);
     if (params.GetPeerAddress().GetTransportType() != Transport::Type::kBle)
     {
         device->SetAddress(params.GetPeerAddress().GetIPAddress());
@@ -871,12 +863,14 @@ CHIP_ERROR DeviceCommissioner::PairDevice(NodeId remoteDeviceId, RendezvousParam
     // TODO - Remove use of SetActive/IsActive from CommissioneeDeviceProxy
     device->SetActive(true);
 
-    err = device->GetPairing().Pair(params.GetPeerAddress(), params.GetSetupPINCode(), keyID, exchangeCtxt, this);
+    err = device->GetPairing().Pair(params.GetPeerAddress(), params.GetSetupPINCode(), keyID,
+                                    Optional<ReliableMessageProtocolConfig>::Value(mMRPConfig), exchangeCtxt, this);
     SuccessOrExit(err);
 
-    // Immediately persist the updted mNextKeyID value
+    // Immediately persist the updated mNextKeyID value
     // TODO maybe remove FreeRendezvousSession() since mNextKeyID is always persisted immediately
     PersistNextKeyId();
+    mCommissioningStage = kSecurePairing;
 
 exit:
     if (err != CHIP_NO_ERROR)
@@ -895,6 +889,58 @@ exit:
     }
 
     return err;
+}
+
+CHIP_ERROR DeviceCommissioner::Commission(NodeId remoteDeviceId, CommissioningParameters & params)
+{
+    // TODO(cecille): Can we get rid of mDeviceBeingCommissioned and use the remote id instead? Would require storing the
+    // commissioning stage in the device.
+    CommissioneeDeviceProxy * device = mDeviceBeingCommissioned;
+    if (device->GetDeviceId() != remoteDeviceId || (!device->IsSecureConnected() && !device->IsSessionSetupInProgress()))
+    {
+        ChipLogError(Controller, "Invalid device for commissioning" ChipLogFormatX64, ChipLogValueX64(remoteDeviceId));
+        return CHIP_ERROR_INCORRECT_STATE;
+    }
+    if (mCommissioningStage != CommissioningStage::kSecurePairing)
+    {
+        ChipLogError(Controller, "Commissioning already in progress - not restarting");
+        return CHIP_ERROR_INCORRECT_STATE;
+    }
+    // If the CSRNonce is passed in, using that else using a random one..
+    if (params.HasCSRNonce())
+    {
+        ReturnErrorOnFailure(device->SetCSRNonce(params.GetCSRNonce().Value()));
+    }
+    else
+    {
+        uint8_t mCSRNonce[kOpCSRNonceLength];
+        Crypto::DRBG_get_bytes(mCSRNonce, sizeof(mCSRNonce));
+        ReturnErrorOnFailure(device->SetCSRNonce(ByteSpan(mCSRNonce)));
+    }
+
+    // If the AttestationNonce is passed in, using that else using a random one..
+    if (params.HasAttestationNonce())
+    {
+        ReturnErrorOnFailure(device->SetAttestationNonce(params.GetAttestationNonce().Value()));
+    }
+    else
+    {
+        uint8_t mAttestationNonce[kAttestationNonceLength];
+        Crypto::DRBG_get_bytes(mAttestationNonce, sizeof(mAttestationNonce));
+        ReturnErrorOnFailure(device->SetAttestationNonce(ByteSpan(mAttestationNonce)));
+    }
+
+    mSystemState->SystemLayer()->StartTimer(chip::System::Clock::Milliseconds32(kSessionEstablishmentTimeout),
+                                            OnSessionEstablishmentTimeoutCallback, this);
+    if (device->IsSecureConnected())
+    {
+        AdvanceCommissioningStage(CHIP_NO_ERROR);
+    }
+    else
+    {
+        mRunCommissioningAfterConnection = true;
+    }
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR DeviceCommissioner::StopPairing(NodeId remoteDeviceId)
@@ -981,21 +1027,29 @@ void DeviceCommissioner::OnSessionEstablished()
 
     // TODO: Add code to receive OpCSR from the device, and process the signing request
     // For IP rendezvous, this is sent as part of the state machine.
-    bool usingLegacyFlowWithImmediateStart = !mIsIPRendezvous;
-
-    if (usingLegacyFlowWithImmediateStart)
+    if (mRunCommissioningAfterConnection)
     {
-        err = SendCertificateChainRequestCommand(mDeviceBeingCommissioned, CertificateType::kPAI);
-        if (err != CHIP_NO_ERROR)
+        mRunCommissioningAfterConnection       = false;
+        bool usingLegacyFlowWithImmediateStart = !mIsIPRendezvous;
+        if (usingLegacyFlowWithImmediateStart)
         {
-            ChipLogError(Ble, "Failed in sending 'Certificate Chain request' command to the device: err %s", ErrorStr(err));
-            OnSessionEstablishmentError(err);
-            return;
+            err = SendCertificateChainRequestCommand(mDeviceBeingCommissioned, CertificateType::kPAI);
+            if (err != CHIP_NO_ERROR)
+            {
+                ChipLogError(Ble, "Failed in sending 'Certificate Chain request' command to the device: err %s", ErrorStr(err));
+                OnSessionEstablishmentError(err);
+                return;
+            }
+        }
+        else
+        {
+            AdvanceCommissioningStage(CHIP_NO_ERROR);
         }
     }
     else
     {
-        AdvanceCommissioningStage(CHIP_NO_ERROR);
+        ChipLogProgress(Controller, "OnPairingComplete");
+        mPairingDelegate->OnPairingComplete(CHIP_NO_ERROR);
     }
 }
 
@@ -1518,7 +1572,7 @@ void DeviceCommissioner::OnSessionEstablishmentTimeoutCallback(System::Layer * a
 CHIP_ERROR DeviceCommissioner::DiscoverCommissionableNodes(Dnssd::DiscoveryFilter filter)
 {
     ReturnErrorOnFailure(SetUpNodeDiscovery());
-    return chip::Dnssd::Resolver::Instance().FindCommissionableNodes(filter);
+    return mDNSResolver.FindCommissionableNodes(filter);
 }
 
 const Dnssd::DiscoveredNodeData * DeviceCommissioner::GetDiscoveredDevice(int idx)
@@ -1559,18 +1613,22 @@ void DeviceCommissioner::OnUserDirectedCommissioningRequest(UDCClientState state
 
     ChipLogDetail(Controller, "------To Accept Enter: discover udc-commission <pincode> <udc-client-index>");
 }
+#endif // CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY
+
+#if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
 
 void DeviceCommissioner::OnNodeDiscoveryComplete(const chip::Dnssd::DiscoveredNodeData & nodeData)
 {
+#if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY
     if (mUdcServer != nullptr)
     {
         mUdcServer->OnCommissionableNodeFound(nodeData);
     }
-
-    AbstractDnssdDiscoveryController::OnNodeDiscoveryComplete(nodeData);
-}
-
 #endif // CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY
+    AbstractDnssdDiscoveryController::OnNodeDiscoveryComplete(nodeData);
+    mSetUpCodePairer.NotifyCommissionableDeviceDiscovered(nodeData);
+}
+#endif // CHIP_DEVICE_CONFIG_ENABLE_DNSSD
 
 void BasicSuccess(void * context, uint16_t val)
 {
@@ -1603,7 +1661,7 @@ void DeviceCommissioner::OnNodeIdResolved(const chip::Dnssd::ResolvedNodeData & 
 
     mDNSCache.Insert(nodeData);
 
-    mCASESessionManager->FindOrEstablishSession(nodeData.mPeerId.GetNodeId(), &mOnDeviceConnectedCallback,
+    mCASESessionManager->FindOrEstablishSession(mFabricInfo, nodeData.mPeerId.GetNodeId(), &mOnDeviceConnectedCallback,
                                                 &mOnDeviceConnectionFailureCallback);
     DeviceController::OnNodeIdResolved(nodeData);
 }
@@ -1762,7 +1820,7 @@ void DeviceCommissioner::AdvanceCommissioningStage(CHIP_ERROR err)
         // TODO(cecille): Worthwhile to keep this around as part of the class?
         // TODO(cecille): Where is the country config actually set?
         ChipLogProgress(Controller, "Setting Regulatory Config");
-        uint32_t regulatoryLocation = EMBER_ZCL_REGULATORY_LOCATION_TYPE_OUTDOOR;
+        uint8_t regulatoryLocation = EMBER_ZCL_REGULATORY_LOCATION_TYPE_OUTDOOR;
 #if CONFIG_DEVICE_LAYER
         CHIP_ERROR status = DeviceLayer::ConfigurationMgr().GetRegulatoryLocation(regulatoryLocation);
 #else
@@ -1780,7 +1838,7 @@ void DeviceCommissioner::AdvanceCommissioningStage(CHIP_ERROR err)
 #if CONFIG_DEVICE_LAYER
         status = DeviceLayer::ConfigurationMgr().GetCountryCode(countryCodeStr, kMaxCountryCodeSize, actualCountryCodeSize);
 #else
-        status            = CHIP_ERROR_NOT_IMPLEMENTED;
+        status = CHIP_ERROR_NOT_IMPLEMENTED;
 #endif
         if (status != CHIP_NO_ERROR)
         {
@@ -1790,8 +1848,8 @@ void DeviceCommissioner::AdvanceCommissioningStage(CHIP_ERROR err)
 
         GeneralCommissioningCluster genCom;
         genCom.Associate(mDeviceBeingCommissioned, 0);
-        genCom.SetRegulatoryConfig(mSuccess.Cancel(), mFailure.Cancel(), static_cast<uint8_t>(regulatoryLocation), countryCode,
-                                   breadcrumb, kCommandTimeoutMs);
+        genCom.SetRegulatoryConfig(mSuccess.Cancel(), mFailure.Cancel(), regulatoryLocation, countryCode, breadcrumb,
+                                   kCommandTimeoutMs);
     }
     break;
     case CommissioningStage::kDeviceAttestation: {
@@ -1837,7 +1895,7 @@ void DeviceCommissioner::AdvanceCommissioningStage(CHIP_ERROR err)
         RendezvousCleanup(CHIP_NO_ERROR);
 #if CHIP_DEVICE_CONFIG_ENABLE_DNSSD
         ChipLogProgress(Controller, "Finding node on operational network");
-        Dnssd::Resolver::Instance().ResolveNodeId(peerId, Inet::IPAddressType::kAny);
+        mDNSResolver.ResolveNodeId(peerId, Inet::IPAddressType::kAny);
 #endif
     }
     break;

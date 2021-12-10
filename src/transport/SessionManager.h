@@ -154,7 +154,7 @@ public:
 #ifndef NDEBUG
         mSessionCreationDelegates.ForEachActiveObject([&](std::reference_wrapper<SessionCreationDelegate> * i) {
             VerifyOrDie(std::addressof(cb) != std::addressof(i->get()));
-            return true;
+            return Loop::Continue;
         });
 #endif
         std::reference_wrapper<SessionCreationDelegate> * slot = mSessionCreationDelegates.CreateObject(cb);
@@ -167,9 +167,9 @@ public:
             if (std::addressof(cb) == std::addressof(i->get()))
             {
                 mSessionCreationDelegates.ReleaseObject(i);
-                return false;
+                return Loop::Break;
             }
-            return true;
+            return Loop::Continue;
         });
     }
 
@@ -179,7 +179,7 @@ public:
 #ifndef NDEBUG
         mSessionReleaseDelegates.ForEachActiveObject([&](std::reference_wrapper<SessionReleaseDelegate> * i) {
             VerifyOrDie(std::addressof(cb) != std::addressof(i->get()));
-            return true;
+            return Loop::Continue;
         });
 #endif
         std::reference_wrapper<SessionReleaseDelegate> * slot = mSessionReleaseDelegates.CreateObject(cb);
@@ -192,9 +192,9 @@ public:
             if (std::addressof(cb) == std::addressof(i->get()))
             {
                 mSessionReleaseDelegates.ReleaseObject(i);
-                return false;
+                return Loop::Break;
             }
-            return true;
+            return Loop::Continue;
         });
     }
 
@@ -286,16 +286,19 @@ private:
     State mState;                                                                         // < Initialization state of the object
 
     SessionMessageDelegate * mCB = nullptr;
-    BitMapObjectPool<std::reference_wrapper<SessionCreationDelegate>, CHIP_CONFIG_MAX_SESSION_CREATION_DELEGATES>
+    BitMapObjectPool<std::reference_wrapper<SessionCreationDelegate>, CHIP_CONFIG_MAX_SESSION_CREATION_DELEGATES,
+                     OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode>
         mSessionCreationDelegates;
 
     // TODO: This is a temporary solution to release sessions, in the near future, SessionReleaseDelegate will be
     //       directly associated with the every SessionHandle. Then the callback function is called on over the handle
     //       delegate directly, in order to prevent dangling handles.
-    BitMapObjectPool<std::reference_wrapper<SessionReleaseDelegate>, CHIP_CONFIG_MAX_SESSION_RELEASE_DELEGATES>
+    BitMapObjectPool<std::reference_wrapper<SessionReleaseDelegate>, CHIP_CONFIG_MAX_SESSION_RELEASE_DELEGATES,
+                     OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode>
         mSessionReleaseDelegates;
 
-    BitMapObjectPool<std::reference_wrapper<SessionRecoveryDelegate>, CHIP_CONFIG_MAX_SESSION_RECOVERY_DELEGATES>
+    BitMapObjectPool<std::reference_wrapper<SessionRecoveryDelegate>, CHIP_CONFIG_MAX_SESSION_RECOVERY_DELEGATES,
+                     OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode>
         mSessionRecoveryDelegates;
 
     TransportMgrBase * mTransportMgr                                   = nullptr;

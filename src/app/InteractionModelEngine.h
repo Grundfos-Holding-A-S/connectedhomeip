@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <access/AccessControl.h>
+#include <app/MessageDef/AttributeReportIBs.h>
 #include <app/MessageDef/ReportDataMessage.h>
 #include <lib/core/CHIPCore.h>
 #include <lib/support/CodeUtils.h>
@@ -140,7 +142,8 @@ public:
      *  @retval #CHIP_ERROR_NO_MEMORY If there is no WriteClient available
      *  @retval #CHIP_NO_ERROR On success.
      */
-    CHIP_ERROR NewWriteClient(WriteClientHandle & apWriteClient, WriteClient::Callback * callback);
+    CHIP_ERROR NewWriteClient(WriteClientHandle & apWriteClient, WriteClient::Callback * callback,
+                              const Optional<uint16_t> & aTimedWriteTimeoutMs = NullOptional);
 
     /**
      *  Allocate a ReadClient that can be used to do a read interaction.  If the call succeeds, the consumer
@@ -176,6 +179,7 @@ public:
 
     uint16_t GetWriteClientArrayIndex(const WriteClient * const apWriteClient) const;
 
+    uint16_t GetReadHandlerArrayIndex(const ReadHandler * const apReadHandler) const;
     /**
      * The Magic number of this InteractionModelEngine, the magic number is set during Init()
      */
@@ -272,6 +276,8 @@ private:
                          TLV::TLVReader & apPayload) override;
     bool CommandExists(const ConcreteCommandPath & aCommandPath) override;
 
+    bool HasActiveRead();
+
     Messaging::ExchangeManager * mpExchangeMgr = nullptr;
     InteractionModelDelegate * mpDelegate      = nullptr;
 
@@ -313,6 +319,8 @@ bool ServerClusterCommandExists(const ConcreteCommandPath & aCommandPath);
 
 /**
  *  Fetch attribute value and version info and write to the AttributeReport provided.
+ *  The ReadSingleClusterData will do everything required for encoding an attribute, i.e. it will try to put one or more
+ * AttributeReportIB to the AttributeReportIBs::Builder.
  *  When the endpoint / cluster / attribute / event data specified by aClusterInfo does not exist, corresponding interaction model
  * error code will be put into the writer, and CHIP_NO_ERROR will be returned.
  *  If the data exists on the server, the data (with tag kData) and the data version (with tag kDataVersion) will be put
@@ -321,18 +329,20 @@ bool ServerClusterCommandExists(const ConcreteCommandPath & aCommandPath);
  *  This function is implemented by CHIP as a part of cluster data storage & management.
  * The apWriter and apDataExists can be nullptr.
  *
- *  @param[in]    aAccessingFabricIndex The accessing fabric index for the read.
- *  @param[in]    aPath             The concrete path of the data being read.
- *  @param[in]    aAttributeReport  The TLV Builder for Cluter attribute builder.
+ *  @param[in]    aSubjectDescriptor    The subject descriptor for the read.
+ *  @param[in]    aPath                 The concrete path of the data being read.
+ *  @param[in]    aAttributeReport      The TLV Builder for Cluter attribute builder.
  *
  *  @retval  CHIP_NO_ERROR on success
  */
-CHIP_ERROR ReadSingleClusterData(FabricIndex aAccessingFabricIndex, const ConcreteReadAttributePath & aPath,
-                                 AttributeReportIB::Builder & aAttributeReport);
+CHIP_ERROR ReadSingleClusterData(const Access::SubjectDescriptor & aSubjectDescriptor, const ConcreteReadAttributePath & aPath,
+                                 AttributeReportIBs::Builder & aAttributeReports,
+                                 AttributeValueEncoder::AttributeEncodeState * apEncoderState);
 
 /**
  * TODO: Document.
  */
-CHIP_ERROR WriteSingleClusterData(ClusterInfo & aClusterInfo, TLV::TLVReader & aReader, WriteHandler * apWriteHandler);
+CHIP_ERROR WriteSingleClusterData(const Access::SubjectDescriptor & aSubjectDescriptor, ClusterInfo & aClusterInfo,
+                                  TLV::TLVReader & aReader, WriteHandler * apWriteHandler);
 } // namespace app
 } // namespace chip

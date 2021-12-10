@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <access/AccessControl.h>
+#include <app/AttributeAccessInterface.h>
 #include <app/AttributePathExpandIterator.h>
 #include <app/ClusterInfo.h>
 #include <app/EventManagement.h>
@@ -51,6 +53,8 @@ namespace app {
 class ReadHandler : public Messaging::ExchangeDelegate
 {
 public:
+    using SubjectDescriptor = Access::SubjectDescriptor;
+
     enum class ShutdownOptions
     {
         KeepCurrentExchange,
@@ -140,11 +144,23 @@ public:
         // If the contents of the global dirty set have changed, we need to reset the iterator since the paths
         // we've sent up till now are no longer valid and need to be invalidated.
         mAttributePathExpandIterator = AttributePathExpandIterator(mpAttributeClusterInfoList);
+        mAttributeEncoderState       = AttributeValueEncoder::AttributeEncodeState();
     }
     void ClearDirty() { mDirty = false; }
     bool IsDirty() { return mDirty; }
     NodeId GetInitiatorNodeId() const { return mInitiatorNodeId; }
-    FabricIndex GetAccessingFabricIndex() const { return mFabricIndex; }
+    FabricIndex GetAccessingFabricIndex() const { return mSubjectDescriptor.fabricIndex; }
+
+    const SubjectDescriptor & GetSubjectDescriptor() const { return mSubjectDescriptor; }
+
+    void UnblockUrgentEventDelivery()
+    {
+        mHoldReport = false;
+        mDirty      = true;
+    }
+
+    const AttributeValueEncoder::AttributeEncodeState & GetAttributeEncodeState() const { return mAttributeEncoderState; }
+    void SetAttributeEncodeState(const AttributeValueEncoder::AttributeEncodeState & aState) { mAttributeEncoderState = aState; }
 
 private:
     friend class TestReadInteraction;
@@ -164,7 +180,7 @@ private:
     CHIP_ERROR ProcessSubscribeRequest(System::PacketBufferHandle && aPayload);
     CHIP_ERROR ProcessReadRequest(System::PacketBufferHandle && aPayload);
     CHIP_ERROR ProcessAttributePathList(AttributePathIBs::Parser & aAttributePathListParser);
-    CHIP_ERROR ProcessEventPaths(EventPaths::Parser & aEventPathsParser);
+    CHIP_ERROR ProcessEventPaths(EventPathIBs::Parser & aEventPathsParser);
     CHIP_ERROR OnStatusResponse(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle && aPayload);
     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader & aPayloadHeader,
                                  System::PacketBufferHandle && aPayload) override;
@@ -188,12 +204,12 @@ private:
     PriorityLevel mCurrentPriority = PriorityLevel::Invalid;
 
     // The event number of the last processed event for each priority level
-    EventNumber mSelfProcessedEvents[kNumPriorityLevel];
+    EventNumber mSelfProcessedEvents[kNumPriorityLevel] = { 0 };
 
     // The last schedule event number snapshoted in the beginning when preparing to fill new events to reports
-    EventNumber mLastScheduledEventNumber[kNumPriorityLevel];
-    Messaging::ExchangeManager * mpExchangeMgr = nullptr;
-    InteractionModelDelegate * mpDelegate      = nullptr;
+    EventNumber mLastScheduledEventNumber[kNumPriorityLevel] = { 0 };
+    Messaging::ExchangeManager * mpExchangeMgr               = nullptr;
+    InteractionModelDelegate * mpDelegate                    = nullptr;
 
     // Tracks whether we're in the initial phase of receiving priming
     // reports, which is always true for reads and true for subscriptions
@@ -211,10 +227,12 @@ private:
     // last chunked message.
     bool mIsChunkedReport                                    = false;
     NodeId mInitiatorNodeId                                  = kUndefinedNodeId;
-    FabricIndex mFabricIndex                                 = 0;
     AttributePathExpandIterator mAttributePathExpandIterator = AttributePathExpandIterator(nullptr);
     bool mIsFabricFiltered                                   = false;
     bool mHoldSync                                           = false;
+    SubjectDescriptor mSubjectDescriptor;
+    // The detailed encoding state for a single attribute, used by list chunking feature.
+    AttributeValueEncoder::AttributeEncodeState mAttributeEncoderState;
 };
 } // namespace app
 } // namespace chip

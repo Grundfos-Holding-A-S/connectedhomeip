@@ -873,7 +873,7 @@
  *   for the debug level events.
  */
 #ifndef CHIP_DEVICE_CONFIG_EVENT_LOGGING_DEBUG_BUFFER_SIZE
-#define CHIP_DEVICE_CONFIG_EVENT_LOGGING_DEBUG_BUFFER_SIZE (256)
+#define CHIP_DEVICE_CONFIG_EVENT_LOGGING_DEBUG_BUFFER_SIZE (512)
 #endif
 
 /**
@@ -894,16 +894,6 @@
  */
 #ifndef CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_CRIT_EIDC_KEY
 #define CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_CRIT_EIDC_KEY "crit-eidc"
-#endif
-
-/**
- *  @def CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_PROD_EIDC_KEY
- *
- *  @brief
- *    The production event id counter (eidc) persisted storage key.
- */
-#ifndef CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_PROD_EIDC_KEY
-#define CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_PROD_EIDC_KEY "prod-eidc"
 #endif
 
 /**
@@ -1268,4 +1258,24 @@
  */
 #ifndef CHIP_DEVICE_CONFIG_PAIRING_SECONDARY_INSTRUCTION
 #define CHIP_DEVICE_CONFIG_PAIRING_SECONDARY_INSTRUCTION ""
+#endif
+
+// -------------------- App Platform Configuration --------------------
+
+/**
+ * CHIP_DEVICE_CONFIG_APP_PLATFORM_ENABLED
+ *
+ * Does this device support an app platform 1=Yes, 0=No
+ */
+#ifndef CHIP_DEVICE_CONFIG_APP_PLATFORM_ENABLED
+#define CHIP_DEVICE_CONFIG_APP_PLATFORM_ENABLED 0
+#endif
+
+/**
+ * CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT
+ *
+ * When app platform is enabled, max number of endpoints
+ */
+#ifndef CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT
+#define CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT 0
 #endif

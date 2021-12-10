@@ -54,7 +54,6 @@ target_sources(${APP_TARGET} PRIVATE
 
                ${MBED_COMMON}/util/LEDWidget.cpp
 
-               ${GEN_DIR}/all-clusters-app/zap-generated/attribute-size.cpp
                ${GEN_DIR}/all-clusters-app/zap-generated/callback-stub.cpp
                ${GEN_DIR}/all-clusters-app/zap-generated/CHIPClientCallbacks.cpp
                ${GEN_DIR}/all-clusters-app/zap-generated/CHIPClusters.cpp
@@ -77,7 +76,6 @@ target_sources(${APP_TARGET} PRIVATE
                ${APP_UTIL}/attribute-storage.cpp
                ${APP_UTIL}/attribute-table.cpp
                ${APP_UTIL}/attribute-size-util.cpp
-               ${APP_UTIL}/attribute-list-byte-span.cpp
                ${APP_UTIL}/binding-table.cpp
                ${APP_UTIL}/chip-message-send.cpp
                ${APP_UTIL}/client-api.cpp
@@ -93,6 +91,7 @@ target_sources(${APP_TARGET} PRIVATE
                ${APP_CLUSTERS}/basic/basic.cpp
                ${APP_CLUSTERS}/bindings/bindings.cpp
                ${APP_CLUSTERS}/on-off-server/on-off-server.cpp
+               ${APP_CLUSTERS}/access-control-server/access-control-server.cpp
                ${APP_CLUSTERS}/account-login-server/account-login-server.cpp
                ${APP_CLUSTERS}/application-launcher-server/application-launcher-server.cpp
                ${APP_CLUSTERS}/audio-output-server/audio-output-server.cpp   
@@ -128,15 +127,16 @@ target_sources(${APP_TARGET} PRIVATE
                ${APP_CLUSTERS}/test-cluster-server/test-cluster-server.cpp
                ${APP_CLUSTERS}/occupancy-sensor-server/occupancy-sensor-server.cpp
                ${APP_CLUSTERS}/diagnostic-logs-server/diagnostic-logs-server.cpp
-               ${APP_CLUSTERS}/ethernet_network_diagnostics_server/ethernet_network_diagnostics_server.cpp
-               ${APP_CLUSTERS}/software_diagnostics_server/software_diagnostics_server.cpp
-               ${APP_CLUSTERS}/thread_network_diagnostics_server/thread_network_diagnostics_server.cpp
-               ${APP_CLUSTERS}/wifi_network_diagnostics_server/wifi_network_diagnostics_server.cpp
+               ${APP_CLUSTERS}/ethernet-network-diagnostics-server/ethernet-network-diagnostics-server.cpp
+               ${APP_CLUSTERS}/software-diagnostics-server/software-diagnostics-server.cpp
+               ${APP_CLUSTERS}/thread-network-diagnostics-server/thread-network-diagnostics-server.cpp
+               ${APP_CLUSTERS}/wifi-network-diagnostics-server/wifi-network-diagnostics-server.cpp
                ${APP_CLUSTERS}/pump-configuration-and-control-server/pump-configuration-and-control-server.cpp
                ${APP_CLUSTERS}/administrator-commissioning-server/administrator-commissioning-server.cpp
                ${APP_CLUSTERS}/identify-server/identify-server.cpp
                ${APP_CLUSTERS}/window-covering-server/window-covering-server.cpp
-               ${APP_CLUSTERS}/general_diagnostics_server/general_diagnostics_server.cpp
+               ${APP_CLUSTERS}/general-diagnostics-server/general-diagnostics-server.cpp
+               ${APP_CLUSTERS}/power-source-configuration-server/power-source-configuration-server.cpp
 )
 
 target_link_libraries(${APP_TARGET} mbed-os-posix-socket mbed-os mbed-ble mbed-events mbed-netsocket mbed-storage mbed-storage-kv-global-api mbed-mbedtls mbed-emac chip)

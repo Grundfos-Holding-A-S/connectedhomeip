@@ -1217,46 +1217,65 @@ CHIP_ERROR GetNumberOfCertsFromPKCS7(const char * pkcs7, uint32_t * n_certs)
 }
 
 CHIP_ERROR ValidateCertificateChain(const uint8_t * rootCertificate, size_t rootCertificateLen, const uint8_t * caCertificate,
-                                    size_t caCertificateLen, const uint8_t * leafCertificate, size_t leafCertificateLen)
+                                    size_t caCertificateLen, const uint8_t * leafCertificate, size_t leafCertificateLen,
+                                    CertificateChainValidationResult & result)
 {
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
     CHIP_ERROR error = CHIP_NO_ERROR;
-    mbedtls_x509_crt cert_chain;
-    mbedtls_x509_crt root_cert;
-    int result;
+    mbedtls_x509_crt certChain;
+    mbedtls_x509_crt rootCert;
+    int mbedResult;
     uint32_t flags;
 
-    mbedtls_x509_crt_init(&cert_chain);
-    mbedtls_x509_crt_init(&root_cert);
+    result = CertificateChainValidationResult::kInternalFrameworkError;
+
+    VerifyOrReturnError(rootCertificate != nullptr && rootCertificateLen != 0,
+                        (result = CertificateChainValidationResult::kRootArgumentInvalid, CHIP_ERROR_INVALID_ARGUMENT));
+    VerifyOrReturnError(caCertificate != nullptr && caCertificateLen != 0,
+                        (result = CertificateChainValidationResult::kICAArgumentInvalid, CHIP_ERROR_INVALID_ARGUMENT));
+    VerifyOrReturnError(leafCertificate != nullptr && leafCertificateLen != 0,
+                        (result = CertificateChainValidationResult::kLeafArgumentInvalid, CHIP_ERROR_INVALID_ARGUMENT));
+
+    mbedtls_x509_crt_init(&certChain);
+    mbedtls_x509_crt_init(&rootCert);
 
     /* Start of chain  */
-    result = mbedtls_x509_crt_parse(&cert_chain, Uint8::to_const_uchar(leafCertificate), leafCertificateLen);
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+    mbedResult = mbedtls_x509_crt_parse(&certChain, Uint8::to_const_uchar(leafCertificate), leafCertificateLen);
+    VerifyOrExit(mbedResult == 0, (result = CertificateChainValidationResult::kLeafFormatInvalid, error = CHIP_ERROR_INTERNAL));
 
-    if (caCertificate != nullptr && caCertificateLen != 0)
-    {
-        /* Add the intermediate to the chain  */
-        result = mbedtls_x509_crt_parse(&cert_chain, Uint8::to_const_uchar(caCertificate), caCertificateLen);
-        VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
-    }
+    /* Add the intermediate to the chain  */
+    mbedResult = mbedtls_x509_crt_parse(&certChain, Uint8::to_const_uchar(caCertificate), caCertificateLen);
+    VerifyOrExit(mbedResult == 0, (result = CertificateChainValidationResult::kICAFormatInvalid, error = CHIP_ERROR_INTERNAL));
 
     /* Add the root to the chain */
-    result = mbedtls_x509_crt_parse(&cert_chain, Uint8::to_const_uchar(rootCertificate), rootCertificateLen);
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+    mbedResult = mbedtls_x509_crt_parse(&certChain, Uint8::to_const_uchar(rootCertificate), rootCertificateLen);
+    VerifyOrExit(mbedResult == 0, (result = CertificateChainValidationResult::kRootFormatInvalid, error = CHIP_ERROR_INTERNAL));
 
     /* Parse the root cert */
-    result = mbedtls_x509_crt_parse(&root_cert, Uint8::to_const_uchar(rootCertificate), rootCertificateLen);
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+    mbedResult = mbedtls_x509_crt_parse(&rootCert, Uint8::to_const_uchar(rootCertificate), rootCertificateLen);
+    VerifyOrExit(mbedResult == 0, (result = CertificateChainValidationResult::kRootFormatInvalid, error = CHIP_ERROR_INTERNAL));
 
-    // TODO: If any specific error occurs here, it should be flagged accordingly, such as specific chain element errors
     /* Verify the chain against the root */
-    result = mbedtls_x509_crt_verify(&cert_chain, &root_cert, NULL, NULL, &flags, NULL, NULL);
-    VerifyOrExit(result == 0 && flags == 0, error = CHIP_ERROR_CERT_NOT_TRUSTED);
+    mbedResult = mbedtls_x509_crt_verify(&certChain, &rootCert, NULL, NULL, &flags, NULL, NULL);
+
+    switch (mbedResult)
+    {
+    case 0:
+        VerifyOrExit(flags == 0, (result = CertificateChainValidationResult::kInternalFrameworkError, error = CHIP_ERROR_INTERNAL));
+        result = CertificateChainValidationResult::kSuccess;
+        break;
+    case MBEDTLS_ERR_X509_CERT_VERIFY_FAILED:
+        result = CertificateChainValidationResult::kChainInvalid;
+        error  = CHIP_ERROR_CERT_NOT_TRUSTED;
+        break;
+    default:
+        SuccessOrExit((result = CertificateChainValidationResult::kInternalFrameworkError, error = CHIP_ERROR_INTERNAL));
+    }
 
 exit:
-    _log_mbedTLS_error(result);
-    mbedtls_x509_crt_free(&cert_chain);
-    mbedtls_x509_crt_free(&root_cert);
+    _log_mbedTLS_error(mbedResult);
+    mbedtls_x509_crt_free(&certChain);
+    mbedtls_x509_crt_free(&rootCert);
 
 #else
     (void) rootCertificate;
@@ -1265,6 +1284,101 @@ exit:
     (void) caCertificateLen;
     (void) leafCertificate;
     (void) leafCertificateLen;
+    (void) result;
+    CHIP_ERROR error = CHIP_ERROR_NOT_IMPLEMENTED;
+#endif // defined(MBEDTLS_X509_CRT_PARSE_C)
+
+    return error;
+}
+
+inline bool IsTimeGreaterThanEqual(const mbedtls_x509_time * const timeA, const mbedtls_x509_time * const timeB)
+{
+    return timeA->year > timeB->year || (timeA->year == timeB->year && timeA->mon > timeB->mon) ||
+        (timeA->year == timeB->year && timeA->mon == timeB->mon && timeA->day > timeB->day) ||
+        (timeA->year == timeB->year && timeA->mon == timeB->mon && timeA->day == timeB->day && timeA->hour > timeB->hour) ||
+        (timeA->year == timeB->year && timeA->mon == timeB->mon && timeA->day == timeB->day && timeA->hour == timeB->hour &&
+         timeA->min > timeB->min) ||
+        (timeA->year == timeB->year && timeA->mon == timeB->mon && timeA->day == timeB->day && timeA->hour == timeB->hour &&
+         timeA->min == timeB->min && timeA->sec >= timeB->sec);
+}
+
+CHIP_ERROR IsCertificateValidAtIssuance(const ByteSpan & referenceCertificate, const ByteSpan & toBeEvaluatedCertificate)
+{
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    CHIP_ERROR error = CHIP_NO_ERROR;
+    mbedtls_x509_crt mbedReferenceCertificate;
+    mbedtls_x509_crt mbedToBeEvaluatedCertificate;
+    mbedtls_x509_time refNotBeforeTime;
+    mbedtls_x509_time tbeNotBeforeTime;
+    mbedtls_x509_time tbeNotAfterTime;
+    int result;
+
+    VerifyOrReturnError(!referenceCertificate.empty() && !toBeEvaluatedCertificate.empty(), CHIP_ERROR_INVALID_ARGUMENT);
+
+    mbedtls_x509_crt_init(&mbedReferenceCertificate);
+    mbedtls_x509_crt_init(&mbedToBeEvaluatedCertificate);
+
+    result = mbedtls_x509_crt_parse(&mbedReferenceCertificate, Uint8::to_const_uchar(referenceCertificate.data()),
+                                    referenceCertificate.size());
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+
+    result = mbedtls_x509_crt_parse(&mbedToBeEvaluatedCertificate, Uint8::to_const_uchar(toBeEvaluatedCertificate.data()),
+                                    toBeEvaluatedCertificate.size());
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+
+    refNotBeforeTime = mbedReferenceCertificate.valid_from;
+    tbeNotBeforeTime = mbedToBeEvaluatedCertificate.valid_from;
+    tbeNotAfterTime  = mbedToBeEvaluatedCertificate.valid_to;
+
+    // TODO: Handle PAA/PAI re-issue and enable below time validation
+    // check if referenceCertificate is issued at or after tbeCertificate's notBefore timestamp
+    // VerifyOrExit(IsTimeGreaterThanEqual(&refNotBeforeTime, &tbeNotBeforeTime), error = CHIP_ERROR_CERT_EXPIRED);
+
+    // check if referenceCertificate is issued at or before tbeCertificate's notAfter timestamp
+    // VerifyOrExit(IsTimeGreaterThanEqual(&tbeNotAfterTime, &refNotBeforeTime), error = CHIP_ERROR_CERT_EXPIRED);
+
+exit:
+    _log_mbedTLS_error(result);
+    mbedtls_x509_crt_free(&mbedReferenceCertificate);
+    mbedtls_x509_crt_free(&mbedToBeEvaluatedCertificate);
+
+#else
+    (void) referenceCertificate;
+    (void) toBeEvaluatedCertificate;
+    CHIP_ERROR error = CHIP_ERROR_NOT_IMPLEMENTED;
+#endif // defined(MBEDTLS_X509_CRT_PARSE_C)
+
+    return error;
+}
+
+CHIP_ERROR IsCertificateValidAtCurrentTime(const ByteSpan & certificate)
+{
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    CHIP_ERROR error = CHIP_NO_ERROR;
+    mbedtls_x509_crt mbedCertificate;
+    int result;
+
+    VerifyOrReturnError(!certificate.empty(), CHIP_ERROR_INVALID_ARGUMENT);
+
+    mbedtls_x509_crt_init(&mbedCertificate);
+
+    result = mbedtls_x509_crt_parse(&mbedCertificate, Uint8::to_const_uchar(certificate.data()), certificate.size());
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+
+    // check if certificate's notBefore timestamp is earlier than or equal to current time.
+    result = mbedtls_x509_time_is_past(&mbedCertificate.valid_from);
+    VerifyOrExit(result == 1, error = CHIP_ERROR_CERT_EXPIRED);
+
+    // check if certificate's notAfter timestamp is later than current time.
+    result = mbedtls_x509_time_is_future(&mbedCertificate.valid_to);
+    VerifyOrExit(result == 1, error = CHIP_ERROR_CERT_EXPIRED);
+
+exit:
+    _log_mbedTLS_error(result);
+    mbedtls_x509_crt_free(&mbedCertificate);
+
+#else
+    (void) certificate;
     CHIP_ERROR error = CHIP_ERROR_NOT_IMPLEMENTED;
 #endif // defined(MBEDTLS_X509_CRT_PARSE_C)
 

@@ -17,6 +17,7 @@
  */
 
 #include "TimedHandler.h"
+#include <app/InteractionModelDelegate.h>
 #include <app/InteractionModelEngine.h>
 #include <app/MessageDef/TimedRequestMessage.h>
 #include <app/StatusResponse.h>
@@ -60,7 +61,11 @@ CHIP_ERROR TimedHandler::OnMessageReceived(Messaging::ExchangeContext * aExchang
 
     if (mState == State::kExpectingFollowingAction)
     {
-        if (System::SystemClock().GetMonotonicTimestamp() > mTimeLimit)
+        System::Clock::Timestamp now = System::SystemClock().GetMonotonicTimestamp();
+        ChipLogDetail(DataManagement,
+                      "Timed following action arrived at 0x" ChipLogFormatX64 ": handler %p exchange " ChipLogFormatExchange,
+                      ChipLogValueX64(now.count()), this, ChipLogValueExchange(aExchangeContext));
+        if (now > mTimeLimit)
         {
             // Time is up.  Spec says to send UNSUPPORTED_ACCESS.
             ChipLogError(DataManagement, "Timeout expired: handler %p exchange " ChipLogFormatExchange, this,
@@ -122,15 +127,20 @@ CHIP_ERROR TimedHandler::HandleTimedRequestAction(Messaging::ExchangeContext * a
 
     ChipLogDetail(DataManagement, "Got Timed Request with timeout %" PRIu16 ": handler %p exchange " ChipLogFormatExchange,
                   timeoutMs, this, ChipLogValueExchange(aExchangeContext));
-    // Tell the exchange to close after the timeout passes, so we don't get
-    // stuck waiting forever if the client never sends another message.
+    // Use at least our default IM timeout, because if we close our exchange as
+    // soon as we know the delay has passed we won't be able to send the
+    // UNSUPPORTED_ACCESS status code the spec tells us to send (and in fact
+    // will send nothing and the other side will have to time out to realize
+    // it's missed its window).
     auto delay = System::Clock::Milliseconds32(timeoutMs);
-    aExchangeContext->SetResponseTimeout(delay);
+    aExchangeContext->SetResponseTimeout(std::max(delay, kImMessageTimeout));
     ReturnErrorOnFailure(StatusResponse::Send(Status::Success, aExchangeContext, /* aExpectResponse = */ true));
 
     // Now just wait for the client.
     mState     = State::kExpectingFollowingAction;
     mTimeLimit = System::SystemClock().GetMonotonicTimestamp() + delay;
+    ChipLogDetail(DataManagement, "Timed Request time limit 0x" ChipLogFormatX64 ": handler %p exchange " ChipLogFormatExchange,
+                  ChipLogValueX64(mTimeLimit.count()), this, ChipLogValueExchange(aExchangeContext));
     return CHIP_NO_ERROR;
 }
 

@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <access/AccessControl.h>
 #include <app/MessageDef/ReportDataMessage.h>
 #include <app/ReadHandler.h>
 #include <app/util/basic-types.h>
@@ -88,6 +89,13 @@ public:
      */
     CHIP_ERROR SetDirty(ClusterInfo & aClusterInfo);
 
+    /**
+     * @brief
+     *  Schedule the urgent event delivery
+     *
+     */
+    CHIP_ERROR ScheduleUrgentEventDelivery(ConcreteEventPath & aPath);
+
 private:
     friend class TestReportingEngine;
     /**
@@ -97,11 +105,13 @@ private:
     CHIP_ERROR BuildAndSendSingleReportData(ReadHandler * apReadHandler);
 
     CHIP_ERROR BuildSingleReportDataAttributeReportIBs(ReportDataMessage::Builder & reportDataBuilder, ReadHandler * apReadHandler,
-                                                       bool * apHasMoreChunks);
+                                                       bool * apHasMoreChunks, bool * apHasEncodedData);
     CHIP_ERROR BuildSingleReportDataEventReports(ReportDataMessage::Builder & reportDataBuilder, ReadHandler * apReadHandler,
-                                                 bool * apHasMoreChunks);
-    CHIP_ERROR RetrieveClusterData(FabricIndex aAccessingFabricIndex, AttributeReportIBs::Builder & aAttributeReportIBs,
-                                   const ConcreteReadAttributePath & aClusterInfo);
+                                                 bool * apHasMoreChunks, bool * apHasEncodedData);
+    CHIP_ERROR RetrieveClusterData(const Access::SubjectDescriptor & aSubjectDescriptor,
+                                   AttributeReportIBs::Builder & aAttributeReportIBs,
+                                   const ConcreteReadAttributePath & aClusterInfo,
+                                   AttributeValueEncoder::AttributeEncodeState * apEncoderState);
     EventNumber CountEvents(ReadHandler * apReadHandler, EventNumber * apInitialEvents);
 
     /**

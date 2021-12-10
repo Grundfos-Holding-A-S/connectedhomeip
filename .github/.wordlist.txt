@@ -4,11 +4,6 @@ aarch
 abcdef
 abfb
 ABI
-AES
-DMM
-ECDH
-ECDSA
-SHA
 ABIs
 ables
 accessor
@@ -31,9 +26,9 @@ AdvRouterAddr
 AdvSendAdvert
 AE
 aef
+AES
 algs
 alloc
-ameba
 Ameba
 amebad
 amebaiot
@@ -87,11 +82,11 @@ BasicCHIPRegression
 baudrate
 BD
 BDX
+BDXDownloader
 BeagleBone
 befc
 bitbake
 bld
-ble
 BLE
 BleApplicationDelegate
 BleLayer
@@ -163,7 +158,6 @@ CHIPTest
 CHIPTool
 chmod
 chrpath
-cipd
 CIPD
 CircleCI
 cJTAG
@@ -286,6 +280,7 @@ dialout
 diffstat
 diffsyms
 dimmable
+dirname
 dirs
 disambiguated
 discoverable
@@ -297,6 +292,7 @@ DK
 DL
 DM
 DMG
+DMM
 DNS
 Dnsmasq
 dnsmasqd
@@ -319,6 +315,8 @@ eabi
 EB
 ECC
 ECD
+ECDH
+ECDSA
 EchoMessage
 EchoRequests
 EchoResponse
@@ -330,7 +328,6 @@ ee
 EEE
 eef
 ef
-efr
 EFR
 eg
 EjQ
@@ -346,6 +343,7 @@ eno
 entrypoint
 enum
 env
+eq
 esd
 ESPPORT
 Espressif
@@ -389,7 +387,6 @@ flashdebug
 focusable
 forkpty
 formatOnSave
-fota
 FOTA
 FreeRTOS
 FreeRTOSConfig
@@ -420,7 +417,6 @@ gn
 GND
 gni
 GNinja
-gnuarmemb
 GNUARMEMB
 gnueabihf
 googleapis
@@ -462,7 +458,6 @@ ifdef
 ifdefs
 IGMP
 ihex
-im
 IM
 imager
 imagetool
@@ -498,15 +493,14 @@ IPv
 ISCAN
 itemName
 iterable
-jinja
-jlink
-jre
 JDK
+jinja
 JLink
 JLinkExe
 JLinkRTTClient
 JN
 jpg
+jre
 js
 json
 JTAG
@@ -550,6 +544,7 @@ lightin
 LightingColor
 LightingState
 LinkSoftwareAndDocumentationPack
+LinuxOTAImageProcessor
 LinuxOTARequestorDriver
 LocalConfigDisabled
 localhost
@@ -652,6 +647,7 @@ navpad
 ncs
 nding
 NDK
+netcmp
 netif
 netplan
 NetworkCommissioning
@@ -684,11 +680,11 @@ Onboarding
 onboardingcodes
 oneshot
 onnetwork
-openjdk
 OnOff
 OnOffClusterTest
 OnPlatformEvent
 OO
+openjdk
 OpenOCD
 OpenSSL
 OpenThread
@@ -705,12 +701,13 @@ orgs
 OTA
 OTADownloader
 OTAImageProcessorDriver
+OTAImageProcessorInterface
 OTAProviderIpAddress
 OTAProviderNodeId
 OTAProviderSerialPort
+OTARequesterImpl
 OTARequestor
 OTARequestorDriver
-OTARequesterImpl
 OTARequestorSerialPort
 OTBR
 otcli
@@ -858,7 +855,6 @@ SDK's
 SDKs
 SDKTARGETSYSROOT
 sdl
-segger
 SEGGER
 semver
 sendto
@@ -873,6 +869,7 @@ SetRequestorInstance
 SetUpPINCode
 SetupQRCode
 sexualized
+SHA
 shubhamdp
 SIGINT
 SiLabs
@@ -913,6 +910,7 @@ subcommand
 subcommands
 subdirectories
 subdirectory
+subfolder
 submodule
 submodules
 subprocess
@@ -927,7 +925,6 @@ sysconfdir
 SysConfig
 sysctl
 sysdeps
-sysroot
 SYSROOT
 systemctl
 systemd
@@ -987,7 +984,6 @@ ttyUSB
 TvChannel
 TXD
 txt
-uart
 UART
 udhcpc
 UDP
@@ -996,11 +992,9 @@ udpPort
 ug
 ui
 uint
-unblur
 UNBLUR
 uncommissioned
 unfocus
-userguide
 Unicast
 UniFlash
 unpair
@@ -1012,6 +1006,7 @@ URI
 usbmodem
 USBtoUART
 uscif
+userguide
 USERINTERFACE
 UserLabel
 usermod

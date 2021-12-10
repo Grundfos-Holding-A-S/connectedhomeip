@@ -159,9 +159,9 @@ private:
             if (MatchPeerAddress(entry->GetPeerAddress(), address))
             {
                 result = entry;
-                return false;
+                return Loop::Break;
             }
-            return true;
+            return Loop::Continue;
         });
         return result;
     }
@@ -177,7 +177,7 @@ private:
                 result     = entry;
                 oldestTime = entry->GetLastActivityTime();
             }
-            return true;
+            return Loop::Continue;
         });
 
         return result;
@@ -223,7 +223,7 @@ private:
     }
 
     Time::TimeSource<Time::Source::kSystem> mTimeSource;
-    BitMapObjectPool<UnauthenticatedSession, kMaxSessionCount> mEntries;
+    BitMapObjectPool<UnauthenticatedSession, kMaxSessionCount, OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode> mEntries;
 };
 
 } // namespace Transport

@@ -29,6 +29,8 @@ import java.util.Map;
 public class ClusterWriteMapping {
   public Map<String, Map<String, InteractionInfo>> getWriteAttributeMap() {
     Map<String, Map<String, InteractionInfo>> writeAttributeMap = new HashMap<>();
+    Map<String, InteractionInfo> writeAccessControlInteractionInfo = new LinkedHashMap<>();
+    writeAttributeMap.put("accessControl", writeAccessControlInteractionInfo);
     Map<String, InteractionInfo> writeAccountLoginInteractionInfo = new LinkedHashMap<>();
     writeAttributeMap.put("accountLogin", writeAccountLoginInteractionInfo);
     Map<String, InteractionInfo> writeAdministratorCommissioningInteractionInfo =
@@ -137,23 +139,6 @@ public class ClusterWriteMapping {
     Map<String, InteractionInfo> writeBridgedActionsInteractionInfo = new LinkedHashMap<>();
     writeAttributeMap.put("bridgedActions", writeBridgedActionsInteractionInfo);
     Map<String, InteractionInfo> writeBridgedDeviceBasicInteractionInfo = new LinkedHashMap<>();
-    Map<String, CommandParameterInfo> writeBridgedDeviceBasicNodeLabelCommandParams =
-        new LinkedHashMap<String, CommandParameterInfo>();
-    CommandParameterInfo bridgedDeviceBasicnodeLabelCommandParameterInfo =
-        new CommandParameterInfo("value", String.class);
-    writeBridgedDeviceBasicNodeLabelCommandParams.put(
-        "value", bridgedDeviceBasicnodeLabelCommandParameterInfo);
-    InteractionInfo writeBridgedDeviceBasicNodeLabelAttributeInteractionInfo =
-        new InteractionInfo(
-            (cluster, callback, commandArguments) -> {
-              ((ChipClusters.BridgedDeviceBasicCluster) cluster)
-                  .writeNodeLabelAttribute(
-                      (DefaultClusterCallback) callback, (String) commandArguments.get("value"));
-            },
-            () -> new ClusterInfoMapping.DelegatedDefaultClusterCallback(),
-            writeBridgedDeviceBasicNodeLabelCommandParams);
-    writeBridgedDeviceBasicInteractionInfo.put(
-        "writeNodeLabelAttribute", writeBridgedDeviceBasicNodeLabelAttributeInteractionInfo);
     writeAttributeMap.put("bridgedDeviceBasic", writeBridgedDeviceBasicInteractionInfo);
     Map<String, InteractionInfo> writeColorControlInteractionInfo = new LinkedHashMap<>();
     Map<String, CommandParameterInfo> writeColorControlColorControlOptionsCommandParams =
@@ -700,6 +685,9 @@ public class ClusterWriteMapping {
     writeAttributeMap.put("operationalCredentials", writeOperationalCredentialsInteractionInfo);
     Map<String, InteractionInfo> writePowerSourceInteractionInfo = new LinkedHashMap<>();
     writeAttributeMap.put("powerSource", writePowerSourceInteractionInfo);
+    Map<String, InteractionInfo> writePowerSourceConfigurationInteractionInfo =
+        new LinkedHashMap<>();
+    writeAttributeMap.put("powerSourceConfiguration", writePowerSourceConfigurationInteractionInfo);
     Map<String, InteractionInfo> writePressureMeasurementInteractionInfo = new LinkedHashMap<>();
     writeAttributeMap.put("pressureMeasurement", writePressureMeasurementInteractionInfo);
     Map<String, InteractionInfo> writePumpConfigurationAndControlInteractionInfo =
@@ -1314,6 +1302,22 @@ public class ClusterWriteMapping {
             writeTestClusterVendorIdCommandParams);
     writeTestClusterInteractionInfo.put(
         "writeVendorIdAttribute", writeTestClusterVendorIdAttributeInteractionInfo);
+    Map<String, CommandParameterInfo> writeTestClusterEnumAttrCommandParams =
+        new LinkedHashMap<String, CommandParameterInfo>();
+    CommandParameterInfo testClusterenumAttrCommandParameterInfo =
+        new CommandParameterInfo("value", int.class);
+    writeTestClusterEnumAttrCommandParams.put("value", testClusterenumAttrCommandParameterInfo);
+    InteractionInfo writeTestClusterEnumAttrAttributeInteractionInfo =
+        new InteractionInfo(
+            (cluster, callback, commandArguments) -> {
+              ((ChipClusters.TestClusterCluster) cluster)
+                  .writeEnumAttrAttribute(
+                      (DefaultClusterCallback) callback, (Integer) commandArguments.get("value"));
+            },
+            () -> new ClusterInfoMapping.DelegatedDefaultClusterCallback(),
+            writeTestClusterEnumAttrCommandParams);
+    writeTestClusterInteractionInfo.put(
+        "writeEnumAttrAttribute", writeTestClusterEnumAttrAttributeInteractionInfo);
     Map<String, CommandParameterInfo> writeTestClusterRangeRestrictedInt8uCommandParams =
         new LinkedHashMap<String, CommandParameterInfo>();
     CommandParameterInfo testClusterrangeRestrictedInt8uCommandParameterInfo =
@@ -1884,6 +1888,23 @@ public class ClusterWriteMapping {
     writeTestClusterInteractionInfo.put(
         "writeNullableCharStringAttribute",
         writeTestClusterNullableCharStringAttributeInteractionInfo);
+    Map<String, CommandParameterInfo> writeTestClusterNullableEnumAttrCommandParams =
+        new LinkedHashMap<String, CommandParameterInfo>();
+    CommandParameterInfo testClusternullableEnumAttrCommandParameterInfo =
+        new CommandParameterInfo("value", int.class);
+    writeTestClusterNullableEnumAttrCommandParams.put(
+        "value", testClusternullableEnumAttrCommandParameterInfo);
+    InteractionInfo writeTestClusterNullableEnumAttrAttributeInteractionInfo =
+        new InteractionInfo(
+            (cluster, callback, commandArguments) -> {
+              ((ChipClusters.TestClusterCluster) cluster)
+                  .writeNullableEnumAttrAttribute(
+                      (DefaultClusterCallback) callback, (Integer) commandArguments.get("value"));
+            },
+            () -> new ClusterInfoMapping.DelegatedDefaultClusterCallback(),
+            writeTestClusterNullableEnumAttrCommandParams);
+    writeTestClusterInteractionInfo.put(
+        "writeNullableEnumAttrAttribute", writeTestClusterNullableEnumAttrAttributeInteractionInfo);
     Map<String, CommandParameterInfo> writeTestClusterNullableRangeRestrictedInt8uCommandParams =
         new LinkedHashMap<String, CommandParameterInfo>();
     CommandParameterInfo testClusternullableRangeRestrictedInt8uCommandParameterInfo =

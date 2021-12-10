@@ -116,7 +116,7 @@ public:
     ~AdvertiserMinMdns() {}
 
     // Service advertiser
-    CHIP_ERROR Init(chip::Inet::InetLayer * inetLayer) override;
+    CHIP_ERROR Init(chip::Inet::EndPointManager<chip::Inet::UDPEndPoint> * udpEndPointManager) override;
     void Shutdown() override;
     CHIP_ERROR RemoveServices() override;
     CHIP_ERROR Advertise(const OperationalAdvertisingParameters & params) override;
@@ -274,7 +274,7 @@ void AdvertiserMinMdns::OnQuery(const QueryData & data)
     }
 }
 
-CHIP_ERROR AdvertiserMinMdns::Init(chip::Inet::InetLayer * inetLayer)
+CHIP_ERROR AdvertiserMinMdns::Init(chip::Inet::EndPointManager<chip::Inet::UDPEndPoint> * udpEndPointManager)
 {
     GlobalMinimalMdnsServer::Server().Shutdown();
 
@@ -285,7 +285,7 @@ CHIP_ERROR AdvertiserMinMdns::Init(chip::Inet::InetLayer * inetLayer)
     // GlobalMinimalMdnsServer (used for testing).
     mResponseSender.SetServer(&GlobalMinimalMdnsServer::Server());
 
-    ReturnErrorOnFailure(GlobalMinimalMdnsServer::Instance().StartServer(inetLayer, kMdnsPort));
+    ReturnErrorOnFailure(GlobalMinimalMdnsServer::Instance().StartServer(udpEndPointManager, kMdnsPort));
 
     ChipLogProgress(Discovery, "CHIP minimal mDNS started advertising.");
 
@@ -724,29 +724,30 @@ FullQName AdvertiserMinMdns::GetCommissioningTxtEntries(const CommissionAdvertis
 bool AdvertiserMinMdns::ShouldAdvertiseOn(const chip::Inet::InterfaceId id, const chip::Inet::IPAddress & addr)
 {
     auto & server = GlobalMinimalMdnsServer::Server();
-    for (unsigned i = 0; i < server.GetEndpointCount(); i++)
-    {
-        const ServerBase::EndpointInfo & info = server.GetEndpoints()[i];
 
-        if (info.listen_udp == nullptr)
+    bool result = false;
+
+    server.ForEachEndPoints([&](auto * info) {
+        if (info->mListenUdp == nullptr)
         {
-            continue;
+            return chip::Loop::Continue;
         }
 
-        if (info.interfaceId != id)
+        if (info->mInterfaceId != id)
         {
-            continue;
+            return chip::Loop::Continue;
         }
 
-        if (info.addressType != addr.Type())
+        if (info->mAddressType != addr.Type())
         {
-            continue;
+            return chip::Loop::Continue;
         }
 
-        return true;
-    }
+        result = true;
+        return chip::Loop::Break;
+    });
 
-    return false;
+    return result;
 }
 
 void AdvertiserMinMdns::AdvertiseRecords()

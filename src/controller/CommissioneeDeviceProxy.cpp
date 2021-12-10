@@ -121,6 +121,10 @@ CHIP_ERROR CommissioneeDeviceProxy::UpdateDeviceData(const Transport::PeerAddres
 
     mMRPConfig = config;
 
+    // Initialize PASE session state with any MRP parameters that DNS-SD has provided.
+    // It can be overridden by PASE session protocol messages that include MRP parameters.
+    mPairing.SetMRPConfig(mMRPConfig);
+
     ReturnErrorOnFailure(LoadSecureSessionParametersIfNeeded(didLoad));
 
     if (!mSecureSession.HasValue())
@@ -142,9 +146,9 @@ void CommissioneeDeviceProxy::Reset()
 {
     SetActive(false);
 
-    mState          = ConnectionState::NotConnected;
-    mSessionManager = nullptr;
-    mInetLayer      = nullptr;
+    mState              = ConnectionState::NotConnected;
+    mSessionManager     = nullptr;
+    mUDPEndPointManager = nullptr;
 #if CONFIG_NETWORK_LAYER_BLE
     mBleLayer = nullptr;
 #endif

@@ -34,21 +34,24 @@ enum class AttestationVerificationResult : uint16_t
     kPaaSignatureInvalid = 103,
     kPaaRevoked          = 104,
     kPaaFormatInvalid    = 105,
+    kPaaArgumentInvalid  = 106,
 
     kPaiExpired           = 200,
     kPaiSignatureInvalid  = 201,
     kPaiRevoked           = 202,
     kPaiFormatInvalid     = 203,
-    kPaiVendorIdMismatch  = 204,
-    kPaiAuthorityNotFound = 205,
+    kPaiArgumentInvalid   = 204,
+    kPaiVendorIdMismatch  = 205,
+    kPaiAuthorityNotFound = 206,
 
     kDacExpired           = 300,
     kDacSignatureInvalid  = 301,
     kDacRevoked           = 302,
     kDacFormatInvalid     = 303,
-    kDacVendorIdMismatch  = 304,
-    kDacProductIdMismatch = 305,
-    kDacAuthorityNotFound = 306,
+    kDacArgumentInvalid   = 304,
+    kDacVendorIdMismatch  = 305,
+    kDacProductIdMismatch = 306,
+    kDacAuthorityNotFound = 307,
 
     kFirmwareInformationMismatch = 400,
     kFirmwareInformationMissing  = 401,
@@ -68,6 +71,8 @@ enum class AttestationVerificationResult : uint16_t
     kNoMemory = 700,
 
     kInvalidArgument = 800,
+
+    kInternalError = 900,
 
     kNotImplemented = 0xFFFFU,
 
@@ -196,18 +201,19 @@ public:
      * @param[in] attestationInfoBuffer Buffer containing attestation information portion of Attestation Response (raw TLV)
      * @param[in] attestationChallengeBuffer Buffer containing the attestation challenge from the secure session
      * @param[in] attestationSignatureBuffer Buffer the signature portion of Attestation Response
-     * @param[in] paiCertDerBuffer Buffer containing the PAI certificate from device in DER format.
+     * @param[in] paiDerBuffer Buffer containing the PAI certificate from device in DER format.
      *                                If length zero, there was no PAI certificate.
-     * @param[in] dacCertDerBuffer Buffer containing the DAC certificate from device in DER format.
+     * @param[in] dacDerBuffer Buffer containing the DAC certificate from device in DER format.
      * @param[in] attestationNonce Buffer containing attestation nonce.
      *
      * @returns AttestationVerificationResult::kSuccess on success or another specific
      *          value from AttestationVerificationResult enum on failure.
      */
-    virtual AttestationVerificationResult
-    VerifyAttestationInformation(const ByteSpan & attestationInfoBuffer, const ByteSpan & attestationChallengeBuffer,
-                                 const ByteSpan & attestationSignatureBuffer, const ByteSpan & paiCertDerBuffer,
-                                 const ByteSpan & dacCertDerBuffer, const ByteSpan & attestationNonce) = 0;
+    virtual AttestationVerificationResult VerifyAttestationInformation(const ByteSpan & attestationInfoBuffer,
+                                                                       const ByteSpan & attestationChallengeBuffer,
+                                                                       const ByteSpan & attestationSignatureBuffer,
+                                                                       const ByteSpan & paiDerBuffer, const ByteSpan & dacDerBuffer,
+                                                                       const ByteSpan & attestationNonce) = 0;
 
     /**
      * @brief Verify a CMS Signed Data signature against the CSA certificate of Subject Key Identifier that matches

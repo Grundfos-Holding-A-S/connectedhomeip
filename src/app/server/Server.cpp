@@ -17,6 +17,7 @@
 
 #include <app/server/Server.h>
 
+#include <app/EventManagement.h>
 #include <app/InteractionModelEngine.h>
 #include <app/server/Dnssd.h>
 #include <app/server/EchoHandler.h>
@@ -25,7 +26,6 @@
 #include <ble/BLEEndPoint.h>
 #include <inet/IPAddress.h>
 #include <inet/InetError.h>
-#include <inet/InetLayer.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 #include <lib/dnssd/Advertiser.h>
 #include <lib/dnssd/ServiceNaming.h>
@@ -70,6 +70,17 @@ namespace chip {
 
 Server Server::sServer;
 
+#if CHIP_CONFIG_ENABLE_SERVER_IM_EVENT
+#define CHIP_NUM_EVENT_LOGGING_BUFFERS 3
+static uint8_t sInfoEventBuffer[CHIP_DEVICE_CONFIG_EVENT_LOGGING_INFO_BUFFER_SIZE];
+static uint8_t sDebugEventBuffer[CHIP_DEVICE_CONFIG_EVENT_LOGGING_DEBUG_BUFFER_SIZE];
+static uint8_t sCritEventBuffer[CHIP_DEVICE_CONFIG_EVENT_LOGGING_CRIT_BUFFER_SIZE];
+static ::chip::PersistedCounter sCritEventIdCounter;
+static ::chip::PersistedCounter sInfoEventIdCounter;
+static ::chip::PersistedCounter sDebugEventIdCounter;
+static ::chip::app::CircularEventBuffer sLoggingBuffer[CHIP_NUM_EVENT_LOGGING_BUFFERS];
+#endif // CHIP_CONFIG_ENABLE_SERVER_IM_EVENT
+
 CHIP_ERROR Server::Init(AppDelegate * delegate, uint16_t secureServicePort, uint16_t unsecureServicePort)
 {
     mSecuredServicePort   = secureServicePort;
@@ -93,17 +104,25 @@ CHIP_ERROR Server::Init(AppDelegate * delegate, uint16_t secureServicePort, uint
     err = mFabrics.Init(&mServerStorage);
     SuccessOrExit(err);
 
+    // Group data provider must be initialized after mServerStorage
+    err = mGroupsProvider.Init();
+    SuccessOrExit(err);
+    SetGroupDataProvider(&mGroupsProvider);
+
     // Init transport before operations with secure session mgr.
-    err = mTransports.Init(
-        UdpListenParameters(&DeviceLayer::InetLayer()).SetAddressType(IPAddressType::kIPv6).SetListenPort(mSecuredServicePort)
+    err = mTransports.Init(UdpListenParameters(DeviceLayer::UDPEndPointManager())
+                               .SetAddressType(IPAddressType::kIPv6)
+                               .SetListenPort(mSecuredServicePort)
 
 #if INET_CONFIG_ENABLE_IPV4
-            ,
-        UdpListenParameters(&DeviceLayer::InetLayer()).SetAddressType(IPAddressType::kIPv4).SetListenPort(mSecuredServicePort)
+                               ,
+                           UdpListenParameters(DeviceLayer::UDPEndPointManager())
+                               .SetAddressType(IPAddressType::kIPv4)
+                               .SetListenPort(mSecuredServicePort)
 #endif
 #if CONFIG_NETWORK_LAYER_BLE
-            ,
-        BleListenParameters(DeviceLayer::ConnectivityMgr().GetBleLayer())
+                               ,
+                           BleListenParameters(DeviceLayer::ConnectivityMgr().GetBleLayer())
 #endif
     );
 
@@ -111,6 +130,16 @@ CHIP_ERROR Server::Init(AppDelegate * delegate, uint16_t secureServicePort, uint
     mBleLayer = DeviceLayer::ConnectivityMgr().GetBleLayer();
 #endif
     SuccessOrExit(err);
+
+    // Enable Group Listening
+    // TODO : Fix this once GroupDataProvider is implemented #Issue 11075
+    // for (iterate through all GroupDataProvider multicast Address)
+    // {
+#ifdef CHIP_ENABLE_GROUP_MESSAGING_TESTS
+    err = mTransports.MulticastGroupJoinLeave(Transport::PeerAddress::Multicast(1, 1234), true);
+    SuccessOrExit(err);
+#endif
+    //}
 
     err = mSessions.Init(&DeviceLayer::SystemLayer(), &mTransports, &mMessageCounterManager);
     SuccessOrExit(err);
@@ -122,6 +151,27 @@ CHIP_ERROR Server::Init(AppDelegate * delegate, uint16_t secureServicePort, uint
 
     err = chip::app::InteractionModelEngine::GetInstance()->Init(&mExchangeMgr, nullptr);
     SuccessOrExit(err);
+
+#if CHIP_CONFIG_ENABLE_SERVER_IM_EVENT
+    // Initialize event logging subsystem
+    {
+        ::chip::Platform::PersistedStorage::Key debugEventIdCounterStorageKey = CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_DEBUG_EIDC_KEY;
+        ::chip::Platform::PersistedStorage::Key critEventIdCounterStorageKey  = CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_CRIT_EIDC_KEY;
+        ::chip::Platform::PersistedStorage::Key infoEventIdCounterStorageKey  = CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_INFO_EIDC_KEY;
+
+        ::chip::app::LogStorageResources logStorageResources[] = {
+            { &sDebugEventBuffer[0], sizeof(sDebugEventBuffer), &debugEventIdCounterStorageKey,
+              CHIP_DEVICE_CONFIG_EVENT_ID_COUNTER_EPOCH, &sDebugEventIdCounter, ::chip::app::PriorityLevel::Debug },
+            { &sInfoEventBuffer[0], sizeof(sInfoEventBuffer), &infoEventIdCounterStorageKey,
+              CHIP_DEVICE_CONFIG_EVENT_ID_COUNTER_EPOCH, &sInfoEventIdCounter, ::chip::app::PriorityLevel::Info },
+            { &sCritEventBuffer[0], sizeof(sCritEventBuffer), &critEventIdCounterStorageKey,
+              CHIP_DEVICE_CONFIG_EVENT_ID_COUNTER_EPOCH, &sCritEventIdCounter, ::chip::app::PriorityLevel::Critical }
+        };
+
+        chip::app::EventManagement::GetInstance().Init(&mExchangeMgr, CHIP_NUM_EVENT_LOGGING_BUFFERS, &sLoggingBuffer[0],
+                                                       &logStorageResources[0]);
+    }
+#endif // CHIP_CONFIG_ENABLE_SERVER_IM_EVENT
 
 #if defined(CHIP_APP_USE_ECHO)
     err = InitEchoHandler(&gExchangeMgr);

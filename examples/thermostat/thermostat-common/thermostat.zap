@@ -31,9 +31,9 @@
   ],
   "endpointTypes": [
     {
-      "name": "Anonymous Endpoint Type",
-      "deviceTypeName": "CHIP-All-Clusters-Server",
-      "deviceTypeCode": 0,
+      "name": "MA-rootdevice",
+      "deviceTypeName": "MA-rootdevice",
+      "deviceTypeCode": 22,
       "deviceTypeProfileId": 259,
       "clusters": [
         {
@@ -837,6 +837,75 @@
               "side": "server",
               "included": 1,
               "storageOption": "External",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Binding",
+          "code": 30,
+          "mfgCode": null,
+          "define": "BINDING_CLUSTER",
+          "side": "client",
+          "enabled": 0,
+          "commands": [
+            {
+              "name": "Bind",
+              "code": 0,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 1
+            },
+            {
+              "name": "Unbind",
+              "code": 1,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 1
+            }
+          ],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Binding",
+          "code": 30,
+          "mfgCode": null,
+          "define": "BINDING_CLUSTER",
+          "side": "server",
+          "enabled": 1,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
               "singleton": 0,
               "bounded": 0,
               "defaultValue": "0x0001",
@@ -2968,6 +3037,21 @@
               "reportableChange": 0
             },
             {
+              "name": "FeatureMap",
+              "code": 65532,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x000F",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
               "name": "ClusterRevision",
               "code": 65533,
               "mfgCode": null,
@@ -3615,6 +3699,51 @@
           "commands": [],
           "attributes": [
             {
+              "name": "WindowStatus",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "External",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "AdminFabricIndex",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "External",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "1",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
+              "name": "AdminVendorId",
+              "code": 2,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "External",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0",
+              "reportable": 0,
+              "minInterval": 1,
+              "maxInterval": 65534,
+              "reportableChange": 0
+            },
+            {
               "name": "ClusterRevision",
               "code": 65533,
               "mfgCode": null,
@@ -3865,6 +3994,88 @@
           ]
         },
         {
+          "name": "Group Key Management",
+          "code": 63,
+          "mfgCode": null,
+          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
+          "side": "client",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Group Key Management",
+          "code": 63,
+          "mfgCode": null,
+          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
+          "side": "server",
+          "enabled": 1,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "groups",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "group keys",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
           "name": "Door Lock",
           "code": 257,
           "mfgCode": null,
@@ -3905,7 +4116,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetPin",
+              "name": "SetPINCode",
               "code": 5,
               "mfgCode": null,
               "source": "client",
@@ -3913,7 +4124,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetPin",
+              "name": "GetPINCode",
               "code": 6,
               "mfgCode": null,
               "source": "client",
@@ -3921,7 +4132,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearPin",
+              "name": "ClearPINCode",
               "code": 7,
               "mfgCode": null,
               "source": "client",
@@ -3929,7 +4140,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearAllPins",
+              "name": "ClearAllPINCodes",
               "code": 8,
               "mfgCode": null,
               "source": "client",
@@ -3937,7 +4148,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetWeekdaySchedule",
+              "name": "SetWeekDaySchedule",
               "code": 11,
               "mfgCode": null,
               "source": "client",
@@ -3945,7 +4156,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetWeekdaySchedule",
+              "name": "GetWeekDaySchedule",
               "code": 12,
               "mfgCode": null,
               "source": "client",
@@ -3953,7 +4164,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearWeekdaySchedule",
+              "name": "ClearWeekDaySchedule",
               "code": 13,
               "mfgCode": null,
               "source": "client",
@@ -3961,7 +4172,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetYeardaySchedule",
+              "name": "SetYearDaySchedule",
               "code": 14,
               "mfgCode": null,
               "source": "client",
@@ -3969,7 +4180,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetYeardaySchedule",
+              "name": "GetYearDaySchedule",
               "code": 15,
               "mfgCode": null,
               "source": "client",
@@ -3977,7 +4188,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearYeardaySchedule",
+              "name": "ClearYearDaySchedule",
               "code": 16,
               "mfgCode": null,
               "source": "client",
@@ -4025,7 +4236,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetRfid",
+              "name": "SetRFIDCode",
               "code": 22,
               "mfgCode": null,
               "source": "client",
@@ -4033,7 +4244,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetRfid",
+              "name": "GetRFIDCode",
               "code": 23,
               "mfgCode": null,
               "source": "client",
@@ -4041,7 +4252,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearRfid",
+              "name": "ClearRFIDCode",
               "code": 24,
               "mfgCode": null,
               "source": "client",
@@ -4049,7 +4260,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearAllRfids",
+              "name": "ClearAllRFIDCodes",
               "code": 25,
               "mfgCode": null,
               "source": "client",
@@ -4082,27 +4293,10 @@
           "define": "DOOR_LOCK_CLUSTER",
           "side": "server",
           "enabled": 0,
-          "commands": [
-            {
-              "name": "LockDoorResponse",
-              "code": 0,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "UnlockDoorResponse",
-              "code": 1,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
+          "commands": [],
           "attributes": [
             {
-              "name": "lock state",
+              "name": "LockState",
               "code": 0,
               "mfgCode": null,
               "side": "server",
@@ -4117,7 +4311,7 @@
               "reportableChange": 0
             },
             {
-              "name": "lock type",
+              "name": "LockType",
               "code": 1,
               "mfgCode": null,
               "side": "server",
@@ -4132,7 +4326,7 @@
               "reportableChange": 0
             },
             {
-              "name": "actuator enabled",
+              "name": "ActuatorEnabled",
               "code": 2,
               "mfgCode": null,
               "side": "server",
@@ -4147,7 +4341,7 @@
               "reportableChange": 0
             },
             {
-              "name": "door state",
+              "name": "DoorState",
               "code": 3,
               "mfgCode": null,
               "side": "server",
@@ -4162,7 +4356,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable logging",
+              "name": "EnableLogging",
               "code": 32,
               "mfgCode": null,
               "side": "server",
@@ -4177,7 +4371,7 @@
               "reportableChange": 0
             },
             {
-              "name": "language",
+              "name": "Language",
               "code": 33,
               "mfgCode": null,
               "side": "server",
@@ -4192,7 +4386,7 @@
               "reportableChange": 0
             },
             {
-              "name": "led settings",
+              "name": "LEDSettings",
               "code": 34,
               "mfgCode": null,
               "side": "server",
@@ -4207,7 +4401,7 @@
               "reportableChange": 0
             },
             {
-              "name": "auto relock time",
+              "name": "AutoRelockTime",
               "code": 35,
               "mfgCode": null,
               "side": "server",
@@ -4222,7 +4416,7 @@
               "reportableChange": 0
             },
             {
-              "name": "sound volume",
+              "name": "SoundVolume",
               "code": 36,
               "mfgCode": null,
               "side": "server",
@@ -4237,7 +4431,7 @@
               "reportableChange": 0
             },
             {
-              "name": "operating mode",
+              "name": "OperatingMode",
               "code": 37,
               "mfgCode": null,
               "side": "server",
@@ -4252,7 +4446,7 @@
               "reportableChange": 0
             },
             {
-              "name": "default configuration register",
+              "name": "DefaultConfigurationRegister",
               "code": 39,
               "mfgCode": null,
               "side": "server",
@@ -4267,7 +4461,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable local programming",
+              "name": "EnableLocalProgramming",
               "code": 40,
               "mfgCode": null,
               "side": "server",
@@ -4282,7 +4476,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable one touch locking",
+              "name": "EnableOneTouchLocking",
               "code": 41,
               "mfgCode": null,
               "side": "server",
@@ -4297,7 +4491,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable inside status led",
+              "name": "EnableInsideStatusLED",
               "code": 42,
               "mfgCode": null,
               "side": "server",
@@ -4312,7 +4506,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable privacy mode button",
+              "name": "EnablePrivacyModeButton",
               "code": 43,
               "mfgCode": null,
               "side": "server",
@@ -4327,7 +4521,7 @@
               "reportableChange": 0
             },
             {
-              "name": "wrong code entry limit",
+              "name": "WrongCodeEntryLimit",
               "code": 48,
               "mfgCode": null,
               "side": "server",
@@ -4342,7 +4536,7 @@
               "reportableChange": 0
             },
             {
-              "name": "user code temporary disable time",
+              "name": "UserCodeTemporaryDisableTime",
               "code": 49,
               "mfgCode": null,
               "side": "server",
@@ -4357,7 +4551,7 @@
               "reportableChange": 0
             },
             {
-              "name": "send pin over the air",
+              "name": "SendPINOverTheAir",
               "code": 50,
               "mfgCode": null,
               "side": "server",
@@ -4372,7 +4566,7 @@
               "reportableChange": 0
             },
             {
-              "name": "require pin for rf operation",
+              "name": "RequirePINforRemoteOperation",
               "code": 51,
               "mfgCode": null,
               "side": "server",
@@ -4387,22 +4581,7 @@
               "reportableChange": 0
             },
             {
-              "name": "zigbee security level",
-              "code": 52,
-              "mfgCode": null,
-              "side": "server",
-              "included": 0,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "alarm mask",
+              "name": "AlarmMask",
               "code": 64,
               "mfgCode": null,
               "side": "server",
@@ -4417,7 +4596,7 @@
               "reportableChange": 0
             },
             {
-              "name": "keypad operation event mask",
+              "name": "KeypadOperationEventMask",
               "code": 65,
               "mfgCode": null,
               "side": "server",
@@ -4432,7 +4611,7 @@
               "reportableChange": 0
             },
             {
-              "name": "RF operation event mask",
+              "name": "RemoteOperationEventMask",
               "code": 66,
               "mfgCode": null,
               "side": "server",
@@ -4447,7 +4626,7 @@
               "reportableChange": 0
             },
             {
-              "name": "manual operation event mask",
+              "name": "ManualOperationEventMask",
               "code": 67,
               "mfgCode": null,
               "side": "server",
@@ -4462,7 +4641,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rfid operation event mask",
+              "name": "RFIDOperationEventMask",
               "code": 68,
               "mfgCode": null,
               "side": "server",
@@ -4477,7 +4656,7 @@
               "reportableChange": 0
             },
             {
-              "name": "keypad programming event mask",
+              "name": "KeypadProgrammingEventMask",
               "code": 69,
               "mfgCode": null,
               "side": "server",
@@ -4492,7 +4671,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rf programming event mask",
+              "name": "RemoteProgrammingEventMask",
               "code": 70,
               "mfgCode": null,
               "side": "server",
@@ -4507,7 +4686,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rfid programming event mask",
+              "name": "RFIDProgrammingEventMask",
               "code": 71,
               "mfgCode": null,
               "side": "server",
@@ -6329,165 +6508,14 @@
               "reportableChange": 0
             }
           ]
-        },
-        {
-          "name": "Binding",
-          "code": 61440,
-          "mfgCode": null,
-          "define": "BINDING_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "Bind",
-              "code": 0,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "Unbind",
-              "code": 1,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Binding",
-          "code": 61440,
-          "mfgCode": null,
-          "define": "BINDING_CLUSTER",
-          "side": "server",
-          "enabled": 1,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Group Key Management",
-          "code": 61444,
-          "mfgCode": null,
-          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Group Key Management",
-          "code": 61444,
-          "mfgCode": null,
-          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
-          "side": "server",
-          "enabled": 1,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "groups",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "group keys",
-              "code": 1,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
         }
       ]
     },
     {
-      "name": "Anonymous Endpoint Type",
-      "deviceTypeName": "HA-tstat",
+      "name": "MA-thermostat",
+      "deviceTypeName": "MA-thermostat",
       "deviceTypeCode": 769,
-      "deviceTypeProfileId": 260,
+      "deviceTypeProfileId": 259,
       "clusters": [
         {
           "name": "Identify",
@@ -7683,6 +7711,75 @@
           ]
         },
         {
+          "name": "Binding",
+          "code": 30,
+          "mfgCode": null,
+          "define": "BINDING_CLUSTER",
+          "side": "client",
+          "enabled": 0,
+          "commands": [
+            {
+              "name": "Bind",
+              "code": 0,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 1
+            },
+            {
+              "name": "Unbind",
+              "code": 1,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 1
+            }
+          ],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Binding",
+          "code": 30,
+          "mfgCode": null,
+          "define": "BINDING_CLUSTER",
+          "side": "server",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
           "name": "Basic",
           "code": 40,
           "mfgCode": null,
@@ -8770,6 +8867,88 @@
           ]
         },
         {
+          "name": "Group Key Management",
+          "code": 63,
+          "mfgCode": null,
+          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
+          "side": "client",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "client",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
+          "name": "Group Key Management",
+          "code": 63,
+          "mfgCode": null,
+          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
+          "side": "server",
+          "enabled": 0,
+          "commands": [],
+          "attributes": [
+            {
+              "name": "groups",
+              "code": 0,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "group keys",
+              "code": 1,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "ClusterRevision",
+              "code": 65533,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "0x0001",
+              "reportable": 1,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            }
+          ]
+        },
+        {
           "name": "Fixed Label",
           "code": 64,
           "mfgCode": null,
@@ -8877,7 +9056,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetPin",
+              "name": "SetPINCode",
               "code": 5,
               "mfgCode": null,
               "source": "client",
@@ -8885,7 +9064,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetPin",
+              "name": "GetPINCode",
               "code": 6,
               "mfgCode": null,
               "source": "client",
@@ -8893,7 +9072,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearPin",
+              "name": "ClearPINCode",
               "code": 7,
               "mfgCode": null,
               "source": "client",
@@ -8901,7 +9080,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearAllPins",
+              "name": "ClearAllPINCodes",
               "code": 8,
               "mfgCode": null,
               "source": "client",
@@ -8909,7 +9088,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetWeekdaySchedule",
+              "name": "SetWeekDaySchedule",
               "code": 11,
               "mfgCode": null,
               "source": "client",
@@ -8917,7 +9096,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetWeekdaySchedule",
+              "name": "GetWeekDaySchedule",
               "code": 12,
               "mfgCode": null,
               "source": "client",
@@ -8925,7 +9104,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearWeekdaySchedule",
+              "name": "ClearWeekDaySchedule",
               "code": 13,
               "mfgCode": null,
               "source": "client",
@@ -8933,7 +9112,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetYeardaySchedule",
+              "name": "SetYearDaySchedule",
               "code": 14,
               "mfgCode": null,
               "source": "client",
@@ -8941,7 +9120,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetYeardaySchedule",
+              "name": "GetYearDaySchedule",
               "code": 15,
               "mfgCode": null,
               "source": "client",
@@ -8949,7 +9128,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearYeardaySchedule",
+              "name": "ClearYearDaySchedule",
               "code": 16,
               "mfgCode": null,
               "source": "client",
@@ -8997,7 +9176,7 @@
               "outgoing": 1
             },
             {
-              "name": "SetRfid",
+              "name": "SetRFIDCode",
               "code": 22,
               "mfgCode": null,
               "source": "client",
@@ -9005,7 +9184,7 @@
               "outgoing": 1
             },
             {
-              "name": "GetRfid",
+              "name": "GetRFIDCode",
               "code": 23,
               "mfgCode": null,
               "source": "client",
@@ -9013,7 +9192,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearRfid",
+              "name": "ClearRFIDCode",
               "code": 24,
               "mfgCode": null,
               "source": "client",
@@ -9021,7 +9200,7 @@
               "outgoing": 1
             },
             {
-              "name": "ClearAllRfids",
+              "name": "ClearAllRFIDCodes",
               "code": 25,
               "mfgCode": null,
               "source": "client",
@@ -9054,27 +9233,10 @@
           "define": "DOOR_LOCK_CLUSTER",
           "side": "server",
           "enabled": 0,
-          "commands": [
-            {
-              "name": "LockDoorResponse",
-              "code": 0,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "UnlockDoorResponse",
-              "code": 1,
-              "mfgCode": null,
-              "source": "server",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
+          "commands": [],
           "attributes": [
             {
-              "name": "lock state",
+              "name": "LockState",
               "code": 0,
               "mfgCode": null,
               "side": "server",
@@ -9089,7 +9251,7 @@
               "reportableChange": 0
             },
             {
-              "name": "lock type",
+              "name": "LockType",
               "code": 1,
               "mfgCode": null,
               "side": "server",
@@ -9104,7 +9266,7 @@
               "reportableChange": 0
             },
             {
-              "name": "actuator enabled",
+              "name": "ActuatorEnabled",
               "code": 2,
               "mfgCode": null,
               "side": "server",
@@ -9119,7 +9281,7 @@
               "reportableChange": 0
             },
             {
-              "name": "door state",
+              "name": "DoorState",
               "code": 3,
               "mfgCode": null,
               "side": "server",
@@ -9134,7 +9296,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable logging",
+              "name": "EnableLogging",
               "code": 32,
               "mfgCode": null,
               "side": "server",
@@ -9149,7 +9311,7 @@
               "reportableChange": 0
             },
             {
-              "name": "language",
+              "name": "Language",
               "code": 33,
               "mfgCode": null,
               "side": "server",
@@ -9164,7 +9326,7 @@
               "reportableChange": 0
             },
             {
-              "name": "led settings",
+              "name": "LEDSettings",
               "code": 34,
               "mfgCode": null,
               "side": "server",
@@ -9179,7 +9341,7 @@
               "reportableChange": 0
             },
             {
-              "name": "auto relock time",
+              "name": "AutoRelockTime",
               "code": 35,
               "mfgCode": null,
               "side": "server",
@@ -9194,7 +9356,7 @@
               "reportableChange": 0
             },
             {
-              "name": "sound volume",
+              "name": "SoundVolume",
               "code": 36,
               "mfgCode": null,
               "side": "server",
@@ -9209,7 +9371,7 @@
               "reportableChange": 0
             },
             {
-              "name": "operating mode",
+              "name": "OperatingMode",
               "code": 37,
               "mfgCode": null,
               "side": "server",
@@ -9224,7 +9386,7 @@
               "reportableChange": 0
             },
             {
-              "name": "default configuration register",
+              "name": "DefaultConfigurationRegister",
               "code": 39,
               "mfgCode": null,
               "side": "server",
@@ -9239,7 +9401,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable local programming",
+              "name": "EnableLocalProgramming",
               "code": 40,
               "mfgCode": null,
               "side": "server",
@@ -9254,7 +9416,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable one touch locking",
+              "name": "EnableOneTouchLocking",
               "code": 41,
               "mfgCode": null,
               "side": "server",
@@ -9269,7 +9431,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable inside status led",
+              "name": "EnableInsideStatusLED",
               "code": 42,
               "mfgCode": null,
               "side": "server",
@@ -9284,7 +9446,7 @@
               "reportableChange": 0
             },
             {
-              "name": "enable privacy mode button",
+              "name": "EnablePrivacyModeButton",
               "code": 43,
               "mfgCode": null,
               "side": "server",
@@ -9299,7 +9461,7 @@
               "reportableChange": 0
             },
             {
-              "name": "wrong code entry limit",
+              "name": "WrongCodeEntryLimit",
               "code": 48,
               "mfgCode": null,
               "side": "server",
@@ -9314,7 +9476,7 @@
               "reportableChange": 0
             },
             {
-              "name": "user code temporary disable time",
+              "name": "UserCodeTemporaryDisableTime",
               "code": 49,
               "mfgCode": null,
               "side": "server",
@@ -9329,7 +9491,7 @@
               "reportableChange": 0
             },
             {
-              "name": "send pin over the air",
+              "name": "SendPINOverTheAir",
               "code": 50,
               "mfgCode": null,
               "side": "server",
@@ -9344,7 +9506,7 @@
               "reportableChange": 0
             },
             {
-              "name": "require pin for rf operation",
+              "name": "RequirePINforRemoteOperation",
               "code": 51,
               "mfgCode": null,
               "side": "server",
@@ -9359,22 +9521,7 @@
               "reportableChange": 0
             },
             {
-              "name": "zigbee security level",
-              "code": 52,
-              "mfgCode": null,
-              "side": "server",
-              "included": 0,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "alarm mask",
+              "name": "AlarmMask",
               "code": 64,
               "mfgCode": null,
               "side": "server",
@@ -9389,7 +9536,7 @@
               "reportableChange": 0
             },
             {
-              "name": "keypad operation event mask",
+              "name": "KeypadOperationEventMask",
               "code": 65,
               "mfgCode": null,
               "side": "server",
@@ -9404,7 +9551,7 @@
               "reportableChange": 0
             },
             {
-              "name": "RF operation event mask",
+              "name": "RemoteOperationEventMask",
               "code": 66,
               "mfgCode": null,
               "side": "server",
@@ -9419,7 +9566,7 @@
               "reportableChange": 0
             },
             {
-              "name": "manual operation event mask",
+              "name": "ManualOperationEventMask",
               "code": 67,
               "mfgCode": null,
               "side": "server",
@@ -9434,7 +9581,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rfid operation event mask",
+              "name": "RFIDOperationEventMask",
               "code": 68,
               "mfgCode": null,
               "side": "server",
@@ -9449,7 +9596,7 @@
               "reportableChange": 0
             },
             {
-              "name": "keypad programming event mask",
+              "name": "KeypadProgrammingEventMask",
               "code": 69,
               "mfgCode": null,
               "side": "server",
@@ -9464,7 +9611,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rf programming event mask",
+              "name": "RemoteProgrammingEventMask",
               "code": 70,
               "mfgCode": null,
               "side": "server",
@@ -9479,7 +9626,7 @@
               "reportableChange": 0
             },
             {
-              "name": "rfid programming event mask",
+              "name": "RFIDProgrammingEventMask",
               "code": 71,
               "mfgCode": null,
               "side": "server",
@@ -13764,180 +13911,28 @@
               "reportableChange": 0
             }
           ]
-        },
-        {
-          "name": "Binding",
-          "code": 61440,
-          "mfgCode": null,
-          "define": "BINDING_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [
-            {
-              "name": "Bind",
-              "code": 0,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "Unbind",
-              "code": 1,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            }
-          ],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Binding",
-          "code": 61440,
-          "mfgCode": null,
-          "define": "BINDING_CLUSTER",
-          "side": "server",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Group Key Management",
-          "code": 61444,
-          "mfgCode": null,
-          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
-          "side": "client",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Group Key Management",
-          "code": 61444,
-          "mfgCode": null,
-          "define": "GROUP_KEY_MANAGEMENT_CLUSTER",
-          "side": "server",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "groups",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "group keys",
-              "code": 1,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            },
-            {
-              "name": "ClusterRevision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x0001",
-              "reportable": 1,
-              "minInterval": 0,
-              "maxInterval": 65344,
-              "reportableChange": 0
-            }
-          ]
         }
       ]
     }
   ],
   "endpoints": [
     {
-      "endpointTypeName": "Anonymous Endpoint Type",
+      "endpointTypeName": "MA-rootdevice",
       "endpointTypeIndex": 0,
       "profileId": 259,
       "endpointId": 0,
       "networkId": 0,
-      "endpointVersion": null,
-      "deviceIdentifier": null
+      "endpointVersion": 1,
+      "deviceIdentifier": 22
     },
     {
-      "endpointTypeName": "Anonymous Endpoint Type",
+      "endpointTypeName": "MA-thermostat",
       "endpointTypeIndex": 1,
-      "profileId": 260,
+      "profileId": 259,
       "endpointId": 1,
       "networkId": 0,
       "endpointVersion": 1,
       "deviceIdentifier": 769
     }
-  ],
-  "log": []
+  ]
 }

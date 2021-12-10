@@ -45,6 +45,7 @@
 #include <app/AttributeAccessInterface.h>
 #include <app/ConcreteAttributePath.h>
 #include <app/util/af.h>
+#include <platform/CHIPDeviceLayer.h>
 
 #if !defined(EMBER_SCRIPTED_TEST)
 #include <app-common/zap-generated/att-storage.h>
@@ -67,11 +68,7 @@
 
 // If we have fixed number of endpoints, then max is the same.
 #ifdef FIXED_ENDPOINT_COUNT
-#ifdef DYNAMIC_ENDPOINT_COUNT
-#define MAX_ENDPOINT_COUNT (FIXED_ENDPOINT_COUNT + DYNAMIC_ENDPOINT_COUNT)
-#else
-#define MAX_ENDPOINT_COUNT FIXED_ENDPOINT_COUNT
-#endif
+#define MAX_ENDPOINT_COUNT (FIXED_ENDPOINT_COUNT + CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
 #endif
 
 #include <app-common/zap-generated/attribute-type.h>
@@ -125,11 +122,22 @@ void emAfCallInits(void);
 void emberAfEndpointConfigure(void);
 
 EmberAfStatus emAfReadOrWriteAttribute(EmberAfAttributeSearchRecord * attRecord, EmberAfAttributeMetadata ** metadata,
-                                       uint8_t * buffer, uint16_t readLength, bool write, int32_t index = -1);
+                                       uint8_t * buffer, uint16_t readLength, bool write);
 
 bool emAfMatchCluster(EmberAfCluster * cluster, EmberAfAttributeSearchRecord * attRecord);
 bool emAfMatchAttribute(EmberAfCluster * cluster, EmberAfAttributeMetadata * am, EmberAfAttributeSearchRecord * attRecord);
 
+// Check if a cluster is implemented or not. If yes, the cluster is returned.
+// If the cluster is not manufacturerSpecific [ClusterId < FC00] then
+// manufacturerCode argument is ignored otherwise checked.
+//
+// mask = 0 -> find either client or server
+// mask = CLUSTER_MASK_CLIENT -> find client
+// mask = CLUSTER_MASK_SERVER -> find server
+//
+// If a pointer to an index is provided, it will be updated to point to the relative index of the cluster
+// within the set of clusters that match the mask criteria.
+//
 EmberAfCluster * emberAfFindClusterInTypeWithMfgCode(EmberAfEndpointType * endpointType, chip::ClusterId clusterId,
                                                      EmberAfClusterMask mask, uint16_t manufacturerCode, uint8_t * index = nullptr);
 
@@ -240,10 +248,6 @@ void emberAfClusterMessageSentCallback(const chip::MessageSendDestination & dest
 void emberAfClusterMessageSentWithMfgCodeCallback(const chip::MessageSendDestination & destination, EmberApsFrame * apsFrame,
                                                   uint16_t msgLen, uint8_t * message, EmberStatus status,
                                                   uint16_t manufacturerCode);
-
-// Used to retrieve a manufacturer code from an attribute metadata
-uint16_t emAfGetManufacturerCodeForCluster(EmberAfCluster * cluster);
-uint16_t emAfGetManufacturerCodeForAttribute(EmberAfCluster * cluster, EmberAfAttributeMetadata * attMetaData);
 
 // Checks a cluster mask byte against ticks passed bitmask
 // returns true if the mask matches a passed interval

@@ -59,7 +59,7 @@ static const int kFixedLabelElementsOctetStringSize = 16;
 
 static EndpointId gCurrentEndpointId;
 static EndpointId gFirstDynamicEndpointId;
-static Device * gDevices[DYNAMIC_ENDPOINT_COUNT];
+static Device * gDevices[CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT];
 
 // ENDPOINT DEFINITIONS:
 // =================================================================================
@@ -184,7 +184,7 @@ DECLARE_DYNAMIC_ENDPOINT(bridgedSwitchEndpoint, bridgedSwitchClusters);
 int AddDeviceEndpoint(Device * dev, EmberAfEndpointType * ep, uint16_t deviceType)
 {
     uint8_t index = 0;
-    while (index < DYNAMIC_ENDPOINT_COUNT)
+    while (index < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
         if (NULL == gDevices[index])
         {
@@ -219,7 +219,7 @@ int AddDeviceEndpoint(Device * dev, EmberAfEndpointType * ep, uint16_t deviceTyp
 int RemoveDeviceEndpoint(Device * dev)
 {
     uint8_t index = 0;
-    while (index < DYNAMIC_ENDPOINT_COUNT)
+    while (index < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
         if (gDevices[index] == dev)
         {
@@ -239,7 +239,6 @@ int RemoveDeviceEndpoint(Device * dev)
 void EncodeFixedLabel(const char * label, const char * value, uint8_t * buffer, uint16_t length, EmberAfAttributeMetadata * am)
 {
     char zclOctetStrBuf[kFixedLabelElementsOctetStringSize];
-    uint16_t listCount = 1;
     _LabelStruct labelStruct;
 
     // TODO: This size is obviously wrong.  See
@@ -251,8 +250,7 @@ void EncodeFixedLabel(const char * label, const char * value, uint8_t * buffer, 
     // https://github.com/project-chip/connectedhomeip/issues/10743
     labelStruct.value = CharSpan(&zclOctetStrBuf[0], sizeof(zclOctetStrBuf));
 
-    emberAfCopyList(ZCL_FIXED_LABEL_CLUSTER_ID, am, true, buffer, reinterpret_cast<uint8_t *>(&labelStruct), 1);
-    emberAfCopyList(ZCL_FIXED_LABEL_CLUSTER_ID, am, true, buffer, reinterpret_cast<uint8_t *>(&listCount), 0);
+    // TODO: Need to set up an AttributeAccessInterface to handle the lists here.
 }
 
 void HandleDeviceStatusChanged(Device * dev, Device::Changed_t itemChangedMask)
@@ -454,13 +452,13 @@ EmberAfStatus HandleReadSwitchAttribute(DeviceSwitch * dev, chip::AttributeId at
 
 EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId,
                                                    EmberAfAttributeMetadata * attributeMetadata, uint16_t manufacturerCode,
-                                                   uint8_t * buffer, uint16_t maxReadLength, int32_t index)
+                                                   uint8_t * buffer, uint16_t maxReadLength)
 {
     uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
 
     EmberAfStatus ret = EMBER_ZCL_STATUS_FAILURE;
 
-    if ((endpointIndex < DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != NULL))
+    if ((endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT) && (gDevices[endpointIndex] != NULL))
     {
         Device * dev = gDevices[endpointIndex];
 
@@ -488,7 +486,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
 
 EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, ClusterId clusterId,
                                                     EmberAfAttributeMetadata * attributeMetadata, uint16_t manufacturerCode,
-                                                    uint8_t * buffer, int32_t index)
+                                                    uint8_t * buffer)
 {
     uint16_t endpointIndex = emberAfGetDynamicIndexFromEndpoint(endpoint);
 
@@ -496,7 +494,7 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
 
     // ChipLogProgress(DeviceLayer, "emberAfExternalAttributeWriteCallback: ep=%d", endpoint);
 
-    if (endpointIndex < DYNAMIC_ENDPOINT_COUNT)
+    if (endpointIndex < CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT)
     {
         Device * dev = gDevices[endpointIndex];
 

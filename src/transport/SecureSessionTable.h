@@ -44,7 +44,7 @@ public:
     /**
      * Allocates a new secure session out of the internal resource pool.
      *
-     * @param sessionType secure session type
+     * @param secureSessionType secure session type
      * @param localSessionId represents the encryption key ID assigned by local node
      * @param peerNodeId represents peer Node's ID
      * @param peerCATs represents peer CASE Authenticated Tags
@@ -69,7 +69,7 @@ public:
     void ReleaseSession(SecureSession * session) { mEntries.ReleaseObject(session); }
 
     template <typename Function>
-    bool ForEachSession(Function && function)
+    Loop ForEachSession(Function && function)
     {
         return mEntries.ForEachActiveObject(std::forward<Function>(function));
     }
@@ -89,9 +89,9 @@ public:
             if (session->GetLocalSessionId() == localSessionId)
             {
                 result = session;
-                return false;
+                return Loop::Break;
             }
-            return true;
+            return Loop::Continue;
         });
         return result;
     }
@@ -115,7 +115,7 @@ public:
                 callback(*session);
                 ReleaseSession(session);
             }
-            return true;
+            return Loop::Continue;
         });
     }
 
@@ -124,7 +124,7 @@ public:
 
 private:
     Time::TimeSource<kTimeSource> mTimeSource;
-    BitMapObjectPool<SecureSession, kMaxSessionCount> mEntries;
+    BitMapObjectPool<SecureSession, kMaxSessionCount, OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode> mEntries;
 };
 
 } // namespace Transport

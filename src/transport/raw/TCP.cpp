@@ -80,7 +80,6 @@ CHIP_ERROR TCPBase::Init(TcpListenParameters & params)
     VerifyOrExit(mState == State::kNotReady, err = CHIP_ERROR_INCORRECT_STATE);
 
 #if INET_CONFIG_ENABLE_TCP_ENDPOINT
-    VerifyOrDieWithMsg(params.GetEndPointManager() != nullptr, Inet, "TCP not initialized");
     err = params.GetEndPointManager()->NewEndPoint(&mListenSocket);
 #else
     err = CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
@@ -213,9 +212,9 @@ CHIP_ERROR TCPBase::SendAfterConnect(const PeerAddress & addr, System::PacketBuf
             // same destination exists.
             alreadyConnecting = true;
             pending->mPacketBuffer->AddToEnd(std::move(msg));
-            return false;
+            return Loop::Break;
         }
-        return true;
+        return Loop::Continue;
     });
 
     // If already connecting, buffer was just enqueued for more sending
@@ -378,7 +377,7 @@ void TCPBase::OnConnectionComplete(Inet::TCPEndPoint * endPoint, CHIP_ERROR inet
                 err = endPoint->Send(std::move(buffer));
             }
         }
-        return true;
+        return Loop::Continue;
     });
 
     if (err == CHIP_NO_ERROR)

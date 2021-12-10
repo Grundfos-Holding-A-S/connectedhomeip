@@ -29,6 +29,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
 {
     switch (clusterId)
     {
+    case ZCL_ACCESS_CONTROL_CLUSTER_ID:
+        emberAfAccessControlClusterInitCallback(endpoint);
+        break;
     case ZCL_ACCOUNT_LOGIN_CLUSTER_ID:
         emberAfAccountLoginClusterInitCallback(endpoint);
         break;
@@ -155,6 +158,9 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     case ZCL_POWER_SOURCE_CLUSTER_ID:
         emberAfPowerSourceClusterInitCallback(endpoint);
         break;
+    case ZCL_POWER_SOURCE_CONFIGURATION_CLUSTER_ID:
+        emberAfPowerSourceConfigurationClusterInitCallback(endpoint);
+        break;
     case ZCL_PRESSURE_MEASUREMENT_CLUSTER_ID:
         emberAfPressureMeasurementClusterInitCallback(endpoint);
         break;
@@ -209,6 +215,11 @@ void emberAfClusterInitCallback(EndpointId endpoint, ClusterId clusterId)
     }
 }
 
+void __attribute__((weak)) emberAfAccessControlClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfAccountLoginClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -419,6 +430,11 @@ void __attribute__((weak)) emberAfPowerSourceClusterInitCallback(EndpointId endp
     // To prevent warning
     (void) endpoint;
 }
+void __attribute__((weak)) emberAfPowerSourceConfigurationClusterInitCallback(EndpointId endpoint)
+{
+    // To prevent warning
+    (void) endpoint;
+}
 void __attribute__((weak)) emberAfPressureMeasurementClusterInitCallback(EndpointId endpoint)
 {
     // To prevent warning
@@ -545,14 +561,14 @@ bool __attribute__((weak)) emberAfMessageSentCallback(const MessageSendDestinati
 
 EmberAfStatus __attribute__((weak))
 emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId, EmberAfAttributeMetadata * attributeMetadata,
-                                     uint16_t manufacturerCode, uint8_t * buffer, uint16_t maxReadLength, int32_t index)
+                                     uint16_t manufacturerCode, uint8_t * buffer, uint16_t maxReadLength)
 {
     return EMBER_ZCL_STATUS_FAILURE;
 }
 
 EmberAfStatus __attribute__((weak))
 emberAfExternalAttributeWriteCallback(EndpointId endpoint, ClusterId clusterId, EmberAfAttributeMetadata * attributeMetadata,
-                                      uint16_t manufacturerCode, uint8_t * buffer, int32_t index)
+                                      uint16_t manufacturerCode, uint8_t * buffer)
 {
     return EMBER_ZCL_STATUS_FAILURE;
 }

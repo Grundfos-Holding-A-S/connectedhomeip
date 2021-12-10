@@ -41,6 +41,10 @@
 
 // ==================== Security Adaptations ====================
 
+#define CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_CRIT_EIDC_KEY 1
+#define CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_INFO_EIDC_KEY 2
+#define CHIP_DEVICE_CONFIG_PERSISTED_STORAGE_DEBUG_EIDC_KEY 3
+
 // This platform uses mbedtls, but these defines don't seem to be used in source
 #define CHIP_CONFIG_USE_OPENSSL_ECC 0
 #define CHIP_CONFIG_USE_MICRO_ECC 1
@@ -108,6 +112,11 @@
 #ifndef CHIP_CONFIG_MAX_LOCAL_ADDR_UDP_ENDPOINTS
 #define CHIP_CONFIG_MAX_LOCAL_ADDR_UDP_ENDPOINTS 4
 #endif // CHIP_CONFIG_MAX_LOCAL_ADDR_UDP_ENDPOINTS
+
+// Limit the number of device admins to ensure enough ressources for handling them
+#ifndef CHIP_CONFIG_MAX_DEVICE_ADMINS
+#define CHIP_CONFIG_MAX_DEVICE_ADMINS 5
+#endif // CHIP_CONFIG_MAX_DEVICE_ADMINS
 
 // ==================== Security Configuration Overrides ====================
 

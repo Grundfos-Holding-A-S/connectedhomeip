@@ -43,7 +43,7 @@ namespace Transport {
 class TcpListenParameters
 {
 public:
-    explicit TcpListenParameters(Inet::InetLayer * inetLayer) : mEndPointManager(inetLayer->GetTCPEndPointManager()) {}
+    explicit TcpListenParameters(Inet::EndPointManager<Inet::TCPEndPoint> * endPointManager) : mEndPointManager(endPointManager) {}
     TcpListenParameters(const TcpListenParameters &) = default;
     TcpListenParameters(TcpListenParameters &&)      = default;
 
@@ -280,7 +280,9 @@ public:
 private:
     friend class TCPTest;
     TCPBase::ActiveConnectionState mConnectionsBuffer[kActiveConnectionsSize];
-    PoolImpl<PendingPacket, kPendingPacketSize, PendingPacketPoolType::Interface> mPendingPackets;
+    PoolImpl<PendingPacket, kPendingPacketSize, OnObjectPoolDestruction::IgnoreUnsafeDoNotUseInNewCode,
+             PendingPacketPoolType::Interface>
+        mPendingPackets;
 };
 
 } // namespace Transport

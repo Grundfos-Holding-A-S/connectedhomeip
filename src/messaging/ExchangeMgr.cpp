@@ -101,7 +101,7 @@ CHIP_ERROR ExchangeManager::Shutdown()
     mContextPool.ForEachActiveObject([](auto * ec) {
         // There should be no active object in the pool
         VerifyOrDie(false);
-        return true;
+        return Loop::Continue;
     });
 
     if (mSessionManager != nullptr)
@@ -221,21 +221,26 @@ void ExchangeManager::OnMessageReceived(const PacketHeader & packetHeader, const
                     ec->SetMsgRcvdFromPeer(true);
                 }
 
-                ChipLogDetail(ExchangeManager, "Found matching exchange: " ChipLogFormatExchange ", Delegate: 0x%p",
+                ChipLogDetail(ExchangeManager, "Found matching exchange: " ChipLogFormatExchange ", Delegate: %p",
                               ChipLogValueExchange(ec), ec->GetDelegate());
 
                 // Matched ExchangeContext; send to message handler.
                 ec->HandleMessage(packetHeader.GetMessageCounter(), payloadHeader, source, msgFlags, std::move(msgBuf));
                 found = true;
-                return false;
+                return Loop::Break;
             }
-            return true;
+            return Loop::Continue;
         });
 
         if (found)
         {
             return;
         }
+    }
+    else
+    {
+        ChipLogProgress(ExchangeManager, "Received Groupcast Message with GroupId of %d",
+                        packetHeader.GetDestinationGroupId().Value());
     }
 
     // If it's not a duplicate message, search for an unsolicited message handler if it is marked as being sent by an initiator.
@@ -290,7 +295,7 @@ void ExchangeManager::OnMessageReceived(const PacketHeader & packetHeader, const
             return;
         }
 
-        ChipLogDetail(ExchangeManager, "Handling via exchange: " ChipLogFormatExchange ", Delegate: 0x%p", ChipLogValueExchange(ec),
+        ChipLogDetail(ExchangeManager, "Handling via exchange: " ChipLogFormatExchange ", Delegate: %p", ChipLogValueExchange(ec),
                       ec->GetDelegate());
 
         if (ec->IsEncryptionRequired() != packetHeader.IsEncrypted())
@@ -323,7 +328,7 @@ void ExchangeManager::ExpireExchangesForSession(SessionHandle session)
             // Continue to iterate because there can be multiple exchanges
             // associated with the connection.
         }
-        return true;
+        return Loop::Continue;
     });
 }
 
@@ -339,7 +344,7 @@ void ExchangeManager::CloseAllContextsForDelegate(const ExchangeDelegate * deleg
             ec->SetDelegate(nullptr);
             ec->Close();
         }
-        return true;
+        return Loop::Continue;
     });
 }
 
