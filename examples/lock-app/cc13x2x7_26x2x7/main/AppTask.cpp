@@ -297,6 +297,10 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
             {
                 BoltLockMgr().InitiateAction(0, BoltLockManager::UNLOCK_ACTION);
             }
+            chip::DeviceLayer::Internal::UserBLESetAdvState(1);
+            ConnectivityMgr().SetBLEAdvertisingEnabled(true);
+            chip::DeviceLayer::Internal::UserBLESetAdvState(0);
+            PLAT_LOG("Enabled user BLE Advertisement");
         }
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
         {
