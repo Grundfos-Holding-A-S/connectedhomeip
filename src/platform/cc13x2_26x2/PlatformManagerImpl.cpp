@@ -26,6 +26,7 @@
 #include <platform/internal/CHIPDeviceLayerInternal.h>
 
 #include <crypto/CHIPCryptoPAL.h>
+#include <platform/FreeRTOS/SystemTimeSupport.h>
 #include <platform/PlatformManager.h>
 #include <platform/cc13x2_26x2/DiagnosticDataProviderImpl.h>
 #include <platform/internal/GenericPlatformManagerImpl_FreeRTOS.cpp>
@@ -143,6 +144,9 @@ CHIP_ERROR PlatformManagerImpl::_InitChipStack(void)
     // to finish the initialization process.
     err = Internal::GenericPlatformManagerImpl_FreeRTOS<PlatformManagerImpl>::_InitChipStack();
     SuccessOrExit(err);
+
+    // Init RTC
+    ReturnErrorOnFailure(System::Clock::InitClock_RealTime());
 
 exit:
     return err;
