@@ -70,7 +70,9 @@ static QueueHandle_t sAppEventQueue;
 static LED_Handle sAppRedHandle;
 static LED_Handle sAppGreenHandle;
 static Button_Handle sAppLeftHandle;
+#if !GRUNDFOS_CONFIG_MGE
 static Button_Handle sAppRightHandle;
+#endif
 
 AppTask AppTask::sAppTask;
 
@@ -198,11 +200,13 @@ int AppTask::Init()
     sAppLeftHandle                 = Button_open(CONFIG_BTN_LEFT, &buttonParams);
     Button_setCallback(sAppLeftHandle, ButtonLeftEventHandler);
 
+#if !GRUNDFOS_CONFIG_MGE
     Button_Params_init(&buttonParams);
     buttonParams.buttonEventMask   = Button_EV_CLICKED;
     buttonParams.longPressDuration = 1000U; // ms
     sAppRightHandle                = Button_open(CONFIG_BTN_RIGHT, &buttonParams);
     Button_setCallback(sAppRightHandle, ButtonRightEventHandler);
+#endif
 
     // Initialize Pump module
     PLAT_LOG("Initialize Pump");

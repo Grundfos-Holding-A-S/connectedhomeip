@@ -27,6 +27,10 @@ assert(current_os == "freertos")
 
 project_dir = "${chip_root}/examples/pump-app/cc13x2x7_26x2x7"
 
+if (ti_use_mge) {
+  bim_hex = "${project_dir}/mge_bim_offchip.hex"
+}
+
 ti_simplelink_sdk("sdk") {
   include_dirs = [ "${project_dir}/main/include" ]
 
@@ -36,10 +40,20 @@ ti_simplelink_sdk("sdk") {
   } else {
     defines += [ "BUILD_RELEASE=1" ]
   }
+
+  if (ti_use_mge) {
+    defines += [ "GRUNDFOS_CONFIG_MGE=1"]
+  } else {
+    defines += [ "GRUNDFOS_CONFIG_MGE=0"]
+  }
 }
 
 ti_sysconfig("sysconfig") {
-  sources = [ "${project_dir}/chip.syscfg" ]
+  if (ti_use_mge) {
+    sources = [ "${project_dir}/chip_mge.syscfg" ]
+  } else {
+    sources = [ "${project_dir}/chip.syscfg" ]
+  }
 
   outputs = [
     "ti_devices_config.c",

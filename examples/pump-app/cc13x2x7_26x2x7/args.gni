@@ -26,6 +26,7 @@ ti_simplelink_board = "LP_CC2652R7"
 is_debug = false
 
 chip_enable_ota_requestor = true
+ti_use_mge = false
 
 # Disable CHIP Logging
 #chip_progress_logging = false

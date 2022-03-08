@@ -30,6 +30,7 @@ declare_args() {
   # Location of the TI SimpleLink SDK.
   ti_simplelink_sdk_root = ""
   ti_sysconfig_root = ""
+  ti_use_mge = false
 }
 
 assert(ti_simplelink_sdk_root != "", "ti_simplelink_sdk_root must be specified")
