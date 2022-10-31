@@ -133,7 +133,34 @@ bool BLEManagerImpl::_IsAdvertisingEnabled(void)
 /* Post event to app processing loop to begin CHIP advertising */
 CHIP_ERROR BLEManagerImpl::_SetAdvertisingEnabled(bool val)
 {
-    mFlags.Set(Flags::kAdvertisingEnabled, val);
+    uint8_t UserAdvState = UserBLEGetAdvertisementState();
+
+    if (UserAdvState == 0)
+    {
+        mFlags.Set(Flags::kAdvertisingEnabled, val);
+        // Always make sure user advertisement is turned off when manipulating Matter advertisement state
+        mFlags.Set(Flags::kAdvertisingUserEnabled, false);
+    }
+    else
+    {
+        mFlags.Set(Flags::kAdvertisingUserEnabled, val);
+        mFlags.Set(Flags::kAdvertisingEnabled, false);
+    }
+
+    if (val)
+    {
+        ChipDeviceEvent advChange;
+        advChange.Type                             = DeviceEventType::kCHIPoBLEAdvertisingChange;
+        advChange.CHIPoBLEAdvertisingChange.Result = kActivity_Started;
+        PlatformMgr().PostEventOrDie(&advChange);
+    }
+    else
+    {
+        ChipDeviceEvent advChange;
+        advChange.Type                             = DeviceEventType::kCHIPoBLEAdvertisingChange;
+        advChange.CHIPoBLEAdvertisingChange.Result = kActivity_Stopped;
+        PlatformMgr().PostEventOrDie(&advChange);
+    }
 
     /* Send event to process state change request */
     return DriveBLEState();
@@ -442,37 +469,59 @@ void BLEManagerImpl::ConfigureAdvertisements(void)
     /* Verify scan response data length */
     assert(scanResLength < CHIPOBLE_ADV_DATA_MAX_SIZE);
 
-    sInstance.mScanResDatachipOBle[scanIndex++] = localDeviceNameLen + 1;
-    sInstance.mScanResDatachipOBle[scanIndex++] = GAP_ADTYPE_LOCAL_NAME_COMPLETE;
-    memcpy(&sInstance.mScanResDatachipOBle[scanIndex], sInstance.mDeviceName, localDeviceNameLen);
-    scanIndex += localDeviceNameLen;
-    sInstance.mScanResDatachipOBle[scanIndex++] = 0x03;
-    sInstance.mScanResDatachipOBle[scanIndex++] = GAP_ADTYPE_16BIT_COMPLETE;
-    sInstance.mScanResDatachipOBle[scanIndex++] = static_cast<uint8_t>(LO_UINT16(CHIPOBLE_SERV_UUID));
-    sInstance.mScanResDatachipOBle[scanIndex++] = static_cast<uint8_t>(HI_UINT16(CHIPOBLE_SERV_UUID));
-
-    for (uint8_t temp = 0; temp < scanIndex; temp++)
+    if (!sInstance.mFlags.Has(Flags::kAdvertisingUserEnabled))
     {
-        BLEMGR_LOG("BLEMGR: AdvInit Scan Response Data: %x", sInstance.mScanResDatachipOBle[temp]);
+        sInstance.mScanResDatachipOBle[scanIndex++] = localDeviceNameLen + 1;
+        sInstance.mScanResDatachipOBle[scanIndex++] = GAP_ADTYPE_LOCAL_NAME_COMPLETE;
+        memcpy(&sInstance.mScanResDatachipOBle[scanIndex], sInstance.mDeviceName, localDeviceNameLen);
+        scanIndex += localDeviceNameLen;
+        sInstance.mScanResDatachipOBle[scanIndex++] = 0x03;
+        sInstance.mScanResDatachipOBle[scanIndex++] = GAP_ADTYPE_16BIT_COMPLETE;
+        sInstance.mScanResDatachipOBle[scanIndex++] = static_cast<uint8_t>(LO_UINT16(CHIPOBLE_SERV_UUID));
+        sInstance.mScanResDatachipOBle[scanIndex++] = static_cast<uint8_t>(HI_UINT16(CHIPOBLE_SERV_UUID));
+
+        for (uint8_t temp = 0; temp < scanIndex; temp++)
+        {
+            BLEMGR_LOG("BLEMGR: AdvInit Scan Response Data: %x", sInstance.mScanResDatachipOBle[temp]);
+        }
+
+        advLength = sizeof(static_cast<uint16_t>(CHIPOBLE_SERV_UUID)) + static_cast<uint8_t>(sizeof(mDeviceIdInfo)) + 1;
+
+        /* Verify advertising data length */
+        assert((CHIPOBLE_ADV_SIZE_NO_DEVICE_ID_INFO + advLength) < CHIPOBLE_ADV_DATA_MAX_SIZE);
+
+        BLEMGR_LOG("BLEMGR: AdvInit: MDeviceIDInfo Size: %d", sizeof(mDeviceIdInfo));
+        BLEMGR_LOG("BLEMGR: AdvInit: advlength: %d", advLength);
+        BLEMGR_LOG("BLEMGR: AdvInit:Desc : %d", mDeviceIdInfo.GetDeviceDiscriminator());
+
+        sInstance.mAdvDatachipOBle[advIndex++] = 0x02;
+        sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_FLAGS;
+        sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED | GAP_ADTYPE_FLAGS_LIMITED;
+        sInstance.mAdvDatachipOBle[advIndex++] = advLength;
+        sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_SERVICE_DATA;
+        sInstance.mAdvDatachipOBle[advIndex++] = static_cast<uint8_t>(LO_UINT16(CHIPOBLE_SERV_UUID));
+        sInstance.mAdvDatachipOBle[advIndex++] = static_cast<uint8_t>(HI_UINT16(CHIPOBLE_SERV_UUID));
+        memcpy(&sInstance.mAdvDatachipOBle[advIndex], (void *) &mDeviceIdInfo, static_cast<uint8_t>(sizeof(mDeviceIdInfo)));
+        advIndex += static_cast<uint8_t>(sizeof(mDeviceIdInfo));
+
+        GGS_SetParameter(GGS_DEVICE_NAME_ATT, GAP_DEVICE_NAME_LEN, sInstance.mDeviceName);
     }
+    else
+    {
+        scanIndex += UserBLEScan_AddData(&sInstance.mScanResDatachipOBle[scanIndex], CHIPOBLE_ADV_DATA_MAX_SIZE);
 
-    advLength = sizeof(static_cast<uint16_t>(CHIPOBLE_SERV_UUID)) + static_cast<uint8_t>(sizeof(mDeviceIdInfo)) + 1;
+        for (uint8_t temp = 0; temp < scanIndex; temp++)
+        {
+            BLEMGR_LOG("BLEMGR: AdvInit Scan Response Data: %x", sInstance.mScanResDatachipOBle[temp]);
+        }
 
-    /* Verify advertising data length */
-    assert((CHIPOBLE_ADV_SIZE_NO_DEVICE_ID_INFO + advLength) < CHIPOBLE_ADV_DATA_MAX_SIZE);
+        advIndex += UserBLEAdv_AddData(&sInstance.mAdvDatachipOBle[advIndex], CHIPOBLE_ADV_DATA_MAX_SIZE);
 
-    BLEMGR_LOG("BLEMGR: AdvInit: MDeviceIDInfo Size: %d", sizeof(mDeviceIdInfo));
-    BLEMGR_LOG("BLEMGR: AdvInit: advlength: %d", advLength);
-    BLEMGR_LOG("BLEMGR: AdvInit:Desc : %d", mDeviceIdInfo.GetDeviceDiscriminator());
+        uint8_t userNameLength = 0;
+        char * userName        = UserBLEGetName(&userNameLength);
 
-    sInstance.mAdvDatachipOBle[advIndex++] = 0x02;
-    sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_FLAGS;
-    sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED | GAP_ADTYPE_FLAGS_GENERAL;
-    sInstance.mAdvDatachipOBle[advIndex++] = advLength;
-    sInstance.mAdvDatachipOBle[advIndex++] = GAP_ADTYPE_SERVICE_DATA;
-    sInstance.mAdvDatachipOBle[advIndex++] = static_cast<uint8_t>(LO_UINT16(CHIPOBLE_SERV_UUID));
-    sInstance.mAdvDatachipOBle[advIndex++] = static_cast<uint8_t>(HI_UINT16(CHIPOBLE_SERV_UUID));
-    memcpy(&sInstance.mAdvDatachipOBle[advIndex], (void *) &mDeviceIdInfo, static_cast<uint8_t>(sizeof(mDeviceIdInfo)));
+        GGS_SetParameter(GGS_DEVICE_NAME_ATT, userNameLength, userName);
+    }
 
     // Setup and start Advertising
     // For more information, see the GAP section in the User's Guide:
@@ -499,8 +548,9 @@ void BLEManagerImpl::ConfigureAdvertisements(void)
         GapAdv_prepareLoadByHandle(sInstance.advHandleLegacy, GAP_ADV_FREE_OPTION_DONT_FREE);
     }
     // Load advertising data for set #1 that is statically allocated by the app
-    status = (bStatus_t) GapAdv_loadByHandle(sInstance.advHandleLegacy, GAP_ADV_DATA_TYPE_ADV,
-                                             CHIPOBLE_ADV_SIZE_NO_DEVICE_ID_INFO + advLength, sInstance.mAdvDatachipOBle);
+    status =
+        (bStatus_t) GapAdv_loadByHandle(sInstance.advHandleLegacy, GAP_ADV_DATA_TYPE_ADV,
+                                        /*CHIPOBLE_ADV_SIZE_NO_DEVICE_ID_INFO + advLength*/ advIndex, sInstance.mAdvDatachipOBle);
     assert(status == SUCCESS);
 
     if (sInstance.mFlags.Has(Flags::kBLEStackAdvInitialized))
@@ -511,7 +561,7 @@ void BLEManagerImpl::ConfigureAdvertisements(void)
     }
 
     // Load scan response data for set #1 that is statically allocated by the app
-    status = (bStatus_t) GapAdv_loadByHandle(sInstance.advHandleLegacy, GAP_ADV_DATA_TYPE_SCAN_RSP, scanResLength,
+    status = (bStatus_t) GapAdv_loadByHandle(sInstance.advHandleLegacy, GAP_ADV_DATA_TYPE_SCAN_RSP, /*scanResLength*/ scanIndex,
                                              sInstance.mScanResDatachipOBle);
     assert(status == SUCCESS);
 }
@@ -577,6 +627,7 @@ void BLEManagerImpl::EventHandler_init(void)
     DevInfo_AddService();                      // Device Information Service
 
     CHIPoBLEProfile_AddService(GATT_ALL_SERVICES);
+    UserBLEProfile_AddService(GATT_ALL_SERVICES);
 
     // Start Bond Manager and register callback
     VOID GAPBondMgr_Register(BLEMgr_BondMgrCBs);
@@ -590,6 +641,7 @@ void BLEManagerImpl::EventHandler_init(void)
     GATT_RegisterForMsgs(BLEManagerImpl::sSelfEntity);
 
     CHIPoBLEProfile_RegisterAppCBs(&CHIPoBLEProfile_CBs);
+    UserBLEProfile_RegisterAppCBs();
     // Set default values for Data Length Extension
     // Extended Data Length Feature is already enabled by default
     {
@@ -818,8 +870,15 @@ void BLEManagerImpl::ProcessEvtHdrMsg(QueuedEvt_t * pMsg)
             }
 
             // Turn on advertisements
-            if (sInstance.mFlags.Has(Flags::kAdvertisingEnabled) && !sInstance.mFlags.Has(Flags::kAdvertising))
+            if (sInstance.mFlags.Has(Flags::kAdvertisingEnabled) /* && !sInstance.mFlags.Has(Flags::kAdvertising) */)
             {
+                // Stop advertising
+                GapAdv_disable(sInstance.advHandleLegacy);
+                sInstance.mFlags.Clear(Flags::kAdvertising);
+
+                // Update advertisement parameters
+                ConfigureAdvertisements();
+
                 // Send notification to thread manager that CHIPoBLE advertising is starting
 
                 // Enable legacy advertising for set #1
@@ -844,8 +903,32 @@ void BLEManagerImpl::ProcessEvtHdrMsg(QueuedEvt_t * pMsg)
                     sInstance.mFlags.Set(Flags::kAdvertising);
                 }
             }
+            else if (sInstance.mFlags.Has(Flags::kAdvertisingUserEnabled) /* && !sInstance.mFlags.Has(Flags::kAdvertising)*/)
+            {
+                // Stop advertising
+                GapAdv_disable(sInstance.advHandleLegacy);
+                sInstance.mFlags.Clear(Flags::kAdvertising);
+
+                // Update advertisement parameters
+                ConfigureAdvertisements();
+
+                // Enable User advertisement
+                status = (bStatus_t) GapAdv_enable(sInstance.advHandleLegacy, GAP_ADV_ENABLE_OPTIONS_USE_MAX, 0);
+
+                // If adverisement fails, keep flags set
+                if (status == SUCCESS)
+                {
+
+                    // Start advertisement timeout timer
+                    Util_rescheduleClock(&sInstance.clkAdvTimeout, ADV_TIMEOUT);
+                    Util_startClock(&sInstance.clkAdvTimeout);
+
+                    sInstance.mFlags.Set(Flags::kAdvertising);
+                }
+            }
             // Advertising should be disabled
-            if ((!sInstance.mFlags.Has(Flags::kAdvertisingEnabled)) && sInstance.mFlags.Has(Flags::kAdvertising))
+            if ((!sInstance.mFlags.Has(Flags::kAdvertisingEnabled)) && (!sInstance.mFlags.Has(Flags::kAdvertisingUserEnabled)) &&
+                sInstance.mFlags.Has(Flags::kAdvertising))
             {
                 BLEMGR_LOG("BLEMGR: BLE Process Application Message: ADvertisements disabled");
 
@@ -1033,6 +1116,8 @@ void BLEManagerImpl::ProcessGapMessage(gapEventHdr_t * pMsg)
 {
     BLEMGR_LOG("BLEMGR: ProcessGapMessage");
 
+    UserProcessGapMessage(pMsg);
+
     switch (pMsg->opcode)
     {
     case GAP_DEVICE_INIT_DONE_EVENT: {
@@ -1101,6 +1186,7 @@ void BLEManagerImpl::ProcessGapMessage(gapEventHdr_t * pMsg)
             // Stop advertising since there is no room for more connections
             BLEMGR_LOG("BLEMGR: BLE event GAP_LINK_ESTABLISHED_EVENT: MAX connections");
             sInstance.mFlags.Clear(Flags::kAdvertisingEnabled).Clear(Flags::kAdvertising);
+            sInstance.mFlags.Clear(Flags::kAdvertisingUserEnabled);
         }
 
         /* Stop advertisement timeout timer */
@@ -1250,6 +1336,7 @@ void BLEManagerImpl::ProcessAdvEvent(GapAdvEventData_t * pEventData)
 {
     BLEMGR_LOG("BLEMGR: ProcessAdvEvent");
 
+    UserProcessAdvEvent(pEventData->event);
     switch (pEventData->event)
     {
     case GAP_EVT_ADV_START_AFTER_ENABLE: {
