@@ -190,6 +190,41 @@ typedef struct
     uint32_t numComparison;
 } PasscodeData_t;
 
+// Weakly declared User functions for BLE. The user can implement these in application code
+// to be able to control the BLE radio outside the matter context
+extern "C" {
+
+uint8_t __attribute__((weak)) UserBLEAdv_AddData(uint8_t * advData, uint8_t size)
+{
+    return 0;
+}
+
+uint8_t __attribute__((weak)) UserBLEScan_AddData(uint8_t * scanData, uint8_t size)
+{
+    return 0;
+}
+bStatus_t __attribute__((weak)) UserBLEProfile_AddService(uint32 services)
+{
+    return 0;
+}
+void __attribute__((weak)) UserProcessGapMessage(gapEventHdr_t * pMsg) {}
+void __attribute__((weak)) UserProcessAdvEvent(uint8_t event) {}
+uint8_t __attribute__((weak)) UserBLEGetAdvertisementState(void)
+{
+    return 0;
+}
+char * __attribute__((weak)) UserBLEGetName(uint8_t * length)
+{
+    return NULL;
+}
+bStatus_t __attribute__((weak)) UserBLEProfile_RegisterAppCBs()
+{
+    return 0;
+}
+
+void __attribute__((weak)) UserBLESetAdvState(uint8_t advState) {}
+}
+
 /**
  * Concrete implementation of the BLEManager singleton object for cc13x2_cc26x2.
  */
@@ -202,7 +237,6 @@ class BLEManagerImpl final : public BLEManager, private BleLayer, private BlePla
 
 public:
     // ===== Platform-specific members that may be accessed directly by the application.
-
 private:
     // ===== Members that implement the BLEManager internal interface.
 
@@ -272,6 +306,7 @@ private:
         kBLEStackGATTNameUpdate   = 0x0020, /* Trigger TI BLE Stack name update, must be performed prior to adv start */
         kBLEStackGATTNameSet      = 0x0040, /* Device name has been set externally*/
         kAdvertisingRefreshNeeded = 0x0080, /* Advertising settings changed and it should be restarted */
+        kAdvertisingUserEnabled   = 0x0100,
 
     };
 

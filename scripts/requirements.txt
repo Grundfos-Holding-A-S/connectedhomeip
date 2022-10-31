@@ -14,6 +14,9 @@ virtualenv
 # openiotsdk
 -r requirements.openiotsdk.txt
 
+# Grundfos fix - TI platform needs ecdsa for OAD
+ecdsa>=0.17.0
+
 # cirque tests
 requests>=2.24.0
 
