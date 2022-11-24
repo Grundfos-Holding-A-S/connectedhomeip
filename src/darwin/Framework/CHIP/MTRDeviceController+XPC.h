@@ -68,20 +68,12 @@ typedef void (^MTRValuesHandler)(id _Nullable values, NSError * _Nullable error)
 /**
  * Returns a serialized subscribe parameter object to send over XPC
  */
-+ (NSDictionary<NSString *, id> * _Nullable)encodeXPCSubscribeParams:(MTRSubscribeParams *)params;
++ (NSDictionary<NSString *, id> * _Nullable)encodeXPCSubscribeParams:(MTRSubscribeParams * _Nullable)params;
 
 /**
  * Returns a deserialized subscribe parameter object from an object received over XPC
  */
 + (MTRSubscribeParams * _Nullable)decodeXPCSubscribeParams:(NSDictionary<NSString *, id> * _Nullable)params;
-
-@end
-
-@interface MTRDeviceController (Deprecated_XPC)
-
-+ (MTRDeviceController *)sharedControllerWithId:(id<NSCopying> _Nullable)controllerID
-                                xpcConnectBlock:(MTRXPCConnectBlock)xpcConnectBlock
-    MTR_NEWLY_DEPRECATED("Please use sharedControllerWithID:xpcConnectBlock:");
 
 @end
 
@@ -139,7 +131,8 @@ typedef void (^MTRValuesHandler)(id _Nullable values, NSError * _Nullable error)
                          completion:(MTRValuesHandler)completion;
 
 /**
- * Requests subscribing attribute
+ * Requests subscribing attribute.  The minInterval/maxInterval arguments
+ * override whatever intervals might be present in params.
  */
 - (void)subscribeAttributeWithController:(id _Nullable)controller
                                   nodeId:(uint64_t)nodeId
@@ -157,7 +150,8 @@ typedef void (^MTRValuesHandler)(id _Nullable values, NSError * _Nullable error)
 - (void)stopReportsWithController:(id _Nullable)controller nodeId:(uint64_t)nodeId completion:(dispatch_block_t)completion;
 
 /**
- * Requests subscription of all attributes.
+ * Requests subscription of all attributes.  The minInterval/maxInterval
+ * arguments override whatever intervals might be present in params.
  */
 - (void)subscribeWithController:(id _Nullable)controller
                          nodeId:(uint64_t)nodeId
@@ -165,7 +159,7 @@ typedef void (^MTRValuesHandler)(id _Nullable values, NSError * _Nullable error)
                     maxInterval:(NSNumber *)maxInterval
                          params:(NSDictionary<NSString *, id> * _Nullable)params
                     shouldCache:(BOOL)shouldCache
-                     completion:(StatusCompletion)completion;
+                     completion:(MTRStatusCompletion)completion;
 
 /**
  * Requests reading attribute cache
@@ -191,6 +185,14 @@ typedef void (^MTRValuesHandler)(id _Nullable values, NSError * _Nullable error)
                             nodeId:(uint64_t)nodeId
                             values:(id _Nullable)values
                              error:(NSError * _Nullable)error;
+
+@end
+
+@interface MTRDeviceController (Deprecated_XPC)
+
++ (MTRDeviceController *)sharedControllerWithId:(id<NSCopying> _Nullable)controllerID
+                                xpcConnectBlock:(MTRXPCConnectBlock)xpcConnectBlock
+    MTR_NEWLY_DEPRECATED("Please use sharedControllerWithID:xpcConnectBlock:");
 
 @end
 

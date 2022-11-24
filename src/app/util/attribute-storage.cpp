@@ -21,13 +21,21 @@
 #include <app/reporting/reporting.h>
 #include <app/util/af.h>
 #include <app/util/attribute-storage.h>
+#include <app/util/generic-callbacks.h>
 #include <lib/support/CodeUtils.h>
 #include <lib/support/logging/CHIPLogging.h>
 #include <platform/LockTracker.h>
 
-#include <app-common/zap-generated/attribute-type.h>
+// Attribute storage depends on knowing the current layout/setup of attributes
+// and corresponding callbacks. Specifically:
+//   - zap-generated/callback.h is needed because endpoint_config will call the
+//     corresponding callbacks (via GENERATED_FUNCTION_ARRAYS) and the include
+//     for it is:
+//       util/common.h
+//           -> util/af.h
+//           -> util/config.h
+//           -> zap-generated/endpoint_config.h
 #include <app-common/zap-generated/callback.h>
-#include <app-common/zap-generated/ids/Attributes.h>
 
 using namespace chip;
 
@@ -1015,7 +1023,7 @@ const EmberAfCluster * emberAfGetClusterByIndex(EndpointId endpoint, uint8_t clu
     return &(definedEndpoint->endpointType->cluster[clusterIndex]);
 }
 
-const chip::Span<const EmberAfDeviceType> emberAfDeviceTypeListFromEndpoint(chip::EndpointId endpoint, CHIP_ERROR & err)
+chip::Span<const EmberAfDeviceType> emberAfDeviceTypeListFromEndpoint(chip::EndpointId endpoint, CHIP_ERROR & err)
 {
     uint16_t endpointIndex = emberAfIndexFromEndpoint(endpoint);
     chip::Span<const EmberAfDeviceType> ret;
@@ -1300,8 +1308,7 @@ void emAfSaveAttributeToStorageIfNeeded(uint8_t * data, EndpointId endpoint, Clu
     auto * attrStorage = app::GetAttributePersistenceProvider();
     if (attrStorage)
     {
-        attrStorage->WriteValue(app::ConcreteAttributePath(endpoint, clusterId, metadata->attributeId), metadata,
-                                ByteSpan(data, dataSize));
+        attrStorage->WriteValue(app::ConcreteAttributePath(endpoint, clusterId, metadata->attributeId), ByteSpan(data, dataSize));
     }
     else
     {

@@ -1027,7 +1027,7 @@ void task_main(void * param)
         }
     }
 
-    while (1)
+    while (true)
     {
         /* wait for interface up */
         os_thread_sleep(os_msec_to_ticks(5000));
@@ -1131,7 +1131,7 @@ static void rst_args_lt(System::Layer * aSystemLayer, void * aAppState)
 
 void task_test_main(void * param)
 {
-    while (1)
+    while (true)
     {
         /* wait for interface up */
         os_thread_sleep(os_msec_to_ticks(500));
@@ -1272,7 +1272,11 @@ void ShellCLIMain(void * pvParameter)
             strcpy(def_psk, "nxp12345");
         }
         PRINTF("Connecting to [%s, %s] \r\n", def_ssid, def_psk);
-        ConnectivityMgrImpl().ProvisionWiFiNetwork(def_ssid, def_psk);
+
+        // TODO: ConnectivityMgrImpl is the platform implementation of ConnectivityMgr layer.
+        // Application should use the APIs defined src/include/platform to talk to the Matter
+        // platfrom layer, instead of calling into the functions defined in the platform implemenation.
+        // ConnectivityMgrImpl().ProvisionWiFiNetwork(def_ssid, def_psk);
     }
 
     // Run CHIP servers
@@ -1613,7 +1617,7 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
                                                    uint16_t maxReadLength)
 {
     // Added for the pairing of TE9 to report the commission_info
-    // default function (in zzz_generated/all-clusters-app/zap-generated/callback-stub.cpp)
+    // default function (in callback-stub.cpp)
     //
     PRINTF("-> %s()\n\r", __FUNCTION__);
     return EMBER_ZCL_STATUS_SUCCESS;

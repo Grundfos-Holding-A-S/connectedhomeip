@@ -1,8 +1,6 @@
 package com.chip.casting.app;
 
 import android.content.Context;
-import android.net.nsd.NsdManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -69,8 +67,6 @@ public class CommissionerDiscoveryFragment extends Fragment {
     manualCommissioningButton.setOnClickListener(manualCommissioningButtonOnClickListener);
 
     Context context = this.getContext();
-    Context applicationContext = this.getContext().getApplicationContext();
-
     SuccessCallback<DiscoveredNodeData> successCallback =
         new SuccessCallback<DiscoveredNodeData>() {
           @Override
@@ -111,12 +107,20 @@ public class CommissionerDiscoveryFragment extends Fragment {
           }
         };
 
+    Button discoverButton = getView().findViewById(R.id.discoverButton);
+    discoverButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            Log.d(TAG, "Discovering on button click");
+            tvCastingApp.discoverVideoPlayerCommissioners(
+                DISCOVERY_DURATION_SECS, successCallback, failureCallback);
+          }
+        });
+
+    Log.d(TAG, "Auto discovering");
     tvCastingApp.discoverVideoPlayerCommissioners(
-        (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
-        (NsdManager) applicationContext.getSystemService(Context.NSD_SERVICE),
-        DISCOVERY_DURATION_SECS,
-        successCallback,
-        failureCallback);
+        DISCOVERY_DURATION_SECS, successCallback, failureCallback);
   }
 
   @VisibleForTesting

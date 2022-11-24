@@ -667,11 +667,7 @@ void TestReadInteraction::TestReadHandlerInvalidAttributePath(nlTestSuite * apSu
 
         err = readHandler.ProcessReadRequest(std::move(readRequestbuf));
         ChipLogError(DataManagement, "The error is %s", ErrorStr(err));
-#if CHIP_CONFIG_IM_ENABLE_SCHEMA_CHECK
-        NL_TEST_ASSERT(apSuite, err == CHIP_ERROR_IM_MALFORMED_READ_REQUEST_MESSAGE);
-#else
         NL_TEST_ASSERT(apSuite, err == CHIP_ERROR_END_OF_TLV);
-#endif // CHIP_CONFIG_IM_ENABLE_SCHEMA_CHECK
 
         //
         // In the call above to ProcessReadRequest, the handler will not actually close out the EC since
@@ -728,9 +724,8 @@ void TestReadInteraction::TestReadClientGenerateOneEventPaths(nlTestSuite * apSu
     err = readRequestParser.Init(reader);
     NL_TEST_ASSERT(apSuite, err == CHIP_NO_ERROR);
 
-#if CHIP_CONFIG_IM_ENABLE_SCHEMA_CHECK
-    err = readRequestParser.CheckSchemaValidity();
-    NL_TEST_ASSERT(apSuite, err == CHIP_NO_ERROR);
+#if CHIP_CONFIG_IM_PRETTY_PRINT
+    readRequestParser.PrettyPrint();
 #endif
 
     NL_TEST_ASSERT(apSuite, ctx.GetExchangeManager().GetNumActiveExchanges() == 0);
@@ -780,9 +775,8 @@ void TestReadInteraction::TestReadClientGenerateTwoEventPaths(nlTestSuite * apSu
     err = readRequestParser.Init(reader);
     NL_TEST_ASSERT(apSuite, err == CHIP_NO_ERROR);
 
-#if CHIP_CONFIG_IM_ENABLE_SCHEMA_CHECK
-    err = readRequestParser.CheckSchemaValidity();
-    NL_TEST_ASSERT(apSuite, err == CHIP_NO_ERROR);
+#if CHIP_CONFIG_IM_PRETTY_PRINT
+    readRequestParser.PrettyPrint();
 #endif
 
     NL_TEST_ASSERT(apSuite, ctx.GetExchangeManager().GetNumActiveExchanges() == 0);
@@ -1225,11 +1219,11 @@ void TestReadInteraction::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, void 
     NL_TEST_ASSERT(apSuite, err == CHIP_NO_ERROR);
 
     chip::app::AttributePathParams attributePathParams[2];
-    for (int i = 0; i < 2; i++)
+    for (auto & attributePathParam : attributePathParams)
     {
-        attributePathParams[i].mEndpointId  = Test::kMockEndpoint3;
-        attributePathParams[i].mClusterId   = Test::MockClusterId(2);
-        attributePathParams[i].mAttributeId = Test::MockAttributeId(4);
+        attributePathParam.mEndpointId  = Test::kMockEndpoint3;
+        attributePathParam.mClusterId   = Test::MockClusterId(2);
+        attributePathParam.mAttributeId = Test::MockAttributeId(4);
     }
 
     ReadPrepareParams readPrepareParams(ctx.GetSessionBobToAlice());
@@ -2213,10 +2207,10 @@ void TestReadInteraction::TestReadShutdown(nlTestSuite * apSuite, void * apConte
     //
     // Allocate a number of clients
     //
-    for (int i = 0; i < 4; i++)
+    for (auto & client : pClients)
     {
-        pClients[i] = Platform::New<app::ReadClient>(engine, &ctx.GetExchangeManager(), delegate,
-                                                     chip::app::ReadClient::InteractionType::Subscribe);
+        client = Platform::New<app::ReadClient>(engine, &ctx.GetExchangeManager(), delegate,
+                                                chip::app::ReadClient::InteractionType::Subscribe);
     }
 
     //

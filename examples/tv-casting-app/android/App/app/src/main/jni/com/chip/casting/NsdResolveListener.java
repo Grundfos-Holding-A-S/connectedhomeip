@@ -20,24 +20,34 @@ package com.chip.casting;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
+import chip.platform.NsdManagerServiceResolver;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class NsdResolveListener implements NsdManager.ResolveListener {
 
   private static final String TAG = NsdResolveListener.class.getSimpleName();
+
+  private static final int MAX_RESOLUTION_ATTEMPTS = 5;
+  private static final int RESOLUTION_ATTEMPT_DELAY_SECS = 1;
 
   private final NsdManager nsdManager;
   private final List<Long> deviceTypeFilter;
   private final List<VideoPlayer> preCommissionedVideoPlayers;
   private final SuccessCallback<DiscoveredNodeData> successCallback;
   private final FailureCallback failureCallback;
+  private final NsdManagerServiceResolver.NsdManagerResolverAvailState nsdManagerResolverAvailState;
+  private final int resolutionAttemptNumber;
 
   public NsdResolveListener(
       NsdManager nsdManager,
       List<Long> deviceTypeFilter,
       List<VideoPlayer> preCommissionedVideoPlayers,
       SuccessCallback<DiscoveredNodeData> successCallback,
-      FailureCallback failureCallback) {
+      FailureCallback failureCallback,
+      NsdManagerServiceResolver.NsdManagerResolverAvailState nsdManagerResolverAvailState,
+      int resolutionAttemptNumber) {
     this.nsdManager = nsdManager;
     this.deviceTypeFilter = deviceTypeFilter;
     this.preCommissionedVideoPlayers = preCommissionedVideoPlayers;
@@ -48,12 +58,18 @@ public class NsdResolveListener implements NsdManager.ResolveListener {
     }
     this.successCallback = successCallback;
     this.failureCallback = failureCallback;
+    this.nsdManagerResolverAvailState = nsdManagerResolverAvailState;
+    this.resolutionAttemptNumber = resolutionAttemptNumber;
   }
 
   @Override
   public void onServiceResolved(NsdServiceInfo serviceInfo) {
     DiscoveredNodeData discoveredNodeData = new DiscoveredNodeData(serviceInfo);
     Log.d(TAG, "DiscoveredNodeData resolved: " + discoveredNodeData);
+
+    if (nsdManagerResolverAvailState != null) {
+      nsdManagerResolverAvailState.signalFree();
+    }
 
     if (isPassingDeviceTypeFilter(discoveredNodeData)) {
       addCommissioningInfo(discoveredNodeData);
@@ -68,12 +84,42 @@ public class NsdResolveListener implements NsdManager.ResolveListener {
 
   @Override
   public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+    if (nsdManagerResolverAvailState != null) {
+      if (errorCode != NsdManager.FAILURE_ALREADY_ACTIVE
+          || resolutionAttemptNumber >= MAX_RESOLUTION_ATTEMPTS) {
+        nsdManagerResolverAvailState.signalFree();
+      }
+    }
+
     switch (errorCode) {
       case NsdManager.FAILURE_ALREADY_ACTIVE:
         Log.e(TAG, "NsdResolveListener FAILURE_ALREADY_ACTIVE - Service: " + serviceInfo);
-        failureCallback.handle(
-            new MatterError(
-                3, "NsdResolveListener FAILURE_ALREADY_ACTIVE - Service: " + serviceInfo));
+        if (resolutionAttemptNumber < MAX_RESOLUTION_ATTEMPTS) {
+          Log.d(TAG, "NsdResolveListener Scheduling a retry to resolve service " + serviceInfo);
+          Executors.newSingleThreadScheduledExecutor()
+              .schedule(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      nsdManager.resolveService(
+                          serviceInfo,
+                          new NsdResolveListener(
+                              nsdManager,
+                              deviceTypeFilter,
+                              preCommissionedVideoPlayers,
+                              successCallback,
+                              failureCallback,
+                              nsdManagerResolverAvailState,
+                              resolutionAttemptNumber + 1));
+                    }
+                  },
+                  RESOLUTION_ATTEMPT_DELAY_SECS,
+                  TimeUnit.SECONDS);
+        } else { // giving up
+          failureCallback.handle(
+              new MatterError(
+                  3, "NsdResolveListener FAILURE_ALREADY_ACTIVE - Service: " + serviceInfo));
+        }
         break;
       case NsdManager.FAILURE_INTERNAL_ERROR:
         Log.e(TAG, "NsdResolveListener FAILURE_INTERNAL_ERROR - Service: " + serviceInfo);
