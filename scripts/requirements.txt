@@ -11,6 +11,9 @@ virtualenv
 # bouffalolab
 -r requirements.bouffalolab.txt
 
+# Telink
+-r requirements.telink.txt
+
 # Grundfos fix - TI platform needs ecdsa for OAD
 ecdsa>=0.17.0
 

@@ -31,7 +31,6 @@ from builders.nrf import NrfApp, NrfBoard, NrfConnectBuilder
 from builders.qpg import QpgApp, QpgBoard, QpgBuilder
 from builders.telink import TelinkApp, TelinkBoard, TelinkBuilder
 from builders.tizen import TizenApp, TizenBoard, TizenBuilder
-from builders.bl602 import Bl602App, Bl602Board, Bl602Builder
 from builders.bouffalolab import BouffalolabApp, BouffalolabBoard, BouffalolabBuilder
 from builders.imx import IMXApp, IMXBuilder
 from builders.genio import GenioApp, GenioBuilder
@@ -615,18 +614,18 @@ def TizenTargets():
         yield target
 
 
-def Bl602Targets():
-    target = Target('bl602', Bl602Builder)
-
-    yield target.Extend('light', board=Bl602Board.BL602BOARD, app=Bl602App.LIGHT)
-
-
 def BouffalolabTargets():
     target = Target('bouffalolab', BouffalolabBuilder)
 
-    yield target.Extend('BL706-IoT-DVK-light', board=BouffalolabBoard.BL706_IoT_DVK, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL706C-22")
-    yield target.Extend('BL706-IoT-DVK-light-rpc', board=BouffalolabBoard.BL706_IoT_DVK, app=BouffalolabApp.LIGHT, enable_rpcs=True, module_type="BL706C-22")
-    yield target.Extend('BL706-NIGHT-LIGHT-light', board=BouffalolabBoard.BL706_NIGHT_LIGHT, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL702")
+    yield target.Extend('bl602-iot-matter-v1-light', board=BouffalolabBoard.BL602_IoT_Matter_V1, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL602")
+    yield target.Extend('bl602-iot-matter-v1-light-115200', board=BouffalolabBoard.BL602_IoT_Matter_V1, app=BouffalolabApp.LIGHT, enable_rpcs=False, baudrate=115200, module_type="BL602")
+    yield target.Extend('bl602-iot-matter-v1-light-rpc', board=BouffalolabBoard.BL602_IoT_Matter_V1, app=BouffalolabApp.LIGHT, enable_rpcs=True, baudrate=115200, module_type="BL602")
+    yield target.Extend('bl602-night-light-light', board=BouffalolabBoard.BL602_NIGHT_LIGHT, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL602")
+
+    yield target.Extend('xt-zb6-devkit-light', board=BouffalolabBoard.XT_ZB6_DevKit, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL706C-22")
+    yield target.Extend('xt-zb6-devkit-light-115200', board=BouffalolabBoard.XT_ZB6_DevKit, app=BouffalolabApp.LIGHT, enable_rpcs=False, baudrate=115200, module_type="BL706C-22")
+    yield target.Extend('xt-zb6-devkit-light-rpc', board=BouffalolabBoard.XT_ZB6_DevKit, app=BouffalolabApp.LIGHT, enable_rpcs=True, baudrate=115200, module_type="BL706C-22")
+    yield target.Extend('bl706-night-light-light', board=BouffalolabBoard.BL706_NIGHT_LIGHT, app=BouffalolabApp.LIGHT, enable_rpcs=False, module_type="BL702")
 
 
 def IMXTargets():
@@ -674,7 +673,6 @@ target_generators = [
     Cyw30739Targets(),
     QorvoTargets(),
     TizenTargets(),
-    Bl602Targets(),
     BouffalolabTargets(),
     IMXTargets(),
     MW320Targets(),
@@ -686,12 +684,20 @@ for generator in target_generators:
         ALL.append(target)
 
 # Simple targets added one by one
+ALL.append(Target('telink-tlsr9518adk80d-all-clusters', TelinkBuilder,
+                  board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.ALL_CLUSTERS))
+ALL.append(Target('telink-tlsr9518adk80d-all-clusters-minimal', TelinkBuilder,
+                  board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.ALL_CLUSTERS_MINIMAL))
+ALL.append(Target('telink-tlsr9518adk80d-contact-sensor', TelinkBuilder,
+                  board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.CONTACT_SENSOR))
 ALL.append(Target('telink-tlsr9518adk80d-light', TelinkBuilder,
                   board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.LIGHT))
 ALL.append(Target('telink-tlsr9518adk80d-light-switch', TelinkBuilder,
                   board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.SWITCH))
 ALL.append(Target('telink-tlsr9518adk80d-ota-requestor', TelinkBuilder,
                   board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.OTA_REQUESTOR))
+ALL.append(Target('telink-tlsr9518adk80d-thermostat', TelinkBuilder,
+                  board=TelinkBoard.TLSR9518ADK80D, app=TelinkApp.THERMOSTAT))
 
 # have a consistent order overall
 ALL.sort(key=lambda t: t.name)

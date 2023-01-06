@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2021 Project CHIP Authors
+ *    Copyright (c) 2022 Project CHIP Authors
  *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,13 @@
 #pragma once
 
 #include "AppEvent.h"
+#include "LEDWidget.h"
 #include "LightingManager.h"
-
 #include <platform/CHIPDeviceLayer.h>
+
+#if CONFIG_CHIP_FACTORY_DATA
+#include <platform/telink/FactoryDataProvider.h>
+#endif
 
 #include <cstdint>
 
@@ -38,7 +42,6 @@ public:
 
 private:
     friend AppTask & GetAppTask(void);
-
     CHIP_ERROR Init();
 
     static void ActionInitiated(LightingManager::Action_t aAction, int32_t aActor);
@@ -47,6 +50,7 @@ private:
     void DispatchEvent(AppEvent * event);
 
     static void UpdateStatusLED();
+    static void LEDStateUpdateHandler(LEDWidget * ledWidget);
     static void LightingActionButtonEventHandler(void);
     static void FactoryResetButtonEventHandler(void);
     static void StartThreadButtonEventHandler(void);
@@ -54,16 +58,25 @@ private:
 
     static void ChipEventHandler(const chip::DeviceLayer::ChipDeviceEvent * event, intptr_t arg);
 
+    static void FactoryResetTimerTimeoutCallback(k_timer * timer);
+
+    static void FactoryResetTimerEventHandler(AppEvent * aEvent);
     static void FactoryResetHandler(AppEvent * aEvent);
     static void StartThreadHandler(AppEvent * aEvent);
     static void LightingActionEventHandler(AppEvent * aEvent);
     static void StartBleAdvHandler(AppEvent * aEvent);
+    static void UpdateLedStateEventHandler(AppEvent * aEvent);
 
     static void InitButtons(void);
 
     static void ThreadProvisioningHandler(const chip::DeviceLayer::ChipDeviceEvent * event, intptr_t arg);
 
     static AppTask sAppTask;
+
+#if CONFIG_CHIP_FACTORY_DATA
+    // chip::DeviceLayer::FactoryDataProvider<chip::DeviceLayer::InternalFlashFactoryData> mFactoryDataProvider;
+    chip::DeviceLayer::FactoryDataProvider<chip::DeviceLayer::ExternalFlashFactoryData> mFactoryDataProvider;
+#endif
 };
 
 inline AppTask & GetAppTask(void)

@@ -21,7 +21,6 @@
 #include "AppConfig.h"
 #include "AppEvent.h"
 #include "ButtonManager.h"
-#include "LEDWidget.h"
 #include <app/server/OnboardingCodesUtil.h>
 #include <app/server/Server.h>
 
@@ -49,20 +48,21 @@
 #include "OTAUtil.h"
 #endif
 
-#include <logging/log.h>
-#include <zephyr.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/zephyr.h>
 
 #include <algorithm>
 
 LOG_MODULE_DECLARE(app);
 
 namespace {
-
-constexpr int kAppEventQueueSize      = 10;
-constexpr uint8_t kButtonPushEvent    = 1;
-constexpr uint8_t kButtonReleaseEvent = 0;
+constexpr int kFactoryResetTriggerTimeout = 2000;
+constexpr int kAppEventQueueSize          = 10;
+constexpr uint8_t kButtonPushEvent        = 1;
+constexpr uint8_t kButtonReleaseEvent     = 0;
 
 K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppEvent));
+k_timer sFactoryResetTimer;
 
 LEDWidget sStatusLED;
 
@@ -70,10 +70,11 @@ Button sFactoryResetButton;
 Button sThreadStartButton;
 Button sBleAdvStartButton;
 
-bool sIsThreadProvisioned = false;
-bool sIsThreadEnabled     = false;
-bool sIsThreadAttached    = false;
-bool sHaveBLEConnections  = false;
+bool sIsThreadProvisioned       = false;
+bool sIsThreadEnabled           = false;
+bool sIsThreadAttached          = false;
+bool sHaveBLEConnections        = false;
+bool sIsFactoryResetTimerActive = false;
 
 chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
@@ -128,11 +129,16 @@ CHIP_ERROR AppTask::Init()
 
     // Initialize status LED
     LEDWidget::InitGpio(SYSTEM_STATE_LED_PORT);
+    LEDWidget::SetStateUpdateCallback(LEDStateUpdateHandler);
     sStatusLED.Init(SYSTEM_STATE_LED_PIN);
 
     UpdateStatusLED();
 
     InitButtons();
+
+    // Initialize function button timer
+    k_timer_init(&sFactoryResetTimer, &AppTask::FactoryResetTimerTimeoutCallback, nullptr);
+    k_timer_user_data_set(&sFactoryResetTimer, this);
 
     // Init ZCL Data Model and start server
     static chip::CommonCaseDeviceServerInitParams initParams;
@@ -140,6 +146,8 @@ CHIP_ERROR AppTask::Init()
     chip::Server::GetInstance().Init(initParams);
 
     // We only have network commissioning on endpoint 0.
+    // Set up a valid Network Commissioning cluster on endpoint 0 is done in
+    // src/platform/OpenThread/GenericThreadStackManagerImpl_OpenThread.cpp
     emberAfEndpointEnableDisable(kNetworkCommissioningEndpointSecondary, false);
 
     // Initialize device attestation config
@@ -191,8 +199,6 @@ CHIP_ERROR AppTask::StartApp()
             DispatchEvent(&event);
             ret = k_msgq_get(&sAppEventQueue, &event, K_NO_WAIT);
         }
-
-        sStatusLED.Animate();
     }
 }
 
@@ -208,8 +214,16 @@ void AppTask::FactoryResetButtonEventHandler(void)
 
 void AppTask::FactoryResetHandler(AppEvent * aEvent)
 {
-    LOG_INF("Factory Reset triggered.");
-    chip::Server::GetInstance().ScheduleFactoryReset();
+    if (!sIsFactoryResetTimerActive)
+    {
+        k_timer_start(&sFactoryResetTimer, K_MSEC(kFactoryResetTriggerTimeout), K_NO_WAIT);
+        sIsFactoryResetTimerActive = true;
+    }
+    else
+    {
+        k_timer_stop(&sFactoryResetTimer);
+        sIsFactoryResetTimerActive = false;
+    }
 }
 
 void AppTask::StartThreadButtonEventHandler(void)
@@ -270,6 +284,23 @@ void AppTask::StartBleAdvHandler(AppEvent * aEvent)
     {
         LOG_ERR("OpenBasicCommissioningWindow() failed");
     }
+}
+
+void AppTask::UpdateLedStateEventHandler(AppEvent * aEvent)
+{
+    if (aEvent->Type == AppEvent::kEventType_UpdateLedState)
+    {
+        aEvent->UpdateLedStateEvent.LedWidget->UpdateState();
+    }
+}
+
+void AppTask::LEDStateUpdateHandler(LEDWidget * ledWidget)
+{
+    AppEvent event;
+    event.Type                          = AppEvent::kEventType_UpdateLedState;
+    event.Handler                       = UpdateLedStateEventHandler;
+    event.UpdateLedStateEvent.LedWidget = ledWidget;
+    sAppTask.PostEvent(&event);
 }
 
 void AppTask::UpdateStatusLED()
@@ -342,11 +373,36 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     }
 }
 
+void AppTask::FactoryResetTimerTimeoutCallback(k_timer * timer)
+{
+    if (!timer)
+    {
+        return;
+    }
+
+    AppEvent event;
+    event.Type    = AppEvent::kEventType_Timer;
+    event.Handler = FactoryResetTimerEventHandler;
+    sAppTask.PostEvent(&event);
+}
+
+void AppTask::FactoryResetTimerEventHandler(AppEvent * aEvent)
+{
+    if (aEvent->Type != AppEvent::kEventType_Timer)
+    {
+        return;
+    }
+
+    sIsFactoryResetTimerActive = false;
+    LOG_INF("FactoryResetHandler");
+    chip::Server::GetInstance().ScheduleFactoryReset();
+}
+
 void AppTask::InitButtons(void)
 {
-    sFactoryResetButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_1, FactoryResetButtonEventHandler);
-    sThreadStartButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_2, StartThreadButtonEventHandler);
-    sBleAdvStartButton.Configure(BUTTON_PORT, BUTTON_PIN_4, BUTTON_PIN_2, StartBleAdvButtonEventHandler);
+    sFactoryResetButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_1, true, FactoryResetButtonEventHandler);
+    sThreadStartButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_2, false, StartThreadButtonEventHandler);
+    sBleAdvStartButton.Configure(BUTTON_PORT, BUTTON_PIN_4, BUTTON_PIN_2, false, StartBleAdvButtonEventHandler);
 
     ButtonManagerInst().AddButton(sFactoryResetButton);
     ButtonManagerInst().AddButton(sThreadStartButton);

@@ -19,8 +19,9 @@
 #pragma once
 
 #include "AppEvent.h"
+#include "LEDWidget.h"
 
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <platform/CHIPDeviceLayer.h>
 
@@ -56,15 +57,20 @@ private:
     void DispatchEvent(AppEvent * event);
 
     static void UpdateStatusLED();
+    static void LEDStateUpdateHandler(LEDWidget * ledWidget);
     static void FactoryResetButtonEventHandler(void);
     static void StartThreadButtonEventHandler(void);
     static void StartBleAdvButtonEventHandler(void);
 
     static void ChipEventHandler(const chip::DeviceLayer::ChipDeviceEvent * event, intptr_t arg);
 
+    static void FactoryResetTimerTimeoutCallback(k_timer * timer);
+
+    static void FactoryResetTimerEventHandler(AppEvent * aEvent);
     static void FactoryResetHandler(AppEvent * aEvent);
     static void StartThreadHandler(AppEvent * aEvent);
     static void StartBleAdvHandler(AppEvent * aEvent);
+    static void UpdateLedStateEventHandler(AppEvent * aEvent);
 
     static void InitButtons(void);
 
