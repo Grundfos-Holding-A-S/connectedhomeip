@@ -80,6 +80,3 @@ colorama
 
 # update tornado for pw_watch
 tornado
-
-# Grundfos fix - TI platform needs ecdsa for OAD
-ecdsa>=0.17.0
