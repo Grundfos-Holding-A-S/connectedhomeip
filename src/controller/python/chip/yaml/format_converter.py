@@ -20,37 +20,88 @@ from chip.clusters.Types import Nullable, NullValue
 from chip.tlv import uint, float32
 import enum
 from chip.yaml.errors import ValidationError
-import binascii
 
 
-def convert_yaml_octet_string_to_bytes(s: str) -> bytes:
-    """Convert YAML octet string body to bytes, handling any c-style hex escapes (e.g. \x5a) and hex: prefix"""
-    # Step 1: handle explicit "hex:" prefix
-    if s.startswith('hex:'):
-        return binascii.unhexlify(s[4:])
-
-    # Step 2: convert non-hex-prefixed to bytes
-    # TODO(#23669): This does not properly support utf8 octet strings. We mimic
-    # javascript codegen behavior. Behavior of javascript is:
-    #   * Octet string character >= u+0200 errors out.
-    #   * Any character greater than 0xFF has the upper bytes chopped off.
-    as_bytes = [ord(c) for c in s]
-
-    if any([value > 0x200 for value in as_bytes]):
-        raise ValueError('Unsupported char in octet string %r' % as_bytes)
-    accumulated_hex = ''.join([f"{(v & 0xFF):02x}" for v in as_bytes])
-    return binascii.unhexlify(accumulated_hex)
+def _case_insensitive_getattr(object, attr_name, default):
+    for attr in dir(object):
+        if attr.lower() == attr_name.lower():
+            return getattr(object, attr)
+    return default
 
 
-def convert_name_value_pair_to_dict(arg_values):
-    ''' Fix yaml command arguments.
+def _get_target_type_fields(test_spec_definition, cluster_name, target_name):
+    element = test_spec_definition.get_type_by_name(cluster_name, target_name)
+    if hasattr(element, 'fields'):
+        return element.fields
+    return None
 
-    For some reason, instead of treating the entire data payload of a
-    command as a singular struct, the top-level args are specified as 'name'
-    and 'value' pairs, while the payload of each argument is itself
-    correctly encapsulated. This fixes up this oddity to create a new
-    key/value pair with the key being the value of the 'name' field, and
-    the value being 'value' field.
+
+def from_data_model_to_test_definition(test_spec_definition, cluster_name, response_definition,
+                                       response_value):
+    '''Converts value from data model to definitions provided in test_spec_definition.
+
+    Args:
+        'test_spec_definition': The spec cluster definition used by the test parser.
+        'cluster_name': Used when we need to look up information in 'test_spec_definition'.
+        'response_definition': Type we are converting 'response_value' to. This will be one of
+            two types: list[idl.matter_idl_types.Field] or idl.matter_idl_types.Field
+        'response_value': Response value that we want to convert to
+    '''
+    if response_value is None:
+        return response_value
+
+    # We first check to see if response_definition is list[idl.matter_idl_types.Field]. When we
+    # have list[idl.matter_idl_types.Field] that means we have a structure with multiple fields
+    # that need to be worked through recursively to properly convert the value to the right type.
+    if isinstance(response_definition, list):
+        rv = {}
+        for item in response_definition:
+            value = _case_insensitive_getattr(response_value, item.name, None)
+            if item.is_optional and value is None:
+                continue
+            rv[item.name] = from_data_model_to_test_definition(test_spec_definition, cluster_name,
+                                                               item, value)
+        return rv
+
+    # We convert uint to python int because constraints first check that it is an expected type.
+    response_value_type = type(response_value)
+    if response_value_type == uint:
+        return int(response_value)
+
+    if response_definition is None:
+        return response_value
+
+    if response_value is NullValue:
+        return None
+
+    # For single float values types there seems to be a floating precision issue. By using '%g'
+    # it naturally give 6 most significat digits for us which is the amount of prcision we are
+    # looking for to give parity results to what chip-tool was getting (For TestCluster.yaml it
+    # give value back of `0.100000`.
+    if response_value_type == float32 and response_definition.data_type.name.lower() == 'single':
+        return float('%g' % response_value)
+
+    response_sub_definition = _get_target_type_fields(test_spec_definition, cluster_name,
+                                                      response_definition.data_type.name)
+
+    # Check below is to see if the field itself is an array, for example array of ints.
+    if response_definition.is_list:
+        return [
+            from_data_model_to_test_definition(test_spec_definition, cluster_name,
+                                               response_sub_definition, item) for item in response_value
+        ]
+
+    return from_data_model_to_test_definition(test_spec_definition, cluster_name,
+                                              response_sub_definition, response_value)
+
+
+def convert_list_of_name_value_pair_to_dict(arg_values):
+    '''Converts list of dict with items with keys 'name' and 'value' into single dict.
+
+    The test step contains a list of arguments that have multiple properties other than
+    'name' and 'value'. For the purposes of executing a test all these other attributes are not
+    important. We only want a simple dictionary of a new key/value where with the key being the
+    value of the 'name' field, and the value being 'value' field.
     '''
     ret_value = {}
 
@@ -60,14 +111,16 @@ def convert_name_value_pair_to_dict(arg_values):
     return ret_value
 
 
-def convert_yaml_type(field_value, field_type, use_from_dict=False):
-    ''' Converts yaml value to expected type.
+def convert_to_data_model_type(field_value, field_type):
+    '''Converts value to provided data model pythonic object type.
 
-    The YAML representation when converted to a Python dictionary does not
-    quite line up in terms of type (see each of the specific if branches
-    below for the rationale for the necessary fix-ups). This function does
-    a fix-up given a field value (as present in the YAML) and its matching
-    cluster object type and returns it.
+    The values provided by parser does not line up to the python data model for the various
+    command/attribute/event object types. This function converts 'field_value' to the provided
+    'field_type'.
+
+    Args:
+        'field_value': Value as extracted by YAML parser.
+        'field_type': Pythonic command/attribute/event object type that we are converting value to.
     '''
     origin = typing.get_origin(field_type)
 
@@ -109,10 +162,8 @@ def convert_yaml_type(field_value, field_type, use_from_dict=False):
                 raise ValidationError(
                     f'Did not find field "{item}" in {str(field_type)}') from None
 
-            return_field_value[field_descriptor.Label] = convert_yaml_type(
-                field_value[item], field_descriptor.Type, use_from_dict)
-        if use_from_dict:
-            return field_type.FromDict(return_field_value)
+            return_field_value[field_descriptor.Label] = convert_to_data_model_type(
+                field_value[item], field_descriptor.Type)
         return return_field_value
     elif(type(field_value) is float):
         return float32(field_value)
@@ -122,7 +173,7 @@ def convert_yaml_type(field_value, field_type, use_from_dict=False):
 
         # The field type passed in is the type of the list element and not list[T].
         for idx, item in enumerate(field_value):
-            field_value[idx] = convert_yaml_type(item, list_element_type, use_from_dict)
+            field_value[idx] = convert_to_data_model_type(item, list_element_type)
         return field_value
     # YAML conversion treats all numbers as ints. Convert to a uint type if the schema
     # type indicates so.
@@ -133,9 +184,6 @@ def convert_yaml_type(field_value, field_type, use_from_dict=False):
     # YAML treats enums as ints. Convert to the typed enum class.
     elif (issubclass(field_type, enum.Enum)):
         return field_type(field_value)
-    # YAML treats bytes as strings. Convert to a byte string.
-    elif (field_type == bytes and type(field_value) != bytes):
-        return convert_yaml_octet_string_to_bytes(field_value)
     # By default, just return the field_value casted to field_type.
     else:
         return field_type(field_value)

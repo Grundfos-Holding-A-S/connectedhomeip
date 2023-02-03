@@ -85,7 +85,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     if (self = [super init]) {
 
-        _groupId = @(0);
+        _groupID = @(0);
 
         _groupName = @"";
         _timedInvokeTimeoutMs = nil;
@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     auto other = [[MTRGroupsClusterAddGroupParams alloc] init];
 
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.groupName = self.groupName;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
@@ -107,10 +107,23 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString =
-        [NSString stringWithFormat:@"<%@: groupId:%@; groupName:%@; >", NSStringFromClass([self class]), _groupId, _groupName];
+        [NSString stringWithFormat:@"<%@: groupID:%@; groupName:%@; >", NSStringFromClass([self class]), _groupID, _groupName];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterAddGroupParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterAddGroupResponseParams
 - (instancetype)init
@@ -119,7 +132,7 @@ NS_ASSUME_NONNULL_BEGIN
 
         _status = @(0);
 
-        _groupId = @(0);
+        _groupID = @(0);
         _timedInvokeTimeoutMs = nil;
     }
     return self;
@@ -130,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
     auto other = [[MTRGroupsClusterAddGroupResponseParams alloc] init];
 
     other.status = self.status;
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
     return other;
@@ -139,17 +152,30 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString =
-        [NSString stringWithFormat:@"<%@: status:%@; groupId:%@; >", NSStringFromClass([self class]), _status, _groupId];
+        [NSString stringWithFormat:@"<%@: status:%@; groupID:%@; >", NSStringFromClass([self class]), _status, _groupID];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterAddGroupResponseParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterViewGroupParams
 - (instancetype)init
 {
     if (self = [super init]) {
 
-        _groupId = @(0);
+        _groupID = @(0);
         _timedInvokeTimeoutMs = nil;
     }
     return self;
@@ -159,7 +185,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     auto other = [[MTRGroupsClusterViewGroupParams alloc] init];
 
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
     return other;
@@ -167,10 +193,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)description
 {
-    NSString * descriptionString = [NSString stringWithFormat:@"<%@: groupId:%@; >", NSStringFromClass([self class]), _groupId];
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: groupID:%@; >", NSStringFromClass([self class]), _groupID];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterViewGroupParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterViewGroupResponseParams
 - (instancetype)init
@@ -179,7 +218,7 @@ NS_ASSUME_NONNULL_BEGIN
 
         _status = @(0);
 
-        _groupId = @(0);
+        _groupID = @(0);
 
         _groupName = @"";
         _timedInvokeTimeoutMs = nil;
@@ -192,7 +231,7 @@ NS_ASSUME_NONNULL_BEGIN
     auto other = [[MTRGroupsClusterViewGroupResponseParams alloc] init];
 
     other.status = self.status;
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.groupName = self.groupName;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
@@ -201,11 +240,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)description
 {
-    NSString * descriptionString = [NSString stringWithFormat:@"<%@: status:%@; groupId:%@; groupName:%@; >",
-                                             NSStringFromClass([self class]), _status, _groupId, _groupName];
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: status:%@; groupID:%@; groupName:%@; >",
+                                             NSStringFromClass([self class]), _status, _groupID, _groupName];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterViewGroupResponseParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterGetGroupMembershipParams
 - (instancetype)init
@@ -272,7 +324,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     if (self = [super init]) {
 
-        _groupId = @(0);
+        _groupID = @(0);
         _timedInvokeTimeoutMs = nil;
     }
     return self;
@@ -282,7 +334,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     auto other = [[MTRGroupsClusterRemoveGroupParams alloc] init];
 
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
     return other;
@@ -290,10 +342,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)description
 {
-    NSString * descriptionString = [NSString stringWithFormat:@"<%@: groupId:%@; >", NSStringFromClass([self class]), _groupId];
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: groupID:%@; >", NSStringFromClass([self class]), _groupID];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterRemoveGroupParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterRemoveGroupResponseParams
 - (instancetype)init
@@ -302,7 +367,7 @@ NS_ASSUME_NONNULL_BEGIN
 
         _status = @(0);
 
-        _groupId = @(0);
+        _groupID = @(0);
         _timedInvokeTimeoutMs = nil;
     }
     return self;
@@ -313,7 +378,7 @@ NS_ASSUME_NONNULL_BEGIN
     auto other = [[MTRGroupsClusterRemoveGroupResponseParams alloc] init];
 
     other.status = self.status;
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
     return other;
@@ -322,10 +387,23 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString =
-        [NSString stringWithFormat:@"<%@: status:%@; groupId:%@; >", NSStringFromClass([self class]), _status, _groupId];
+        [NSString stringWithFormat:@"<%@: status:%@; groupID:%@; >", NSStringFromClass([self class]), _status, _groupID];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterRemoveGroupResponseParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRGroupsClusterRemoveAllGroupsParams
 - (instancetype)init
@@ -357,7 +435,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     if (self = [super init]) {
 
-        _groupId = @(0);
+        _groupID = @(0);
 
         _groupName = @"";
         _timedInvokeTimeoutMs = nil;
@@ -369,7 +447,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     auto other = [[MTRGroupsClusterAddGroupIfIdentifyingParams alloc] init];
 
-    other.groupId = self.groupId;
+    other.groupID = self.groupID;
     other.groupName = self.groupName;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
@@ -379,10 +457,23 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString =
-        [NSString stringWithFormat:@"<%@: groupId:%@; groupName:%@; >", NSStringFromClass([self class]), _groupId, _groupName];
+        [NSString stringWithFormat:@"<%@: groupID:%@; groupName:%@; >", NSStringFromClass([self class]), _groupID, _groupName];
     return descriptionString;
 }
 
+@end
+
+@implementation MTRGroupsClusterAddGroupIfIdentifyingParams (Deprecated)
+
+- (void)setGroupId:(NSNumber * _Nonnull)groupId
+{
+    self.groupID = groupId;
+}
+
+- (NSNumber * _Nonnull)groupId
+{
+    return self.groupID;
+}
 @end
 @implementation MTRScenesClusterAddSceneParams
 - (instancetype)init
@@ -1144,7 +1235,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     if (self = [super init]) {
 
-        _effectId = @(0);
+        _effectIdentifier = @(0);
 
         _effectVariant = @(0);
         _timedInvokeTimeoutMs = nil;
@@ -1156,7 +1247,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     auto other = [[MTROnOffClusterOffWithEffectParams alloc] init];
 
-    other.effectId = self.effectId;
+    other.effectIdentifier = self.effectIdentifier;
     other.effectVariant = self.effectVariant;
     other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
 
@@ -1165,11 +1256,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)description
 {
-    NSString * descriptionString = [NSString
-        stringWithFormat:@"<%@: effectId:%@; effectVariant:%@; >", NSStringFromClass([self class]), _effectId, _effectVariant];
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: effectIdentifier:%@; effectVariant:%@; >",
+                                             NSStringFromClass([self class]), _effectIdentifier, _effectVariant];
     return descriptionString;
 }
 
+@end
+
+@implementation MTROnOffClusterOffWithEffectParams (Deprecated)
+
+- (void)setEffectId:(NSNumber * _Nonnull)effectId
+{
+    self.effectIdentifier = effectId;
+}
+
+- (NSNumber * _Nonnull)effectId
+{
+    return self.effectIdentifier;
+}
 @end
 @implementation MTROnOffClusterOnWithRecallGlobalSceneParams
 - (instancetype)init
@@ -1985,14 +2089,14 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @end
-@implementation MTROtaSoftwareUpdateProviderClusterQueryImageParams
+@implementation MTROTASoftwareUpdateProviderClusterQueryImageParams
 - (instancetype)init
 {
     if (self = [super init]) {
 
-        _vendorId = @(0);
+        _vendorID = @(0);
 
-        _productId = @(0);
+        _productID = @(0);
 
         _softwareVersion = @(0);
 
@@ -2012,10 +2116,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateProviderClusterQueryImageParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateProviderClusterQueryImageParams alloc] init];
 
-    other.vendorId = self.vendorId;
-    other.productId = self.productId;
+    other.vendorID = self.vendorID;
+    other.productID = self.productID;
     other.softwareVersion = self.softwareVersion;
     other.protocolsSupported = self.protocolsSupported;
     other.hardwareVersion = self.hardwareVersion;
@@ -2030,15 +2134,38 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString =
-        [NSString stringWithFormat:@"<%@: vendorId:%@; productId:%@; softwareVersion:%@; protocolsSupported:%@; "
+        [NSString stringWithFormat:@"<%@: vendorID:%@; productID:%@; softwareVersion:%@; protocolsSupported:%@; "
                                    @"hardwareVersion:%@; location:%@; requestorCanConsent:%@; metadataForProvider:%@; >",
-                  NSStringFromClass([self class]), _vendorId, _productId, _softwareVersion, _protocolsSupported, _hardwareVersion,
+                  NSStringFromClass([self class]), _vendorID, _productID, _softwareVersion, _protocolsSupported, _hardwareVersion,
                   _location, _requestorCanConsent, [_metadataForProvider base64EncodedStringWithOptions:0]];
     return descriptionString;
 }
 
 @end
-@implementation MTROtaSoftwareUpdateProviderClusterQueryImageResponseParams
+
+@implementation MTROtaSoftwareUpdateProviderClusterQueryImageParams
+
+- (void)setVendorId:(NSNumber * _Nonnull)vendorId
+{
+    self.vendorID = vendorId;
+}
+
+- (NSNumber * _Nonnull)vendorId
+{
+    return self.vendorID;
+}
+
+- (void)setProductId:(NSNumber * _Nonnull)productId
+{
+    self.productID = productId;
+}
+
+- (NSNumber * _Nonnull)productId
+{
+    return self.productID;
+}
+@end
+@implementation MTROTASoftwareUpdateProviderClusterQueryImageResponseParams
 - (instancetype)init
 {
     if (self = [super init]) {
@@ -2065,7 +2192,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateProviderClusterQueryImageResponseParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateProviderClusterQueryImageResponseParams alloc] init];
 
     other.status = self.status;
     other.delayedActionTime = self.delayedActionTime;
@@ -2092,7 +2219,10 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @end
-@implementation MTROtaSoftwareUpdateProviderClusterApplyUpdateRequestParams
+
+@implementation MTROtaSoftwareUpdateProviderClusterQueryImageResponseParams
+@end
+@implementation MTROTASoftwareUpdateProviderClusterApplyUpdateRequestParams
 - (instancetype)init
 {
     if (self = [super init]) {
@@ -2107,7 +2237,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateProviderClusterApplyUpdateRequestParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateProviderClusterApplyUpdateRequestParams alloc] init];
 
     other.updateToken = self.updateToken;
     other.newVersion = self.newVersion;
@@ -2125,7 +2255,10 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @end
-@implementation MTROtaSoftwareUpdateProviderClusterApplyUpdateResponseParams
+
+@implementation MTROtaSoftwareUpdateProviderClusterApplyUpdateRequestParams
+@end
+@implementation MTROTASoftwareUpdateProviderClusterApplyUpdateResponseParams
 - (instancetype)init
 {
     if (self = [super init]) {
@@ -2140,7 +2273,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateProviderClusterApplyUpdateResponseParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateProviderClusterApplyUpdateResponseParams alloc] init];
 
     other.action = self.action;
     other.delayedActionTime = self.delayedActionTime;
@@ -2157,7 +2290,10 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @end
-@implementation MTROtaSoftwareUpdateProviderClusterNotifyUpdateAppliedParams
+
+@implementation MTROtaSoftwareUpdateProviderClusterApplyUpdateResponseParams
+@end
+@implementation MTROTASoftwareUpdateProviderClusterNotifyUpdateAppliedParams
 - (instancetype)init
 {
     if (self = [super init]) {
@@ -2172,7 +2308,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateProviderClusterNotifyUpdateAppliedParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateProviderClusterNotifyUpdateAppliedParams alloc] init];
 
     other.updateToken = self.updateToken;
     other.softwareVersion = self.softwareVersion;
@@ -2190,14 +2326,17 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @end
-@implementation MTROtaSoftwareUpdateRequestorClusterAnnounceOtaProviderParams
+
+@implementation MTROtaSoftwareUpdateProviderClusterNotifyUpdateAppliedParams
+@end
+@implementation MTROTASoftwareUpdateRequestorClusterAnnounceOTAProviderParams
 - (instancetype)init
 {
     if (self = [super init]) {
 
-        _providerNodeId = @(0);
+        _providerNodeID = @(0);
 
-        _vendorId = @(0);
+        _vendorID = @(0);
 
         _announcementReason = @(0);
 
@@ -2211,10 +2350,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)copyWithZone:(NSZone * _Nullable)zone;
 {
-    auto other = [[MTROtaSoftwareUpdateRequestorClusterAnnounceOtaProviderParams alloc] init];
+    auto other = [[MTROTASoftwareUpdateRequestorClusterAnnounceOTAProviderParams alloc] init];
 
-    other.providerNodeId = self.providerNodeId;
-    other.vendorId = self.vendorId;
+    other.providerNodeID = self.providerNodeID;
+    other.vendorID = self.vendorID;
     other.announcementReason = self.announcementReason;
     other.metadataForNode = self.metadataForNode;
     other.endpoint = self.endpoint;
@@ -2226,12 +2365,35 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)description
 {
     NSString * descriptionString = [NSString
-        stringWithFormat:@"<%@: providerNodeId:%@; vendorId:%@; announcementReason:%@; metadataForNode:%@; endpoint:%@; >",
-        NSStringFromClass([self class]), _providerNodeId, _vendorId, _announcementReason,
+        stringWithFormat:@"<%@: providerNodeID:%@; vendorID:%@; announcementReason:%@; metadataForNode:%@; endpoint:%@; >",
+        NSStringFromClass([self class]), _providerNodeID, _vendorID, _announcementReason,
         [_metadataForNode base64EncodedStringWithOptions:0], _endpoint];
     return descriptionString;
 }
 
+@end
+
+@implementation MTROtaSoftwareUpdateRequestorClusterAnnounceOtaProviderParams
+
+- (void)setProviderNodeId:(NSNumber * _Nonnull)providerNodeId
+{
+    self.providerNodeID = providerNodeId;
+}
+
+- (NSNumber * _Nonnull)providerNodeId
+{
+    return self.providerNodeID;
+}
+
+- (void)setVendorId:(NSNumber * _Nonnull)vendorId
+{
+    self.vendorID = vendorId;
+}
+
+- (NSNumber * _Nonnull)vendorId
+{
+    return self.vendorID;
+}
 @end
 @implementation MTRGeneralCommissioningClusterArmFailSafeParams
 - (instancetype)init
@@ -6974,6 +7136,63 @@ NS_ASSUME_NONNULL_BEGIN
 {
     NSString * descriptionString = [NSString stringWithFormat:@"<%@: attributeId:%@; startTime:%@; numberOfIntervals:%@; >",
                                              NSStringFromClass([self class]), _attributeId, _startTime, _numberOfIntervals];
+    return descriptionString;
+}
+
+@end
+@implementation MTRClientMonitoringClusterRegisterClientMonitoringParams
+- (instancetype)init
+{
+    if (self = [super init]) {
+
+        _clientNodeId = @(0);
+
+        _iCid = @(0);
+        _timedInvokeTimeoutMs = nil;
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone * _Nullable)zone;
+{
+    auto other = [[MTRClientMonitoringClusterRegisterClientMonitoringParams alloc] init];
+
+    other.clientNodeId = self.clientNodeId;
+    other.iCid = self.iCid;
+    other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
+
+    return other;
+}
+
+- (NSString *)description
+{
+    NSString * descriptionString =
+        [NSString stringWithFormat:@"<%@: clientNodeId:%@; iCid:%@; >", NSStringFromClass([self class]), _clientNodeId, _iCid];
+    return descriptionString;
+}
+
+@end
+@implementation MTRClientMonitoringClusterStayAwakeRequestParams
+- (instancetype)init
+{
+    if (self = [super init]) {
+        _timedInvokeTimeoutMs = nil;
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone * _Nullable)zone;
+{
+    auto other = [[MTRClientMonitoringClusterStayAwakeRequestParams alloc] init];
+
+    other.timedInvokeTimeoutMs = self.timedInvokeTimeoutMs;
+
+    return other;
+}
+
+- (NSString *)description
+{
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: >", NSStringFromClass([self class])];
     return descriptionString;
 }
 

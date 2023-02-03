@@ -23,7 +23,7 @@
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/attribute-type.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/cluster-id.h>
+#include <app-common/zap-generated/ids/Clusters.h>
 #include <app/clusters/identify-server/identify-server.h>
 #include <app/util/attribute-storage.h>
 
@@ -417,7 +417,8 @@ void AppTask::ChipEventHandler(const ChipDeviceEvent * event, intptr_t arg)
 #if CHIP_DEVICE_CONFIG_ENABLE_WIFI
     case DeviceEventType::kWiFiConnectivityChange:
 
-        ChipLogProgress(NotSpecified, "Wi-Fi state changed\r\n", ConnectivityMgr().IsWiFiStationConnected());
+        ChipLogProgress(NotSpecified, "Wi-Fi state changed to %s.\r\n",
+                        ConnectivityMgr().IsWiFiStationConnected() ? "connected" : "disconnected");
 
         chip::app::DnssdServer::Instance().StartServer();
         NetworkCommissioning::BLWiFiDriver::GetInstance().SaveConfiguration();
@@ -469,26 +470,25 @@ void AppTask::LightingUpdate(app_event_t event)
     do
     {
         if (EMBER_ZCL_STATUS_SUCCESS !=
-            emberAfReadAttribute(endpoint, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, &onoff, sizeof(onoff)))
+            emberAfReadAttribute(endpoint, Clusters::OnOff::Id, ZCL_ON_OFF_ATTRIBUTE_ID, &onoff, sizeof(onoff)))
         {
             break;
         }
 
         if (EMBER_ZCL_STATUS_SUCCESS !=
-            emberAfReadAttribute(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, &v, sizeof(v)))
+            emberAfReadAttribute(endpoint, Clusters::LevelControl::Id, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, &v, sizeof(v)))
         {
             break;
         }
 
         if (EMBER_ZCL_STATUS_SUCCESS !=
-            emberAfReadAttribute(endpoint, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, &hue,
-                                 sizeof(v)))
+            emberAfReadAttribute(endpoint, Clusters::ColorControl::Id, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, &hue, sizeof(v)))
         {
             break;
         }
 
         if (EMBER_ZCL_STATUS_SUCCESS !=
-            emberAfReadAttribute(endpoint, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &sat,
+            emberAfReadAttribute(endpoint, Clusters::ColorControl::Id, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &sat,
                                  sizeof(v)))
         {
             break;
@@ -516,10 +516,10 @@ void AppTask::LightingSetOnoff(uint8_t bonoff)
     EndpointId endpoint = GetAppTask().GetEndpointId();
 
     // write the new on/off value
-    emberAfWriteAttribute(endpoint, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &newValue,
+    emberAfWriteAttribute(endpoint, Clusters::OnOff::Id, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &newValue,
                           ZCL_BOOLEAN_ATTRIBUTE_TYPE);
     newValue = 254;
-    emberAfWriteAttribute(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &newValue,
+    emberAfWriteAttribute(endpoint, Clusters::LevelControl::Id, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &newValue,
                           ZCL_INT8U_ATTRIBUTE_TYPE);
 }
 
@@ -531,20 +531,20 @@ void AppTask::LightingSetStatus(app_event_t status)
 
     if (APP_EVENT_SYS_LIGHT_TOGGLE == status)
     {
-        emberAfReadAttribute(endpoint, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &onoff,
+        emberAfReadAttribute(endpoint, Clusters::OnOff::Id, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &onoff,
                              ZCL_BOOLEAN_ATTRIBUTE_TYPE);
         onoff = 1 - onoff;
     }
     else if (APP_EVENT_SYS_BLE_ADV == status)
     {
         hue = 35;
-        emberAfWriteAttribute(endpoint, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, (uint8_t *) &hue,
+        emberAfWriteAttribute(endpoint, Clusters::ColorControl::Id, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, (uint8_t *) &hue,
                               ZCL_INT8U_ATTRIBUTE_TYPE);
         sat = 254;
-        emberAfWriteAttribute(endpoint, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+        emberAfWriteAttribute(endpoint, Clusters::ColorControl::Id, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
                               (uint8_t *) &sat, ZCL_INT8U_ATTRIBUTE_TYPE);
         level = 254;
-        emberAfWriteAttribute(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &level,
+        emberAfWriteAttribute(endpoint, Clusters::LevelControl::Id, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &level,
                               ZCL_INT8U_ATTRIBUTE_TYPE);
 
         isProvisioned = false;
@@ -557,14 +557,14 @@ void AppTask::LightingSetStatus(app_event_t status)
         }
         isProvisioned = true;
         sat           = 0;
-        emberAfWriteAttribute(endpoint, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+        emberAfWriteAttribute(endpoint, Clusters::ColorControl::Id, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
                               (uint8_t *) &sat, ZCL_INT8U_ATTRIBUTE_TYPE);
         level = 254;
-        emberAfWriteAttribute(endpoint, ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &level,
+        emberAfWriteAttribute(endpoint, Clusters::LevelControl::Id, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, (uint8_t *) &level,
                               ZCL_INT8U_ATTRIBUTE_TYPE);
     }
 
-    emberAfWriteAttribute(endpoint, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &onoff, ZCL_BOOLEAN_ATTRIBUTE_TYPE);
+    emberAfWriteAttribute(endpoint, Clusters::OnOff::Id, ZCL_ON_OFF_ATTRIBUTE_ID, (uint8_t *) &onoff, ZCL_BOOLEAN_ATTRIBUTE_TYPE);
 }
 
 bool AppTask::StartTimer(void)

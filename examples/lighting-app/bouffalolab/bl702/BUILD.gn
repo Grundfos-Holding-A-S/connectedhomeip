@@ -16,8 +16,8 @@ import("//build_overrides/bouffalolab_iot_sdk.gni")
 import("//build_overrides/build.gni")
 import("//build_overrides/chip.gni")
 
-import("${bl702_sdk_build_root}/bl702_executable.gni")
-import("${bl702_sdk_build_root}/bl702_sdk.gni")
+import("${bouffalolab_iot_sdk_build_root}/bl702/bl_iot_sdk.gni")
+import("${bouffalolab_iot_sdk_build_root}/common/bouffalolab_executable.gni")
 import("${build_root}/config/defaults.gni")
 import("${chip_root}/examples/common/pigweed/pigweed_rpcs.gni")
 import("${chip_root}/src/platform/device.gni")
@@ -38,24 +38,23 @@ declare_args() {
   # Dump memory usage at link time.
   chip_print_memory_usage = true
 
-  config_cache_size = 8192
-
-  # Monitor & log memory usage at runtime.
-  enable_heap_monitoring = false
-
   # OTA periodic query timeout in seconds
   ota_periodic_query_timeout = 86400
+
+  config_cache_size = 8192
+
+  enable_heap_monitoring = false
+
+  setupPinCode = 20202021
+  setupDiscriminator = 3840
 
   board = "XT-ZB6-DevKit"
   module_type = "BL706C-22"
   enable_psram = true
   baudrate = 2000000
-
-  setupPinCode = 20202021
-  setupDiscriminator = 3840
 }
 
-bl702_sdk("sdk") {
+bl_iot_sdk("sdk") {
   include_dirs = [
     "${example_dir}",
     "${example_common_dir}",
@@ -89,8 +88,9 @@ bl702_sdk("sdk") {
   }
 }
 
-bl702_executable("lighting_app") {
+bouffalolab_executable("lighting_app") {
   output_name = "chip-bl702-lighting-example.out"
+  bl_plat_name = "bl702"
 
   defines = [
     "APP_TASK_STACK_SIZE=2044",

@@ -30,16 +30,14 @@ public:
         InteractionModelCommands(this), ModelCommand("command-by-id", credsIssuerConfig)
     {
         AddArgument("cluster-id", 0, UINT32_MAX, &mClusterId);
-        AddArgument("command-id", 0, UINT32_MAX, &mCommandId);
-        AddArgument("payload", &mPayload);
+        AddByIdArguments();
         AddArguments();
     }
 
     ClusterCommand(chip::ClusterId clusterId, CredentialIssuerCommands * credsIssuerConfig) :
         InteractionModelCommands(this), ModelCommand("command-by-id", credsIssuerConfig), mClusterId(clusterId)
     {
-        AddArgument("command-id", 0, UINT32_MAX, &mCommandId);
-        AddArgument("payload", &mPayload);
+        AddByIdArguments();
         AddArguments();
     }
 
@@ -47,16 +45,14 @@ public:
 
     CHIP_ERROR SendCommand(chip::DeviceProxy * device, std::vector<chip::EndpointId> endpointIds) override
     {
-        return InteractionModelCommands::SendCommand(device, endpointIds.at(0), mClusterId, mCommandId, mPayload,
-                                                     mTimedInteractionTimeoutMs, mSuppressResponse, mRepeatCount, mRepeatDelayInMs);
+        return InteractionModelCommands::SendCommand(device, endpointIds.at(0), mClusterId, mCommandId, mPayload);
     }
 
     template <class T>
     CHIP_ERROR SendCommand(chip::DeviceProxy * device, chip::EndpointId endpointId, chip::ClusterId clusterId,
                            chip::CommandId commandId, const T & value)
     {
-        return InteractionModelCommands::SendCommand(device, endpointId, clusterId, commandId, value, mTimedInteractionTimeoutMs,
-                                                     mSuppressResponse, mRepeatCount, mRepeatDelayInMs);
+        return InteractionModelCommands::SendCommand(device, endpointId, clusterId, commandId, value);
     }
 
     CHIP_ERROR SendGroupCommand(chip::GroupId groupId, chip::FabricIndex fabricIndex) override
@@ -137,6 +133,41 @@ protected:
         // Subclasses are responsible for calling AddArguments.
     }
 
+    void AddByIdArguments()
+    {
+        AddArgument("command-id", 0, UINT32_MAX, &mCommandId);
+        AddArgument("payload", &mPayload,
+                    "The command payload.  This should be a JSON-encoded object, with string representations of field ids as keys. "
+                    " The values for the keys are represented as follows, depending on the type:\n"
+                    "  * struct: a JSON-encoded object, with field ids as keys.\n"
+                    "  * list: a JSON-encoded array of values.\n"
+                    "  * null: A literal null.\n"
+                    "  * boolean: A literal true or false.\n"
+                    "  * unsigned integer: One of:\n"
+                    "      a) The number directly, as decimal.\n"
+                    "      b) A string starting with \"u:\" followed by decimal digits\n"
+                    "  * signed integer: One of:\n"
+                    "      a) The number directly, if it's negative.\n"
+                    "      b) A string starting with \"s:\" followed by decimal digits\n"
+                    "  * single-precision float: A string starting with \"f:\" followed by the number.\n"
+                    "  * double-precision float: One of:\n"
+                    "      a) The number directly, if it's not an integer.\n"
+                    "      b) A string starting with \"d:\" followed by the number.\n"
+                    "  * octet string: A string starting with \"hex:\" followed by the hex encoding of the bytes.\n"
+                    "  * string: A string with the characters.\n"
+                    "\n"
+                    "  An example payload may look like this: '{ \"0x0\": { \"0\": null, \"1\": false }, \"1\": [17, \"u:17\"], "
+                    "\"0x2\": [ -17, \"s:17\", \"s:-17\" ], \"0x3\": \"f:2\", \"0x4\": [ \"d:3\", 4.5 ], \"0x5\": \"hex:ab12\", "
+                    "\"0x6\": \"ab12\" }' and represents:\n"
+                    "    Field 0: a struct with two fields, one with value null and one with value false.\n"
+                    "    Field 1: A list of unsigned integers.\n"
+                    "    Field 2: A list of signed integers.\n"
+                    "    Field 3: A single-precision float.\n"
+                    "    Field 4: A list of double-precision floats.\n"
+                    "    Field 5: A 2-byte octet string.\n"
+                    "    Field 6: A 4-char character string.");
+    }
+
     void AddArguments()
     {
         AddArgument("timedInteractionTimeoutMs", 0, UINT16_MAX, &mTimedInteractionTimeoutMs,
@@ -151,10 +182,6 @@ protected:
 private:
     chip::ClusterId mClusterId;
     chip::CommandId mCommandId;
-    chip::Optional<uint16_t> mTimedInteractionTimeoutMs;
-    chip::Optional<bool> mSuppressResponse;
-    chip::Optional<uint16_t> mRepeatCount;
-    chip::Optional<uint16_t> mRepeatDelayInMs;
 
     CHIP_ERROR mError = CHIP_NO_ERROR;
     CustomArgument mPayload;

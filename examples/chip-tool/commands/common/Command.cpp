@@ -17,12 +17,17 @@
  */
 
 #include "Command.h"
+#include "CustomStringPrefix.h"
+#include "HexConversion.h"
 #include "platform/PlatformManager.h"
 
+#include <functional>
 #include <netdb.h>
 #include <sstream>
 #include <sys/socket.h>
 #include <sys/types.h>
+
+#include <math.h> // For INFINITY
 
 #include <lib/core/CHIPSafeCasts.h>
 #include <lib/support/BytesToHex.h>
@@ -360,10 +365,9 @@ bool Command::InitArgument(size_t argIndex, char * argValue)
             // We support two ways to pass an octet string argument.  If it happens
             // to be all-ASCII, you can just pass it in.  Otherwise you can pass in
             // "hex:" followed by the hex-encoded bytes.
-            size_t argLen                     = strlen(argValue);
-            static constexpr char hexPrefix[] = "hex:";
-            constexpr size_t prefixLen        = ArraySize(hexPrefix) - 1; // Don't count the null
-            if (strncmp(argValue, hexPrefix, prefixLen) == 0)
+            size_t argLen = strlen(argValue);
+
+            if (IsHexString(argValue))
             {
                 // Hex-encoded.  Decode it into a temporary buffer first, so if we
                 // run into errors we can do correct "argument is not valid" logging
@@ -374,13 +378,16 @@ bool Command::InitArgument(size_t argIndex, char * argValue)
                 // representation is always longer than the octet string it encodes,
                 // so we have enough space in argValue for the decoded version.
                 chip::Platform::ScopedMemoryBuffer<uint8_t> buffer;
-                if (!buffer.Calloc(argLen)) // Bigger than needed, but it's fine.
-                {
-                    return false;
-                }
 
-                size_t octetCount = chip::Encoding::HexToBytes(argValue + prefixLen, argLen - prefixLen, buffer.Get(), argLen);
-                if (octetCount == 0)
+                size_t octetCount;
+                CHIP_ERROR err = HexToBytes(
+                    chip::CharSpan(argValue + kHexStringPrefixLen, argLen - kHexStringPrefixLen),
+                    [&buffer](size_t allocSize) {
+                        buffer.Calloc(allocSize);
+                        return buffer.Get();
+                    },
+                    &octetCount);
+                if (err != CHIP_NO_ERROR)
                 {
                     return false;
                 }
@@ -391,13 +398,11 @@ bool Command::InitArgument(size_t argIndex, char * argValue)
             }
 
             // Just ASCII.  Check for the "str:" prefix.
-            static constexpr char strPrefix[] = "str:";
-            constexpr size_t strPrefixLen     = ArraySize(strPrefix) - 1; // Don't         count the null
-            if (strncmp(argValue, strPrefix, strPrefixLen) == 0)
+            if (IsStrString(argValue))
             {
                 // Skip the prefix
-                argValue += strPrefixLen;
-                argLen -= strPrefixLen;
+                argValue += kStrStringPrefixLen;
+                argLen -= kStrStringPrefixLen;
             }
             *value = chip::ByteSpan(chip::Uint8::from_char(argValue), argLen);
             return true;
@@ -541,6 +546,18 @@ bool Command::InitArgument(size_t argIndex, char * argValue)
 
     case ArgumentType::Float: {
         isValidArgument = HandleNullableOptional<float>(arg, argValue, [&](auto * value) {
+            if (strcmp(argValue, "Infinity") == 0)
+            {
+                *value = INFINITY;
+                return true;
+            }
+
+            if (strcmp(argValue, "-Infinity") == 0)
+            {
+                *value = -INFINITY;
+                return true;
+            }
+
             std::stringstream ss;
             ss << argValue;
             ss >> *value;
@@ -551,6 +568,18 @@ bool Command::InitArgument(size_t argIndex, char * argValue)
 
     case ArgumentType::Double: {
         isValidArgument = HandleNullableOptional<double>(arg, argValue, [&](auto * value) {
+            if (strcmp(argValue, "Infinity") == 0)
+            {
+                *value = INFINITY;
+                return true;
+            }
+
+            if (strcmp(argValue, "-Infinity") == 0)
+            {
+                *value = -INFINITY;
+                return true;
+            }
+
             std::stringstream ss;
             ss << argValue;
             ss >> *value;
@@ -803,7 +832,7 @@ const char * Command::GetArgumentDescription(size_t index) const
     return nullptr;
 }
 
-const char * Command::GetAttribute(void) const
+const char * Command::GetAttribute() const
 {
     size_t argsCount = mArgs.size();
     for (size_t i = 0; i < argsCount; i++)
@@ -818,7 +847,7 @@ const char * Command::GetAttribute(void) const
     return nullptr;
 }
 
-const char * Command::GetEvent(void) const
+const char * Command::GetEvent() const
 {
     size_t argsCount = mArgs.size();
     for (size_t i = 0; i < argsCount; i++)

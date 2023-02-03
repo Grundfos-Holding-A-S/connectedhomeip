@@ -46,6 +46,11 @@ ReadHandler::ReadHandler(ManagementCallback & apCallback, Messaging::ExchangeCon
     VerifyOrDie(apExchangeContext != nullptr);
 
     mExchangeCtx.Grab(apExchangeContext);
+#if CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
+    // TODO: this should be replaced by a pointer to the InteractionModelEngine that created the ReadHandler
+    // once InteractionModelEngine is no longer a singleton (see issue 23625)
+    mExchangeMgr = apExchangeContext->GetExchangeMgr();
+#endif // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
 
     mInteractionType            = aInteractionType;
     mLastWrittenEventsBytes     = 0;
@@ -185,7 +190,11 @@ CHIP_ERROR ReadHandler::SendStatusReport(Protocols::InteractionModel::Status aSt
     {
         VerifyOrReturnLogError(!mExchangeCtx, CHIP_ERROR_INCORRECT_STATE);
         VerifyOrReturnLogError(mSessionHandle, CHIP_ERROR_INCORRECT_STATE);
+#if CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
+        auto exchange = mExchangeMgr->NewContext(mSessionHandle.Get().Value(), this);
+#else  // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
         auto exchange = InteractionModelEngine::GetInstance()->GetExchangeManager()->NewContext(mSessionHandle.Get().Value(), this);
+#endif // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
         VerifyOrReturnLogError(exchange != nullptr, CHIP_ERROR_INCORRECT_STATE);
         mExchangeCtx.Grab(exchange);
     }
@@ -197,6 +206,7 @@ CHIP_ERROR ReadHandler::SendStatusReport(Protocols::InteractionModel::Status aSt
 CHIP_ERROR ReadHandler::SendReportData(System::PacketBufferHandle && aPayload, bool aMoreChunks)
 {
     VerifyOrReturnLogError(IsReportable(), CHIP_ERROR_INCORRECT_STATE);
+    VerifyOrDie(!IsAwaitingReportResponse()); // Should not be reportable!
     if (IsPriming() || IsChunkedReport())
     {
         mSessionHandle.Grab(mExchangeCtx->GetSessionHandle());
@@ -205,7 +215,11 @@ CHIP_ERROR ReadHandler::SendReportData(System::PacketBufferHandle && aPayload, b
     {
         VerifyOrReturnLogError(!mExchangeCtx, CHIP_ERROR_INCORRECT_STATE);
         VerifyOrReturnLogError(mSessionHandle, CHIP_ERROR_INCORRECT_STATE);
+#if CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
+        auto exchange = mExchangeMgr->NewContext(mSessionHandle.Get().Value(), this);
+#else  // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
         auto exchange = InteractionModelEngine::GetInstance()->GetExchangeManager()->NewContext(mSessionHandle.Get().Value(), this);
+#endif // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE
         VerifyOrReturnLogError(exchange != nullptr, CHIP_ERROR_INCORRECT_STATE);
         mExchangeCtx.Grab(exchange);
     }
@@ -217,27 +231,31 @@ CHIP_ERROR ReadHandler::SendReportData(System::PacketBufferHandle && aPayload, b
         mCurrentReportsBeginGeneration = InteractionModelEngine::GetInstance()->GetReportingEngine().GetDirtySetGeneration();
     }
     SetStateFlag(ReadHandlerFlags::ChunkedReport, aMoreChunks);
-    bool noResponseExpected = IsType(InteractionType::Read) && !aMoreChunks;
-    if (!noResponseExpected)
-    {
-        MoveToState(HandlerState::AwaitingReportResponse);
-    }
+    bool responseExpected = IsType(InteractionType::Subscribe) || aMoreChunks;
 
     mExchangeCtx->UseSuggestedResponseTimeout(app::kExpectedIMProcessingTime);
-    CHIP_ERROR err =
-        mExchangeCtx->SendMessage(Protocols::InteractionModel::MsgType::ReportData, std::move(aPayload),
-                                  Messaging::SendFlags(noResponseExpected ? Messaging::SendMessageFlags::kNone
-                                                                          : Messaging::SendMessageFlags::kExpectResponse));
-    if (err == CHIP_NO_ERROR && noResponseExpected)
-    {
-        InteractionModelEngine::GetInstance()->GetReportingEngine().OnReportConfirm();
-    }
-
+    CHIP_ERROR err = mExchangeCtx->SendMessage(Protocols::InteractionModel::MsgType::ReportData, std::move(aPayload),
+                                               responseExpected ? Messaging::SendMessageFlags::kExpectResponse
+                                                                : Messaging::SendMessageFlags::kNone);
     if (err == CHIP_NO_ERROR)
     {
+        if (responseExpected)
+        {
+            MoveToState(HandlerState::AwaitingReportResponse);
+        }
+        else
+        {
+            // Make sure we're not treated as an in-flight report waiting for a
+            // response by the reporting engine.
+            InteractionModelEngine::GetInstance()->GetReportingEngine().OnReportConfirm();
+        }
+
         if (IsType(InteractionType::Subscribe) && !IsPriming())
         {
-            err = RefreshSubscribeSyncTimer();
+            // Ignore the error from RefreshSubscribeSyncTimer.  If we've
+            // successfully sent the message, we need to return success from
+            // this method.
+            RefreshSubscribeSyncTimer();
         }
     }
     if (!aMoreChunks)

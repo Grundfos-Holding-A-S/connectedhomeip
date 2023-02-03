@@ -58,6 +58,7 @@ static_library("chip-tool-utils") {
     "commands/common/Commands.cpp",
     "commands/common/Commands.h",
     "commands/common/CredentialIssuerCommands.h",
+    "commands/common/HexConversion.h",
     "commands/discover/DiscoverCommand.cpp",
     "commands/discover/DiscoverCommissionablesCommand.cpp",
     "commands/discover/DiscoverCommissionersCommand.cpp",
@@ -120,7 +121,10 @@ static_library("chip-tool-utils") {
 executable("chip-tool") {
   sources = [ "main.cpp" ]
 
-  deps = [ ":chip-tool-utils" ]
+  deps = [
+    ":chip-tool-utils",
+    "${chip_root}/src/platform/logging:force_stdio",
+  ]
 
   output_dir = root_out_dir
 }
