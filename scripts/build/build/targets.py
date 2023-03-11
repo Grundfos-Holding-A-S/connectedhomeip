@@ -389,12 +389,10 @@ def Buildcc13x2x7_26x2x7Target():
 
     # apps
     target.AppendFixedTargets([
-        TargetPart('all-clusters', app=cc13x2x7_26x2x7App.ALL_CLUSTERS),
         TargetPart('all-clusters-minimal', app=cc13x2x7_26x2x7App.ALL_CLUSTERS_MINIMAL),
         TargetPart('lock', app=cc13x2x7_26x2x7App.LOCK),
         TargetPart('pump', app=cc13x2x7_26x2x7App.PUMP),
         TargetPart('pump-controller', app=cc13x2x7_26x2x7App.PUMP_CONTROLLER),
-        TargetPart('shell', app=cc13x2x7_26x2x7App.SHELL),
     ])
 
     target.AppendModifier(name="ftd", openthread_ftd=True).ExceptIfRe("-mtd")

@@ -26,7 +26,11 @@
 #include "FreeRTOS.h"
 #include "Globals.h"
 #include <credentials/DeviceAttestationCredsProvider.h>
+#ifdef CC13X2_26X2_ATTESTATION_CREDENTIALS
+#include <platform/cc13x2_26x2/CC13X2_26X2DeviceAttestationCreds.h>
+#else
 #include <credentials/examples/DeviceAttestationCredsExample.h>
+#endif
 
 #include <DeviceInfoProviderImpl.h>
 #include <platform/CHIPDeviceLayer.h>
@@ -255,7 +259,11 @@ int AppTask::Init()
     ConfigurationMgr().LogDeviceConfig();
 
     // Initialize device attestation config
+#ifdef CC13X2_26X2_ATTESTATION_CREDENTIALS
+    SetDeviceAttestationCredentialsProvider(CC13X2_26X2::GetCC13X2_26X2DacProvider());
+#else
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+#endif
 
     // We only have network commissioning on endpoint 0.
     emberAfEndpointEnableDisable(kNetworkCommissioningEndpointSecondary, false);
@@ -343,8 +351,7 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     {
     case AppEvent::kEventType_ButtonLeft:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
-        {
-        }
+        {}
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
         {
             chip::Server::GetInstance().ScheduleFactoryReset();
@@ -353,8 +360,7 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
 
     case AppEvent::kEventType_ButtonRight:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
-        {
-        }
+        {}
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
         {
             // Enable BLE advertisements
