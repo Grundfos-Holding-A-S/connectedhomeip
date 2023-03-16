@@ -24,11 +24,8 @@
 #include "FreeRTOS.h"
 
 #include <credentials/DeviceAttestationCredsProvider.h>
-#ifdef CC13X2_26X2_ATTESTATION_CREDENTIALS
-#include <examples/platform/cc13x2_26x2/CC13X2_26X2DeviceAttestationCreds.h>
-#else
 #include <credentials/examples/DeviceAttestationCredsExample.h>
-#endif
+#include <examples/platform/cc13x2_26x2/CC13X2_26X2DeviceAttestationCreds.h>
 
 #include <DeviceInfoProviderImpl.h>
 #include <platform/CHIPDeviceLayer.h>
@@ -51,8 +48,8 @@
 #include <app-common/zap-generated/cluster-id.h>
 #include <app-common/zap-generated/cluster-objects.h>
 
-#include <app/clusters/door-lock-server/door-lock-server.h>
 #include <app/clusters/identify-server/identify-server.h>
+#include <app/clusters/on-off-server/on-off-server.h>
 #include <app/server/OnboardingCodesUtil.h>
 #include <app/server/Server.h>
 #include <app/util/attribute-storage.h>
@@ -67,10 +64,18 @@
 #define APP_TASK_PRIORITY 4
 #define APP_EVENT_QUEUE_SIZE 10
 
+#define IDENTIFY_TRIGGER_EFFECT_BLINK 0 
+#define IDENTIFY_TRIGGER_EFFECT_BREATHE 1 
+#define IDENTIFY_TRIGGER_EFFECT_OKAY 2 
+#define IDENTIFY_TRIGGER_EFFECT_FINISH_STOP 3
+
+static uint32_t identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_FINISH_STOP;
+
+#define LIGHTING_APPLICATION_IDENTIFY_ENDPOINT 1
+
 using namespace ::chip;
 using namespace ::chip::Credentials;
 using namespace ::chip::DeviceLayer;
-using namespace ::chip::app::Clusters::DoorLock;
 
 static TaskHandle_t sAppTaskHandle;
 static QueueHandle_t sAppEventQueue;
@@ -103,7 +108,7 @@ void InitializeOTARequestor(void)
 }
 #endif
 
-::Identify stIdentify = { 0, AppTask::IdentifyStartHandler, AppTask::IdentifyStopHandler,
+::Identify stIdentify = { LIGHTING_APPLICATION_IDENTIFY_ENDPOINT, AppTask::IdentifyStartHandler, AppTask::IdentifyStopHandler,
                           EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_VISIBLE_LED, AppTask::TriggerIdentifyEffectHandler };
 
 int AppTask::StartAppTask()
@@ -129,38 +134,34 @@ int AppTask::StartAppTask()
     return ret;
 }
 
-void uiLocking(void)
+//Action initiated callback
+void uiTurnOn(void)
 {
-    PLAT_LOG("Lock initiated");
-    LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
-    LED_startBlinking(sAppGreenHandle, 50 /* ms */, LED_BLINK_FOREVER);
+    PLAT_LOG("Light On initiated");
     LED_setOn(sAppRedHandle, LED_BRIGHTNESS_MAX);
     LED_startBlinking(sAppRedHandle, 110 /* ms */, LED_BLINK_FOREVER);
 }
 
-void uiLocked(void)
+//Action completed callback 
+void uiTurnedOn(void)
 {
-    PLAT_LOG("Lock completed");
-    LED_stopBlinking(sAppGreenHandle);
-    LED_setOff(sAppGreenHandle);
+    PLAT_LOG("Light On completed");
     LED_stopBlinking(sAppRedHandle);
     LED_setOn(sAppRedHandle, LED_BRIGHTNESS_MAX);
 }
 
-void uiUnlocking(void)
+//Action initiated callback 
+void uiTurnOff(void)
 {
-    PLAT_LOG("Unlock initiated");
-    LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
-    LED_startBlinking(sAppGreenHandle, 50 /* ms */, LED_BLINK_FOREVER);
+    PLAT_LOG("Light Off initiated");
     LED_setOn(sAppRedHandle, LED_BRIGHTNESS_MAX);
     LED_startBlinking(sAppRedHandle, 110 /* ms */, LED_BLINK_FOREVER);
 }
 
-void uiUnlocked(void)
+//Action completed callback 
+void uiTurnedOff(void)
 {
-    PLAT_LOG("Unlock completed");
-    LED_stopBlinking(sAppGreenHandle);
-    LED_setOff(sAppGreenHandle);
+    PLAT_LOG("Light Off completed");
     LED_stopBlinking(sAppRedHandle);
     LED_setOff(sAppRedHandle);
 }
@@ -263,72 +264,17 @@ int AppTask::Init()
     buttonParams.longPressDuration = 1000U; // ms
     sAppRightHandle                = Button_open(CONFIG_BTN_RIGHT, &buttonParams);
     Button_setCallback(sAppRightHandle, ButtonRightEventHandler);
-
-    PlatformMgr().LockChipStack();
-    {
-        uint8_t numberOfCredentialsPerUser      = 0;
-        uint16_t numberOfUsers                  = 0;
-        uint8_t numberOfWeekdaySchedulesPerUser = 0;
-        uint8_t numberOfYeardaySchedulesPerUser = 0;
-        uint8_t numberOfHolidaySchedules        = 0;
-        chip::app::DataModel::Nullable<chip::app::Clusters::DoorLock::DlLockState> state;
-        EndpointId endpointId{ 1 };
-
-        if (!DoorLockServer::Instance().GetNumberOfCredentialsSupportedPerUser(endpointId, numberOfCredentialsPerUser))
-        {
-            numberOfCredentialsPerUser = 5;
-        }
-
-        if (!DoorLockServer::Instance().GetNumberOfUserSupported(endpointId, numberOfUsers))
-        {
-            numberOfUsers = 10;
-        }
-
-        if (!DoorLockServer::Instance().GetNumberOfWeekDaySchedulesPerUserSupported(endpointId, numberOfWeekdaySchedulesPerUser))
-        {
-            numberOfWeekdaySchedulesPerUser = 10;
-        }
-
-        if (!DoorLockServer::Instance().GetNumberOfYearDaySchedulesPerUserSupported(endpointId, numberOfYeardaySchedulesPerUser))
-        {
-            numberOfYeardaySchedulesPerUser = 10;
-        }
-
-        if (!DoorLockServer::Instance().GetNumberOfHolidaySchedulesSupported(endpointId, numberOfHolidaySchedules))
-        {
-            numberOfHolidaySchedules = 10;
-        }
-
-        Attributes::LockState::Get(endpointId, state);
-        ret = LockMgr().Init(state,
-                             CC13X2_26X2DoorLock::LockInitParams::ParamBuilder()
-                                 .SetNumberOfUsers(numberOfUsers)
-                                 .SetNumberOfCredentialsPerUser(numberOfCredentialsPerUser)
-                                 .SetNumberOfWeekdaySchedulesPerUser(numberOfWeekdaySchedulesPerUser)
-                                 .SetNumberOfYeardaySchedulesPerUser(numberOfYeardaySchedulesPerUser)
-                                 .SetNumberOfHolidaySchedules(numberOfHolidaySchedules)
-                                 .GetLockParam());
-
-        if (state.Value() == DlLockState::kLocked)
-        {
-            uiLocked();
-        }
-        else
-        {
-            uiUnlocked();
-        }
-    }
-
-    PlatformMgr().UnlockChipStack();
+        
+    ret = LightMgr().Init();
 
     if (ret != CHIP_NO_ERROR)
     {
-        PLAT_LOG("LockMgr().Init() failed");
+        PLAT_LOG("LightMgr().Init() failed");
         while (1)
             ;
     }
 
-    LockMgr().SetCallbacks(ActionInitiated, ActionCompleted);
+    LightMgr().SetCallbacks(ActionInitiated, ActionCompleted);
 
     ConfigurationMgr().LogDeviceConfig();
 
@@ -346,8 +292,6 @@ void AppTask::AppTaskMain(void * pvParameter)
     AppEvent event;
 
     sAppTask.Init();
-
-    LockMgr().ReadConfigValues();
 
     while (1)
     {
@@ -399,27 +343,27 @@ void AppTask::ButtonRightEventHandler(Button_Handle handle, Button_EventMask eve
     }
 }
 
-void AppTask::ActionInitiated(LockManager::Action_t aAction)
+void AppTask::ActionInitiated(LightingManager::Action_t aAction, int32_t aActor)
 {
-    if (aAction == LockManager::LOCK_ACTION)
+    if (aAction == LightingManager::ON_ACTION)
     {
-        uiLocking();
+        uiTurnOn();
     }
-    else if (aAction == LockManager::UNLOCK_ACTION)
+    else if (aAction == LightingManager::OFF_ACTION)
     {
-        uiUnlocking();
+        uiTurnOff();
     }
 }
 
-void AppTask::ActionCompleted(LockManager::Action_t aAction)
+void AppTask::ActionCompleted(LightingManager::Action_t aAction)
 {
-    if (aAction == LockManager::LOCK_ACTION)
+    if (aAction == LightingManager::ON_ACTION)
     {
-        uiLocked();
+        uiTurnedOn();
     }
-    else if (aAction == LockManager::UNLOCK_ACTION)
+    else if (aAction == LightingManager::OFF_ACTION)
     {
-        uiUnlocked();
+        uiTurnedOff();
     }
 }
 
@@ -459,12 +403,20 @@ void AppTask::PostEvent(const AppEvent * aEvent)
 
 void AppTask::DispatchEvent(AppEvent * aEvent)
 {
+    int32_t actor;
+
     switch (aEvent->Type)
     {
+    case AppEvent::kEventType_Light:
+    {
+        actor  = aEvent->LightEvent.Actor;
+        LightMgr().IsLightOn() ? LightMgr().InitiateAction(actor, LightingManager::OFF_ACTION): LightMgr().InitiateAction(actor, LightingManager::ON_ACTION);
+    }    
     case AppEvent::kEventType_ButtonLeft:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
-            LockMgr().InitiateAction(LockManager::UNLOCK_ACTION);
+            actor  = AppEvent::kEventType_ButtonLeft;
+            LightMgr().InitiateAction(actor, LightingManager::ON_ACTION);
         }
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
         {
@@ -475,7 +427,8 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     case AppEvent::kEventType_ButtonRight:
         if (AppEvent::kAppEventButtonType_Clicked == aEvent->ButtonEvent.Type)
         {
-            LockMgr().InitiateAction(LockManager::LOCK_ACTION);
+            actor  = AppEvent::kEventType_ButtonRight;
+            LightMgr().InitiateAction(actor, LightingManager::OFF_ACTION);
         }
         else if (AppEvent::kAppEventButtonType_LongClicked == aEvent->ButtonEvent.Type)
         {
@@ -501,14 +454,28 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
         break;
 
     case AppEvent::kEventType_IdentifyStart:
-        LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
-        LED_startBlinking(sAppGreenHandle, 500, LED_BLINK_FOREVER);
+        switch(identify_trigger_effect)
+        {
+            case IDENTIFY_TRIGGER_EFFECT_BLINK:
+                LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
+                LED_startBlinking(sAppGreenHandle, 1000, LED_BLINK_FOREVER);
+                break;
+            case IDENTIFY_TRIGGER_EFFECT_BREATHE:
+                LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
+                LED_startBlinking(sAppGreenHandle, 100, LED_BLINK_FOREVER);
+                break;
+            case IDENTIFY_TRIGGER_EFFECT_OKAY:
+                LED_setOn(sAppGreenHandle, LED_BRIGHTNESS_MAX);
+                LED_startBlinking(sAppGreenHandle, 500, LED_BLINK_FOREVER);
+                break;
+            default:
+                break;
+        }
         PLAT_LOG("Identify started");
         break;
 
     case AppEvent::kEventType_IdentifyStop:
         LED_stopBlinking(sAppGreenHandle);
-
         LED_setOff(sAppGreenHandle);
         PLAT_LOG("Identify stopped");
         break;
@@ -546,22 +513,30 @@ void AppTask::TriggerIdentifyEffectHandler(::Identify * identify)
     {
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_BLINK:
         PLAT_LOG("Starting blink identifier effect");
+        identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_BLINK;
         IdentifyStartHandler(identify);
         break;
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_BREATHE:
-        PLAT_LOG("Breathe identifier effect not implemented");
+        PLAT_LOG("Starting breathe identifier effect");
+        identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_BREATHE;
+        IdentifyStartHandler(identify);
         break;
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_OKAY:
-        PLAT_LOG("Okay identifier effect not implemented");
+        PLAT_LOG("Starting okay identifier effect");
+        identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_OKAY;
+        IdentifyStartHandler(identify);
         break;
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_CHANNEL_CHANGE:
         PLAT_LOG("Channel Change identifier effect not implemented");
         break;
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_FINISH_EFFECT:
-        PLAT_LOG("Finish identifier effect not implemented");
+        PLAT_LOG("Finish identifier effect");
+        identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_FINISH_STOP;
+        IdentifyStopHandler(identify);
         break;
     case EMBER_ZCL_IDENTIFY_EFFECT_IDENTIFIER_STOP_EFFECT:
         PLAT_LOG("Stop identifier effect");
+        identify_trigger_effect = IDENTIFY_TRIGGER_EFFECT_FINISH_STOP;
         IdentifyStopHandler(identify);
         break;
     default:
